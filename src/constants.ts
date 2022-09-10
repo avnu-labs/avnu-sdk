@@ -1,2 +1,2 @@
-export const STAGING_BASE_URL = 'https://avnu-backend.herokuapp.com';
-export const BASE_URL = 'https://avnu-backend.herokuapp.com';
+export const STAGING_BASE_URL = 'https://goerli.api.avnu.fi'
+export const BASE_URL = 'https://goerli.api.avnu.fi'
