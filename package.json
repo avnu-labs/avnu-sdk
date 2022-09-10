@@ -1,0 +1,78 @@
+{
+  "name": "@avnu/avnu-sdk",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "AVNU",
+  "description": "TypeScript SDK for building exchange functionality on Layers 2 with the AVNU API",
+  "keywords": [
+    "dapp",
+    "dex",
+    "erc-20",
+    "ethereum",
+    "exchange",
+    "liquidity aggregator",
+    "tokens",
+    "starknet",
+    "swap"
+  ],
+  "homepage": "https://github.com/419Labs/avnu-sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/419Labs/avnu-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/419Labs/avnu-sdk/issues/new?template=bug_report.yml&title=[bug]+<replace+this+with+a+title>"
+  },
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "module": "dist/avnu-sdk.esm.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test -i",
+    "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx,json}' --quiet",
+    "lint:fix": "tsc --noEmit && prettier --write \"src/**/*.{ts,tsx,js,json,css,yml,md}\" && eslint 'src/**/*.{js,ts,tsx,json}' --quiet --fix",
+    "size": "size-limit",
+    "analyze": "size-limit --why"
+  },
+  "size-limit": [
+    {
+      "path": "dist/avnu-sdk.cjs.production.min.js",
+      "limit": "300 KB"
+    },
+    {
+      "path": "dist/avnu-sdk.esm.js",
+      "limit": "250 KB"
+    }
+  ],
+  "dependencies": {
+    "ethers": "5.7.0",
+    "starknet": "4.4.2",
+    "qs": "^6.11.0"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "8.0.1",
+    "@types/jest": "29.0.0",
+    "@types/qs": "6.9.7",
+    "@typescript-eslint/eslint-plugin": "5.36.2",
+    "@typescript-eslint/parser": "5.36.2",
+    "eslint": "8.23.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-prettier": "4.2.1",
+    "fetch-mock": "9.11.0",
+    "eslint-plugin-simple-import-sort": "8.0.0",
+    "prettier": "2.7.1",
+    "size-limit": "8.0.1",
+    "tsdx": "0.14.1",
+    "tslib": "2.4.0",
+    "typescript": "4.8.2"
+  }
+}
