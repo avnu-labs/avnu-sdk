@@ -1,0 +1,31 @@
+# AVNU-SDK
+
+AVNU-sdk is a typeScript SDK for building exchange functionality on Layers 2 with the AVNU API.
+
+## Installation
+
+```shell
+npm install @avnu/avnu-sdk
+
+# or
+
+yarn add @avnu/avnu-sdk
+```
+
+## Usage
+
+```ts
+const params = {
+  sellTokenAddress: ethAddress,
+  buyTokenAddress: wBtcAddress,
+  sellAmount: '200000000000000000',
+  takerAddress: account.address,
+}
+const quotes = await getQuotes(params);
+const swapTransaction = await buildSwapTransaction(quotes[0].quoteId)
+await executeSwap(account, transaction, ethAddress, parseUnits(sellAmount, 18).toString())
+```
+
+## Example
+
+This repository includes a basic example in the `[/examples](/examples)` folder.
