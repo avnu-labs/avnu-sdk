@@ -80,4 +80,25 @@ const executeSwap = (
 ): Promise<InvokeFunctionResponse> =>
   account.execute([buildApproveTx(sellTokenAddress, swapTransaction.contractAddress, sellAmount), swapTransaction]);
 
-export { buildApproveTx, buildSwapTransaction, executeSwap, getQuotes };
+/**
+ * Approves and executes the quote
+ *
+ * @param quoteId: The id of the selected quote
+ * @param account: The account of the trader
+ * @param sellTokenAddress: The sell token address
+ * @param sellAmount: The sell amount
+ * @param options: Optional options.
+ * @returns Promise<InvokeFunctionResponse>
+ */
+const approveAndExecuteSwap = (
+  quoteId: string,
+  account: AccountInterface,
+  sellTokenAddress: string,
+  sellAmount: BigNumberish,
+  options?: AvnuOptions,
+): Promise<InvokeFunctionResponse> =>
+  buildSwapTransaction(quoteId, options).then((transaction) =>
+    executeSwap(account, transaction, sellTokenAddress, sellAmount),
+  );
+
+export { approveAndExecuteSwap, buildApproveTx, buildSwapTransaction, executeSwap, getQuotes };

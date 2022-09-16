@@ -2,7 +2,7 @@ import React, { ChangeEvent, useState } from 'react';
 import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import type { AccountInterface } from "starknet";
 import { connect } from "get-starknet";
-import { buildSwapTransaction, executeSwap, getQuotes, Quote } from "@avnu/avnu-sdk";
+import { approveAndExecuteSwap, getQuotes, Quote,  } from "@avnu/avnu-sdk";
 
 const ethAddress = "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
 const wBtcAddress = "0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7"
@@ -44,8 +44,7 @@ function App() {
 
   const handleSwap = async () => {
     if (!account || !sellAmount || !quotes || !quotes[0]) return;
-    buildSwapTransaction(quotes[0].quoteId)
-      .then((transaction) => executeSwap(account, transaction, ethAddress, parseUnits(sellAmount, 18).toString()))
+    approveAndExecuteSwap(quotes[0].quoteId, account, ethAddress, parseUnits(sellAmount, 18).toString())
       .then(() => setQuotes([]))
       .catch((error: any) => console.error(error))
   }
