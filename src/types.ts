@@ -25,14 +25,14 @@ export interface Quote {
   buyTokenAddress: string;
   buyAmount: string;
   blockNumber: number;
-  chainId: number;
+  chainId: string;
   slippage: number;
   expiry: number;
   sources: Source[];
 }
 
 export interface Transaction {
-  chainId: number;
+  chainId: string;
   contractAddress: string;
   entrypoint: string;
   calldata: string[];

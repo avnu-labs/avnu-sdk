@@ -1,4 +1,5 @@
 import { parseUnits } from '@ethersproject/units/src.ts';
+import { StarknetChainId } from 'starknet/constants';
 import { Quote, QuoteRequest, Transaction } from './types';
 
 export const aQuoteRequest = (): QuoteRequest => ({
@@ -16,7 +17,7 @@ export const aQuote = (): Quote => ({
   buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
   buyAmount: parseUnits('2', 18).toString(),
   blockNumber: 1,
-  chainId: 1001,
+  chainId: StarknetChainId.TESTNET,
   slippage: 0,
   expiry: 100000000000,
   sources: [
@@ -33,7 +34,7 @@ export const aQuote = (): Quote => ({
 
 export const aTransaction = (): Transaction => ({
   contractAddress: '0x0',
-  chainId: 1001,
+  chainId: StarknetChainId.TESTNET,
   calldata: [],
   entrypoint: 'execute',
 });
