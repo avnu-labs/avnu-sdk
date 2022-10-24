@@ -2,7 +2,7 @@ import React, { ChangeEvent, useState } from 'react';
 import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import type { AccountInterface } from "starknet";
 import { connect } from "get-starknet";
-import { approveAndExecuteSwap, getQuotes, Quote,  } from "@avnu/avnu-sdk";
+import { approveAndExecuteSwap, getQuotes, Quote } from "@avnu/avnu-sdk";
 
 const ethAddress = "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
 const wBtcAddress = "0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7"
@@ -12,6 +12,7 @@ function App() {
   const [ sellAmount, setSellAmount ] = useState<string>()
   const [ quotes, setQuotes ] = useState<Quote[]>([])
   const [ loading, setLoading ] = useState<boolean>(false)
+  const [ errorMessage, setErrorMessage ] = useState<string>()
 
   const handleConnect = async () => {
     const starknet = await connect({ modalOptions: { theme: "dark" } });
@@ -24,6 +25,7 @@ function App() {
 
   const handleChangeInput = (event: ChangeEvent<HTMLInputElement>) => {
     if (!account) return;
+    setErrorMessage('')
     setQuotes([])
     setSellAmount(event.target.value);
     setLoading(true)
@@ -39,14 +41,22 @@ function App() {
         setLoading(false)
         setQuotes(quotes)
       })
-      .catch(() => setLoading(false))
+      .catch(() => setLoading(false));
   }
 
   const handleSwap = async () => {
     if (!account || !sellAmount || !quotes || !quotes[0]) return;
+    setErrorMessage('')
+    setLoading(true)
     approveAndExecuteSwap(quotes[0].quoteId, account, ethAddress, parseUnits(sellAmount, 18).toString())
-      .then(() => setQuotes([]))
-      .catch((error: any) => console.error(error))
+      .then(() => {
+        setLoading(false)
+        setQuotes([])
+      })
+      .catch((error: Error) => {
+        setLoading(false)
+        setErrorMessage(error.message)
+      });
   }
 
   if (!account) {
@@ -72,6 +82,7 @@ function App() {
         />
       </div>
       {loading ? <p>Loading...</p> : quotes && quotes[0] && <button onClick={handleSwap}>Swap</button>}
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
     </div>
   );
 }

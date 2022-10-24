@@ -9,7 +9,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@avnu/avnu-sdk": "^0.0.2",
+    "@avnu/avnu-sdk": "file:../",
     "starknet": "4.4.2",
     "ethers": "5.7.0",
     "get-starknet": "1.5.0",

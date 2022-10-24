@@ -2,7 +2,7 @@ import { BigNumberish } from 'ethers';
 import qs from 'qs';
 import { AccountInterface, Call, InvokeFunctionResponse } from 'starknet';
 import { bnToUint256 } from 'starknet/utils/uint256';
-import { BASE_URL, STAGING_BASE_URL } from './constants';
+import { BASE_URL, STAGING_BASE_URL, WHITELISTED_ADDRESSES } from './constants';
 import { AvnuOptions, Quote, QuoteRequest, Transaction } from './types';
 
 const getBaseUrl = (): string => (process.env.NODE_ENV === 'dev' ? STAGING_BASE_URL : BASE_URL);
@@ -47,15 +47,36 @@ const buildSwapTransaction = (quoteId: string, options?: AvnuOptions): Promise<T
   }).then((response) => parseResponse(response));
 
 /**
+ * Verifies if the address is whitelisted
+ * Throws an error when the contractAddress is not whitelisted
+ *
+ * @param contractAddress: The address to check
+ * @param chainId: The chainId
+ */
+const checkAddress = (contractAddress: string, chainId: string) => {
+  if (!WHITELISTED_ADDRESSES[chainId]?.includes(contractAddress)) {
+    throw Error(`${contractAddress} is not whitelisted`);
+  }
+};
+
+/**
  * Build approve transaction
+ * Could throw an error if the contractAddress is not whitelisted
  *
  * @param sellTokenAddress: The sell token address
  * @param contractAddress: The avnu contract address
  * @param sellAmount: The sell amount
+ * @param chainId: The chainId
  * @returns Call
  */
-const buildApproveTx = (sellTokenAddress: string, contractAddress: string, sellAmount: BigNumberish): Call => {
+const buildApproveTx = (
+  sellTokenAddress: string,
+  contractAddress: string,
+  sellAmount: BigNumberish,
+  chainId: string,
+): Call => {
   const uint256 = bnToUint256(sellAmount);
+  checkAddress(contractAddress, chainId);
   return {
     contractAddress: sellTokenAddress,
     entrypoint: 'approve',
@@ -77,8 +98,16 @@ const executeSwap = (
   swapTransaction: Transaction,
   sellTokenAddress: string,
   sellAmount: BigNumberish,
-): Promise<InvokeFunctionResponse> =>
-  account.execute([buildApproveTx(sellTokenAddress, swapTransaction.contractAddress, sellAmount), swapTransaction]);
+): Promise<InvokeFunctionResponse> => {
+  if (account.chainId !== swapTransaction.chainId) {
+    throw Error(`Invalid chainId`);
+  }
+  checkAddress(swapTransaction.contractAddress, swapTransaction.chainId);
+  return account.execute([
+    buildApproveTx(sellTokenAddress, swapTransaction.contractAddress, sellAmount, swapTransaction.chainId),
+    swapTransaction,
+  ]);
+};
 
 /**
  * Approves and executes the quote
@@ -101,4 +130,4 @@ const approveAndExecuteSwap = (
     executeSwap(account, transaction, sellTokenAddress, sellAmount),
   );
 
-export { approveAndExecuteSwap, buildApproveTx, buildSwapTransaction, executeSwap, getQuotes };
+export { approveAndExecuteSwap, buildApproveTx, buildSwapTransaction, checkAddress, executeSwap, getQuotes };
