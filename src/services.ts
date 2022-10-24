@@ -2,7 +2,7 @@ import { BigNumberish } from 'ethers';
 import qs from 'qs';
 import { AccountInterface, Call, InvokeFunctionResponse } from 'starknet';
 import { bnToUint256 } from 'starknet/utils/uint256';
-import { BASE_URL, STAGING_BASE_URL } from './constants';
+import { BASE_URL, STAGING_BASE_URL, WHITELISTED_ADDRESSES } from './constants';
 import { AvnuOptions, Quote, QuoteRequest, Transaction } from './types';
 
 const getBaseUrl = (): string => (process.env.NODE_ENV === 'dev' ? STAGING_BASE_URL : BASE_URL);
@@ -47,7 +47,20 @@ const buildSwapTransaction = (quoteId: string, options?: AvnuOptions): Promise<T
   }).then((response) => parseResponse(response));
 
 /**
+ * Verifies if the address is whitelisted
+ * Throws an error when the contractAddress is not whitelisted
+ *
+ * @param contractAddress: The address to check
+ */
+const checkAddress = (contractAddress: string) => {
+  if (!WHITELISTED_ADDRESSES.includes(contractAddress)) {
+    throw Error(`${contractAddress} is not whitelisted`);
+  }
+};
+
+/**
  * Build approve transaction
+ * Could throw an error if the contractAddress is not whitelisted
  *
  * @param sellTokenAddress: The sell token address
  * @param contractAddress: The avnu contract address
@@ -56,6 +69,7 @@ const buildSwapTransaction = (quoteId: string, options?: AvnuOptions): Promise<T
  */
 const buildApproveTx = (sellTokenAddress: string, contractAddress: string, sellAmount: BigNumberish): Call => {
   const uint256 = bnToUint256(sellAmount);
+  checkAddress(contractAddress);
   return {
     contractAddress: sellTokenAddress,
     entrypoint: 'approve',
@@ -77,7 +91,12 @@ const executeSwap = (
   swapTransaction: Transaction,
   sellTokenAddress: string,
   sellAmount: BigNumberish,
-): Promise<InvokeFunctionResponse> =>
-  account.execute([buildApproveTx(sellTokenAddress, swapTransaction.contractAddress, sellAmount), swapTransaction]);
+): Promise<InvokeFunctionResponse> => {
+  checkAddress(swapTransaction.contractAddress);
+  return account.execute([
+    buildApproveTx(sellTokenAddress, swapTransaction.contractAddress, sellAmount),
+    swapTransaction,
+  ]);
+};
 
-export { buildApproveTx, buildSwapTransaction, executeSwap, getQuotes };
+export { buildApproveTx, buildSwapTransaction, checkAddress, executeSwap, getQuotes };

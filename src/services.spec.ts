@@ -1,8 +1,10 @@
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
+import { AccountInterface } from 'starknet';
 import { BASE_URL } from './constants';
 import { aQuote, aQuoteRequest, aTransaction } from './fixtures';
-import { buildApproveTx, buildSwapTransaction, getQuotes } from './services';
+import { buildApproveTx, buildSwapTransaction, checkAddress, executeSwap, getQuotes } from './services';
+import { Transaction } from './types';
 
 describe('Avnu services', () => {
   beforeEach(() => {
@@ -84,17 +86,76 @@ describe('Avnu services', () => {
     });
   });
 
+  describe('checkAddress', () => {
+    it('should do nothing when address is whitelisted', () => {
+      // When & Then
+      checkAddress('0x0'); // TODO: change the address
+    });
+
+    it('should throw an error when address is not whitelisted', () => {
+      let thrownError;
+
+      // When
+      try {
+        checkAddress('0x1');
+      } catch (error) {
+        thrownError = error;
+      }
+
+      // Then
+      expect(thrownError).toEqual(Error('0x1 is not whitelisted'));
+    });
+  });
+
   describe('buildApproveTx', () => {
     it('should a Call', () => {
       // When
-      const result = buildApproveTx('0x1', '0x2', '1');
+      const result = buildApproveTx('0x1', '0x0', '1');
 
       // Then
       expect(result).toStrictEqual({
-        calldata: ['0x2', '0x1', '0x0'],
-        contractAddress: '0x1',
+        calldata: ['0x0', '0x1', '0x0'], // TODO: change the address
+        contractAddress: '0x1', // TODO: change the address
         entrypoint: 'approve',
       });
+    });
+
+    it('should throw an error when contractAddress is not whitelisted', () => {
+      let thrownError;
+
+      // When
+      try {
+        buildApproveTx('0x1', '0x1', '1');
+      } catch (error) {
+        thrownError = error;
+      }
+
+      // Then
+      expect(thrownError).toEqual(Error('0x1 is not whitelisted'));
+    });
+  });
+
+  describe('executeSwap', () => {
+    it('should throw an error when swapTransaction.contractAddress is not whitelisted', () => {
+      // given
+      let thrownError;
+      const account: AccountInterface = {} as AccountInterface;
+      const swapTransaction: Transaction = {
+        chainId: 1001,
+        contractAddress: '0x1',
+        entrypoint: 'approve',
+        calldata: [],
+      };
+
+      // When
+      try {
+        executeSwap(account, swapTransaction, '0x1', '1');
+      } catch (error) {
+        thrownError = error;
+      }
+
+      // Then
+      expect(thrownError).toEqual(Error('0x1 is not whitelisted'));
     });
   });
 });

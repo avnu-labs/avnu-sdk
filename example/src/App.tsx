@@ -12,6 +12,7 @@ function App() {
   const [ sellAmount, setSellAmount ] = useState<string>()
   const [ quotes, setQuotes ] = useState<Quote[]>([])
   const [ loading, setLoading ] = useState<boolean>(false)
+  const [ errorMessage, setErrorMessage ] = useState<string>()
 
   const handleConnect = async () => {
     const starknet = await connect({ modalOptions: { theme: "dark" } });
@@ -24,6 +25,7 @@ function App() {
 
   const handleChangeInput = (event: ChangeEvent<HTMLInputElement>) => {
     if (!account) return;
+    setErrorMessage('')
     setQuotes([])
     setSellAmount(event.target.value);
     setLoading(true)
@@ -39,15 +41,23 @@ function App() {
         setLoading(false)
         setQuotes(quotes)
       })
-      .catch(() => setLoading(false))
+      .catch(() => setLoading(false));
   }
 
   const handleSwap = async () => {
     if (!account || !sellAmount || !quotes || !quotes[0]) return;
+    setErrorMessage('')
+    setLoading(true)
     buildSwapTransaction(quotes[0].quoteId)
       .then((transaction) => executeSwap(account, transaction, ethAddress, parseUnits(sellAmount, 18).toString()))
-      .then(() => setQuotes([]))
-      .catch((error: any) => console.error(error))
+      .then(() => {
+        setLoading(false)
+        setQuotes([])
+      })
+      .catch((error: Error) => {
+        setLoading(false)
+        setErrorMessage(error.message)
+      });
   }
 
   if (!account) {
@@ -73,6 +83,7 @@ function App() {
         />
       </div>
       {loading ? <p>Loading...</p> : quotes && quotes[0] && <button onClick={handleSwap}>Swap</button>}
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
     </div>
   );
 }
