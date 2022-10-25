@@ -4,7 +4,6 @@ export interface QuoteRequest {
   sellAmount?: string;
   buyAmount?: string;
   takerAddress: string;
-  slippage?: number;
   excludeSources?: string[];
   size?: number;
 }
