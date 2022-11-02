@@ -3,7 +3,17 @@ import qs from 'qs';
 import { AccountInterface, Call, InvokeFunctionResponse } from 'starknet';
 import { bnToUint256 } from 'starknet/utils/uint256';
 import { BASE_URL, STAGING_BASE_URL, WHITELISTED_ADDRESSES } from './constants';
-import { AvnuOptions, Quote, QuoteRequest, Transaction } from './types';
+import {
+  AvnuOptions,
+  GetPairsRequest,
+  GetTokensRequest,
+  Page,
+  Pair,
+  Quote,
+  QuoteRequest,
+  Token,
+  Transaction,
+} from './types';
 
 const getBaseUrl = (): string => (process.env.NODE_ENV === 'dev' ? STAGING_BASE_URL : BASE_URL);
 
@@ -45,6 +55,30 @@ const buildSwapTransaction = (quoteId: string, options?: AvnuOptions): Promise<T
     body: JSON.stringify({ quoteId }),
     signal: options?.abortSignal,
   }).then((response) => parseResponse(response));
+
+/**
+ * Fetches the supported tokens.
+ *
+ * @param request: The request params for the avnu API `/swap/v1/tokens` endpoint.
+ * @param options: Optional options.
+ * @returns The best quotes
+ */
+const getTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise<Page<Token>> =>
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/tokens?${qs.stringify(request ?? {})}`, {
+    signal: options?.abortSignal,
+  }).then((response) => parseResponse<Page<Token>>(response));
+
+/**
+ * Fetches the supported pairs
+ *
+ * @param request: The request params for the avnu API `/swap/v1/pairs` endpoint.
+ * @param options: Optional options.
+ * @returns The best quotes
+ */
+const getPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<Page<Pair>> =>
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/pairs?${qs.stringify(request ?? {})}`, {
+    signal: options?.abortSignal,
+  }).then((response) => parseResponse<Page<Pair>>(response));
 
 /**
  * Verifies if the address is whitelisted
@@ -130,4 +164,13 @@ const approveAndExecuteSwap = (
     executeSwap(account, transaction, sellTokenAddress, sellAmount),
   );
 
-export { approveAndExecuteSwap, buildApproveTx, buildSwapTransaction, checkAddress, executeSwap, getQuotes };
+export {
+  approveAndExecuteSwap,
+  buildApproveTx,
+  buildSwapTransaction,
+  checkAddress,
+  executeSwap,
+  getPairs,
+  getQuotes,
+  getTokens,
+};
