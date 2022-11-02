@@ -3,8 +3,16 @@ import qs from 'qs';
 import { AccountInterface } from 'starknet';
 import { StarknetChainId } from 'starknet/dist/constants';
 import { BASE_URL } from './constants';
-import { aQuote, aQuoteRequest, aTransaction } from './fixtures';
-import { buildApproveTx, buildSwapTransaction, checkAddress, executeSwap, getQuotes } from './services';
+import { aPage, aPair, aQuote, aQuoteRequest, aTransaction, ethToken } from './fixtures';
+import {
+  buildApproveTx,
+  buildSwapTransaction,
+  checkAddress,
+  executeSwap,
+  getPairs,
+  getQuotes,
+  getTokens,
+} from './services';
 import { Transaction } from './types';
 
 describe('Avnu services', () => {
@@ -84,6 +92,52 @@ describe('Avnu services', () => {
       // When & Then
       expect.assertions(1);
       expect(buildSwapTransaction('quoteId')).rejects.toEqual(Error('401 Unauthorized'));
+    });
+  });
+
+  describe('getTokens', () => {
+    it('should return a page of tokens', async () => {
+      // Given
+      const response = aPage([ethToken()]);
+      fetchMock.get(`${BASE_URL}/swap/v1/tokens?`, response);
+
+      // When
+      const result = await getTokens();
+
+      // Then
+      expect(result).toStrictEqual(response);
+    });
+
+    it('should use throw Error with status code and text when status is higher than 400', () => {
+      // Given
+      fetchMock.get(`${BASE_URL}/swap/v1/tokens?`, 401);
+
+      // When & Then
+      expect.assertions(1);
+      expect(getTokens()).rejects.toEqual(Error('401 Unauthorized'));
+    });
+  });
+
+  describe('getPairs', () => {
+    it('should return a page of pairs', async () => {
+      // Given
+      const response = aPage([aPair()]);
+      fetchMock.get(`${BASE_URL}/swap/v1/pairs?`, response);
+
+      // When
+      const result = await getPairs();
+
+      // Then
+      expect(result).toStrictEqual(response);
+    });
+
+    it('should use throw Error with status code and text when status is higher than 400', () => {
+      // Given
+      fetchMock.get(`${BASE_URL}/swap/v1/pairs?`, 401);
+
+      // When & Then
+      expect.assertions(1);
+      expect(getPairs()).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
