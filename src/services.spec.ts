@@ -144,7 +144,7 @@ describe('Avnu services', () => {
   describe('checkAddress', () => {
     it('should do nothing when address is whitelisted', () => {
       // When & Then
-      checkAddress('0x0', StarknetChainId.TESTNET); // TODO: change the address
+      checkAddress('0x5c614428c49b94ab60c90ea55d366d328921c829bbd3ae81d748723750c0931', StarknetChainId.TESTNET);
     });
 
     it('should throw an error when address is not whitelisted', () => {
@@ -163,14 +163,19 @@ describe('Avnu services', () => {
   });
 
   describe('buildApproveTx', () => {
-    it('should a Call', () => {
+    it('should build approve', () => {
       // When
-      const result = buildApproveTx('0x1', '0x0', '1', StarknetChainId.TESTNET);
+      const result = buildApproveTx(
+        '0x1',
+        '0x5c614428c49b94ab60c90ea55d366d328921c829bbd3ae81d748723750c0931',
+        '1',
+        StarknetChainId.TESTNET,
+      );
 
       // Then
       expect(result).toStrictEqual({
-        calldata: ['0x0', '0x1', '0x0'], // TODO: change the address
-        contractAddress: '0x1', // TODO: change the address
+        calldata: ['0x5c614428c49b94ab60c90ea55d366d328921c829bbd3ae81d748723750c0931', '0x1', '0x0'],
+        contractAddress: '0x1',
         entrypoint: 'approve',
       });
     });
