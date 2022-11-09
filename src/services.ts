@@ -11,6 +11,7 @@ import {
   Pair,
   Quote,
   QuoteRequest,
+  RequestError,
   Token,
   Transaction,
 } from './types';
@@ -18,7 +19,13 @@ import {
 const getBaseUrl = (): string => (process.env.NODE_ENV === 'dev' ? STAGING_BASE_URL : BASE_URL);
 
 const parseResponse = <T>(response: Response): Promise<T> => {
-  if (response.status >= 400) {
+  if (response.status === 400) {
+    return response.json().then((error: RequestError) => {
+      throw new Error(error.messages[0]);
+    });
+  }
+  if (response.status > 400) {
+    // return Promise.reject(new Error(`${response.status} ${response.statusText}`))
     throw new Error(`${response.status} ${response.statusText}`);
   }
   return response.json();
