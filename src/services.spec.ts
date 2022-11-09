@@ -108,13 +108,18 @@ describe('Avnu services', () => {
       expect(result).toStrictEqual(response);
     });
 
-    it('should use throw Error with status code and text when status is higher than 400', () => {
+    it('should use throw Error with status code and text when status is higher than 400', async () => {
       // Given
       fetchMock.get(`${BASE_URL}/swap/v1/tokens?`, 401);
 
-      // When & Then
+      // When
+      try {
+        await getTokens();
+      } catch (error) {
+        // Then
+        expect(error).toStrictEqual(new Error('401 Unauthorized'));
+      }
       expect.assertions(1);
-      expect(getTokens()).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
@@ -131,13 +136,18 @@ describe('Avnu services', () => {
       expect(result).toStrictEqual(response);
     });
 
-    it('should use throw Error with status code and text when status is higher than 400', () => {
+    it('should use throw Error with status code and text when status is higher than 400', async () => {
       // Given
-      fetchMock.get(`${BASE_URL}/swap/v1/pairs?`, 401);
+      fetchMock.get(`${BASE_URL}/swap/v1/pairs?`, { status: 400, body: { messages: ['This is an error'] } });
 
-      // When & Then
+      // When
+      try {
+        await getPairs();
+      } catch (error) {
+        // Then
+        expect(error).toStrictEqual(new Error('This is an error'));
+      }
       expect.assertions(1);
-      expect(getPairs()).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
