@@ -1,4 +1,4 @@
-import { BigNumberish } from 'ethers';
+import { BigNumber, BigNumberish } from 'ethers';
 import qs from 'qs';
 import { AccountInterface, Call, InvokeFunctionResponse } from 'starknet';
 import { bnToUint256 } from 'starknet/utils/uint256';
@@ -38,10 +38,29 @@ const parseResponse = <T>(response: Response): Promise<T> => {
  * @param options: Optional options.
  * @returns The best quotes
  */
-const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> =>
-  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/quotes?${qs.stringify(request)}`, {
+const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
+  const queryParams = qs.stringify({
+    ...request,
+    sellAmount: request.sellAmount?.toHexString(),
+    buyAmount: request.buyAmount?.toHexString(),
+  });
+  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/quotes?${queryParams}`, {
     signal: options?.abortSignal,
-  }).then((response) => parseResponse<Quote[]>(response));
+  })
+    .then((response) => parseResponse<Quote[]>(response))
+    .then((quotes) =>
+      quotes.map((quote) => ({
+        ...quote,
+        sellAmount: BigNumber.from(quote.sellAmount),
+        buyAmount: BigNumber.from(quote.buyAmount),
+        sources: quote.sources.map((source) => ({
+          ...source,
+          sellAmount: BigNumber.from(source.sellAmount),
+          buyAmount: BigNumber.from(source.buyAmount),
+        })),
+      })),
+    );
+};
 
 /**
  * Build data for executing the exchange through AVNU router

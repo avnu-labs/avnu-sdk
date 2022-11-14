@@ -1,3 +1,5 @@
+import { BigNumber } from 'ethers';
+
 export interface Pageable {
   page?: number;
   size?: number;
@@ -35,8 +37,8 @@ export interface Pair {
 export interface QuoteRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
-  sellAmount?: string;
-  buyAmount?: string;
+  sellAmount?: BigNumber;
+  buyAmount?: BigNumber;
   takerAddress?: string;
   size?: number;
 }
@@ -46,17 +48,17 @@ export interface Source {
   icon?: string;
   percent: number;
   sellTokenAddress: string;
-  sellAmount: string;
+  sellAmount: BigNumber;
   buyTokenAddress: string;
-  buyAmount: string;
+  buyAmount: BigNumber;
 }
 
 export interface Quote {
   quoteId: string;
   sellTokenAddress: string;
-  sellAmount: string;
+  sellAmount: BigNumber;
   buyTokenAddress: string;
-  buyAmount: string;
+  buyAmount: BigNumber;
   blockNumber?: number;
   chainId: string;
   slippage: number;
