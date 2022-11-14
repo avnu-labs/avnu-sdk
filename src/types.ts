@@ -37,7 +37,7 @@ export interface QuoteRequest {
   buyTokenAddress: string;
   sellAmount?: string;
   buyAmount?: string;
-  takerAddress: string;
+  takerAddress?: string;
   size?: number;
 }
 

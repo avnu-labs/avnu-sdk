@@ -25,7 +25,6 @@ const parseResponse = <T>(response: Response): Promise<T> => {
     });
   }
   if (response.status > 400) {
-    // return Promise.reject(new Error(`${response.status} ${response.statusText}`))
     throw new Error(`${response.status} ${response.statusText}`);
   }
   return response.json();
@@ -49,17 +48,18 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
  * It allows trader to build the data needed for executing the exchange on AVNU router
  *
  * @param quoteId: The id of the selected quote
+ * @param takerAddress: Required when taker address was not provided during the quote request
  * @param options: Optional options.
  * @returns The transaction
  */
-const buildSwapTransaction = (quoteId: string, options?: AvnuOptions): Promise<Transaction> =>
+const buildSwapTransaction = (quoteId: string, takerAddress?: string, options?: AvnuOptions): Promise<Transaction> =>
   fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/build`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ quoteId }),
+    body: JSON.stringify({ quoteId, takerAddress }),
     signal: options?.abortSignal,
   }).then((response) => parseResponse(response));
 
@@ -167,7 +167,7 @@ const approveAndExecuteSwap = (
   sellAmount: BigNumberish,
   options?: AvnuOptions,
 ): Promise<InvokeFunctionResponse> =>
-  buildSwapTransaction(quoteId, options).then((transaction) =>
+  buildSwapTransaction(quoteId, account.address, options).then((transaction) =>
     executeSwap(account, transaction, sellTokenAddress, sellAmount),
   );
 
