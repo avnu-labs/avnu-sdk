@@ -4,7 +4,7 @@ import { Page, Pair, Quote, QuoteRequest, Token, Transaction } from './types';
 
 export const aQuoteRequest = (): QuoteRequest => ({
   sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-  sellAmount: parseUnits('1', 18).toString(),
+  sellAmount: parseUnits('1', 18),
   buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
   size: 1,
   takerAddress: '0x0',
@@ -13,9 +13,9 @@ export const aQuoteRequest = (): QuoteRequest => ({
 export const aQuote = (): Quote => ({
   quoteId: 'quoteId',
   sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-  sellAmount: parseUnits('1', 18).toString(),
+  sellAmount: parseUnits('1', 18),
   buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
-  buyAmount: parseUnits('2', 18).toString(),
+  buyAmount: parseUnits('2', 18),
   blockNumber: 1,
   chainId: StarknetChainId.TESTNET,
   slippage: 0,
@@ -25,9 +25,9 @@ export const aQuote = (): Quote => ({
       name: 'Market market 1',
       percent: 1,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-      sellAmount: parseUnits('1', 18).toString(),
+      sellAmount: parseUnits('1', 18),
       buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
-      buyAmount: parseUnits('2', 18).toString(),
+      buyAmount: parseUnits('2', 18),
     },
   ],
 });

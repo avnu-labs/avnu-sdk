@@ -25,7 +25,8 @@ describe('Avnu services', () => {
       // Given
       const request = aQuoteRequest();
       const response = [aQuote()];
-      fetchMock.get(`${BASE_URL}/swap/v1/quotes?${qs.stringify(request)}`, response);
+      const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
+      fetchMock.get(`${BASE_URL}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
       const result = await getQuotes(request);
@@ -39,7 +40,8 @@ describe('Avnu services', () => {
       const request = aQuoteRequest();
       const baseUrl = 'http://example.com';
       const response = [aQuote()];
-      fetchMock.get(`${baseUrl}/swap/v1/quotes?${qs.stringify(request)}`, response);
+      const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
+      fetchMock.get(`${baseUrl}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
       const result = await getQuotes(request, { baseUrl });
@@ -48,14 +50,20 @@ describe('Avnu services', () => {
       expect(result).toStrictEqual(response);
     });
 
-    it('should use throw Error with status code and text when status is higher than 400', () => {
+    it('should use throw Error with status code and text when status is higher than 400', async () => {
       // Given
       const request = aQuoteRequest();
-      fetchMock.get(`${BASE_URL}/swap/v1/quotes?${qs.stringify(request)}`, 401);
+      const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
+      fetchMock.get(`${BASE_URL}/swap/v1/quotes?${qs.stringify(queryParams)}`, 401);
 
-      // When & Then
+      // When
+      try {
+        await getQuotes(request);
+      } catch (error) {
+        // Then
+        expect(error).toStrictEqual(new Error('401 Unauthorized'));
+      }
       expect.assertions(1);
-      expect(getQuotes(request)).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
