@@ -66,11 +66,8 @@ export interface Quote {
   sources: Source[];
 }
 
-export interface Transaction {
-  chainId: string;
-  contractAddress: string;
-  entrypoint: string;
-  calldata: string[];
+export interface InvokeSwapResponse {
+  transactionHash: string;
 }
 
 export interface RequestError {

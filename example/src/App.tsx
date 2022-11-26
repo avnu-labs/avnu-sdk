@@ -2,7 +2,8 @@ import React, { ChangeEvent, useState } from 'react';
 import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import type { AccountInterface } from "starknet";
 import { connect } from "get-starknet";
-import { approveAndExecuteSwap, getQuotes, Quote } from "@avnu/avnu-sdk";
+import { buildGetNonce, executeSwap, getQuotes, Quote } from "@avnu/avnu-sdk";
+import { BigNumber } from "ethers";
 
 const ethAddress = "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
 const wBtcAddress = "0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7"
@@ -32,7 +33,7 @@ function App() {
     const params = {
       sellTokenAddress: ethAddress,
       buyTokenAddress: wBtcAddress,
-      sellAmount: parseUnits(event.target.value, 18).toString(),
+      sellAmount: parseUnits(event.target.value, 18),
       takerAddress: account.address,
       size: 1,
     }
@@ -48,12 +49,18 @@ function App() {
     if (!account || !sellAmount || !quotes || !quotes[0]) return;
     setErrorMessage('')
     setLoading(true)
-    approveAndExecuteSwap(quotes[0].quoteId, account, ethAddress, parseUnits(sellAmount, 18).toString())
+    console.log('d', BigNumber.from(account.address).toString())
+    console.log('buildGetNonce(account.address, account.chainId)', buildGetNonce(account.address, account.chainId))
+    const nonce = await account.callContract(buildGetNonce(account.address, account.chainId)).then((v)=> v.result[0]);
+    console.log('nonce', nonce)
+    console.log('executeSwap', account, quotes[0], nonce)
+    executeSwap(account, quotes[0], nonce)
       .then(() => {
         setLoading(false)
         setQuotes([])
       })
       .catch((error: Error) => {
+        console.log('error', error)
         setLoading(false)
         setErrorMessage(error.message)
       });

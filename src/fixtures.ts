@@ -1,6 +1,6 @@
 import { parseUnits } from '@ethersproject/units/src.ts';
 import { StarknetChainId } from 'starknet/constants';
-import { Page, Pair, Quote, QuoteRequest, Token, Transaction } from './types';
+import { InvokeSwapResponse, Page, Pair, Quote, QuoteRequest, Token } from './types';
 
 export const aQuoteRequest = (): QuoteRequest => ({
   sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
@@ -32,11 +32,8 @@ export const aQuote = (): Quote => ({
   ],
 });
 
-export const aTransaction = (): Transaction => ({
-  contractAddress: '0x0',
-  chainId: StarknetChainId.TESTNET,
-  calldata: [],
-  entrypoint: 'execute',
+export const anInvokeSwapResponse = (): InvokeSwapResponse => ({
+  transactionHash: '0x0',
 });
 
 export const ethToken = (): Token => ({
