@@ -1,19 +1,19 @@
-import { BigNumber, BigNumberish } from 'ethers';
+import { BigNumber } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, Call, InvokeFunctionResponse } from 'starknet';
+import { AccountInterface, Call, Signature } from 'starknet';
 import { bnToUint256 } from 'starknet/utils/uint256';
-import { BASE_URL, STAGING_BASE_URL, WHITELISTED_ADDRESSES } from './constants';
+import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
   GetPairsRequest,
   GetTokensRequest,
+  InvokeSwapResponse,
   Page,
   Pair,
   Quote,
   QuoteRequest,
   RequestError,
   Token,
-  Transaction,
 } from './types';
 
 const getBaseUrl = (): string => (process.env.NODE_ENV === 'dev' ? STAGING_BASE_URL : BASE_URL);
@@ -63,24 +63,35 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
 };
 
 /**
- * Build data for executing the exchange through AVNU router
- * It allows trader to build the data needed for executing the exchange on AVNU router
+ * Executing the exchange through AVNU router
  *
  * @param quoteId: The id of the selected quote
+ * @param takerSignature: Required when taker address was not provided during the quote request
+ * @param nonce: Taker's address nonce. See `buildGetNonce`
  * @param takerAddress: Required when taker address was not provided during the quote request
  * @param options: Optional options.
- * @returns The transaction
+ * @returns The transaction hash
  */
-const buildSwapTransaction = (quoteId: string, takerAddress?: string, options?: AvnuOptions): Promise<Transaction> =>
-  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/build`, {
+const executeSwapTransaction = (
+  quoteId: string,
+  takerSignature: Signature,
+  nonce: string,
+  takerAddress?: string,
+  options?: AvnuOptions,
+): Promise<InvokeSwapResponse> =>
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/execute`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ quoteId, takerAddress }),
-    signal: options?.abortSignal,
-  }).then((response) => parseResponse(response));
+    body: JSON.stringify({
+      quoteId,
+      takerAddress,
+      nonce,
+      takerSignature: takerSignature.map((signature) => BigNumber.from(signature).toHexString()),
+    }),
+  }).then((response) => parseResponse<InvokeSwapResponse>(response));
 
 /**
  * Fetches the supported tokens.
@@ -107,96 +118,111 @@ const getPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<Pag
   }).then((response) => parseResponse<Page<Pair>>(response));
 
 /**
- * Verifies if the address is whitelisted
- * Throws an error when the contractAddress is not whitelisted
- *
- * @param contractAddress: The address to check
- * @param chainId: The chainId
- */
-const checkAddress = (contractAddress: string, chainId: string) => {
-  if (!WHITELISTED_ADDRESSES[chainId]?.includes(contractAddress)) {
-    throw Error(`${contractAddress} is not whitelisted`);
-  }
-};
-
-/**
- * Build approve transaction
- * Could throw an error if the contractAddress is not whitelisted
+ * Build approve call
  *
  * @param sellTokenAddress: The sell token address
- * @param contractAddress: The avnu contract address
  * @param sellAmount: The sell amount
  * @param chainId: The chainId
  * @returns Call
  */
-const buildApproveTx = (
-  sellTokenAddress: string,
-  contractAddress: string,
-  sellAmount: BigNumberish,
-  chainId: string,
-): Call => {
-  const uint256 = bnToUint256(sellAmount);
-  checkAddress(contractAddress, chainId);
+const buildApproveTx = (sellTokenAddress: string, sellAmount: BigNumber, chainId: string): Call => {
+  const uint256 = bnToUint256(sellAmount.toHexString());
   return {
     contractAddress: sellTokenAddress,
     entrypoint: 'approve',
-    calldata: [contractAddress, uint256.low, uint256.high],
+    calldata: [AVNU_ADDRESS[chainId], uint256.low, uint256.high],
   };
 };
 
 /**
- * Execute approve and swap transactions
+ * Build getNonce call
  *
- * @param account: The account of the trader
- * @param swapTransaction: The swap transaction (returned by buildSwapTransaction)
- * @param sellTokenAddress: The sell token address
- * @param sellAmount: The sell amount
- * @returns Promise<InvokeFunctionResponse>
+ * @param takerAddress: The taker's address
+ * @param chainId: The chainId
+ * @returns Call
  */
-const executeSwap = (
-  account: AccountInterface,
-  swapTransaction: Transaction,
-  sellTokenAddress: string,
-  sellAmount: BigNumberish,
-): Promise<InvokeFunctionResponse> => {
-  if (account.chainId !== swapTransaction.chainId) {
-    throw Error(`Invalid chainId`);
-  }
-  checkAddress(swapTransaction.contractAddress, swapTransaction.chainId);
-  return account.execute([
-    buildApproveTx(sellTokenAddress, swapTransaction.contractAddress, sellAmount, swapTransaction.chainId),
-    swapTransaction,
-  ]);
-};
+const buildGetNonce = (takerAddress: string, chainId: string): Call => ({
+  contractAddress: AVNU_ADDRESS[chainId],
+  entrypoint: 'getNonce',
+  calldata: [BigNumber.from(takerAddress).toString()],
+});
 
 /**
- * Approves and executes the quote
+ * Sign the quote
+ * The signature will be used in the AVNU contract
  *
- * @param quoteId: The id of the selected quote
  * @param account: The account of the trader
- * @param sellTokenAddress: The sell token address
- * @param sellAmount: The sell amount
- * @param options: Optional options.
- * @returns Promise<InvokeFunctionResponse>
+ * @param quote: The selected quote. See `getQuotes`
+ * @param nonce: Taker's address nonce. See `buildGetNonce`
+ * @param chainId: The chainId
+ * @returns Call
  */
-const approveAndExecuteSwap = (
-  quoteId: string,
+const signQuote = (account: AccountInterface, quote: Quote, nonce: string, chainId: string): Promise<Signature> =>
+  account.signMessage({
+    domain: { name: 'AVNUFinance', version: '1', chainId: chainId },
+    message: {
+      taker_address: account.address,
+      taker_token_address: quote.sellTokenAddress,
+      taker_token_amount: quote.sellAmount.toString(),
+      maker_token_address: quote.buyTokenAddress,
+      maker_token_amount: quote.buyAmount.toString(),
+      nonce,
+    },
+    primaryType: 'AVNUMessage',
+    types: {
+      StarkNetDomain: [
+        { name: 'name', type: 'felt' },
+        { name: 'version', type: 'felt' },
+        { name: 'chainId', type: 'felt' },
+      ],
+      AVNUMessage: [
+        { name: 'taker_address', type: 'felt' },
+        { name: 'taker_token_address', type: 'felt' },
+        { name: 'taker_token_amount', type: 'felt' },
+        { name: 'maker_token_address', type: 'felt' },
+        { name: 'maker_token_amount', type: 'felt' },
+        { name: 'nonce', type: 'felt' },
+      ],
+    },
+  });
+
+/**
+ * Execute the exchange
+ *
+ * @param account: The account of the trader
+ * @param quote: The selected quote. See `getQuotes`
+ * @param nonce: Taker's address nonce. See `buildGetNonce`
+ * @param executeApprove: False if the taker already executed `approve`
+ * @param takerSignature: Optional: the function will ask the user tu sign the quote if param is undefined
+ * @param options: Optional options.
+ * @returns Promise<InvokeSwapResponse>
+ */
+const executeSwap = async (
   account: AccountInterface,
-  sellTokenAddress: string,
-  sellAmount: BigNumberish,
+  quote: Quote,
+  nonce: string,
+  executeApprove = true,
+  takerSignature?: Signature,
   options?: AvnuOptions,
-): Promise<InvokeFunctionResponse> =>
-  buildSwapTransaction(quoteId, account.address, options).then((transaction) =>
-    executeSwap(account, transaction, sellTokenAddress, sellAmount),
-  );
+): Promise<InvokeSwapResponse> => {
+  if (account.chainId !== quote.chainId) {
+    throw Error(`Invalid chainId`);
+  }
+  if (executeApprove) {
+    const approve = buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId);
+    await account.execute([approve]);
+  }
+  takerSignature = takerSignature ?? (await signQuote(account, quote, nonce, quote.chainId));
+  return executeSwapTransaction(quote.quoteId, takerSignature, nonce, account.address, options);
+};
 
 export {
-  approveAndExecuteSwap,
   buildApproveTx,
-  buildSwapTransaction,
-  checkAddress,
+  buildGetNonce,
   executeSwap,
+  executeSwapTransaction,
   getPairs,
   getQuotes,
   getTokens,
+  signQuote,
 };

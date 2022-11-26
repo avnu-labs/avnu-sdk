@@ -1,19 +1,10 @@
+import { BigNumber } from 'ethers';
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
-import { AccountInterface } from 'starknet';
 import { StarknetChainId } from 'starknet/dist/constants';
 import { BASE_URL } from './constants';
-import { aPage, aPair, aQuote, aQuoteRequest, aTransaction, ethToken } from './fixtures';
-import {
-  buildApproveTx,
-  buildSwapTransaction,
-  checkAddress,
-  executeSwap,
-  getPairs,
-  getQuotes,
-  getTokens,
-} from './services';
-import { Transaction } from './types';
+import { anInvokeSwapResponse, aPage, aPair, aQuote, aQuoteRequest, ethToken } from './fixtures';
+import { buildApproveTx, buildGetNonce, executeSwapTransaction, getPairs, getQuotes, getTokens } from './services';
 
 describe('Avnu services', () => {
   beforeEach(() => {
@@ -67,14 +58,14 @@ describe('Avnu services', () => {
     });
   });
 
-  describe('buildSwapTransaction', () => {
-    it('should return a Transaction', async () => {
+  describe('executeSwapTransaction', () => {
+    it('should return an InvokeSwapResponse', async () => {
       // Given
-      const response = [aTransaction()];
-      fetchMock.post(`${BASE_URL}/swap/v1/build`, response);
+      const response = anInvokeSwapResponse();
+      fetchMock.post(`${BASE_URL}/swap/v1/execute`, response);
 
       // When
-      const result = await buildSwapTransaction('quoteId');
+      const result = await executeSwapTransaction('quoteId', [], '', '');
 
       // Then
       expect(result).toStrictEqual(response);
@@ -83,11 +74,11 @@ describe('Avnu services', () => {
     it('should use baseUrl from AvnuOption when defined', async () => {
       // Given
       const baseUrl = 'http://example.com';
-      const response = [aTransaction()];
-      fetchMock.post(`${baseUrl}/swap/v1/build`, response);
+      const response = anInvokeSwapResponse();
+      fetchMock.post(`${baseUrl}/swap/v1/execute`, response);
 
       // When
-      const result = await buildSwapTransaction('quoteId', undefined, { baseUrl });
+      const result = await executeSwapTransaction('quoteId', [], '', '', undefined, { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -95,11 +86,11 @@ describe('Avnu services', () => {
 
     it('should use throw Error with status code and text when status is higher than 400', () => {
       // Given
-      fetchMock.post(`${BASE_URL}/swap/v1/build`, 401);
+      fetchMock.post(`${BASE_URL}/swap/v1/execute`, 401);
 
       // When & Then
       expect.assertions(1);
-      expect(buildSwapTransaction('quoteId')).rejects.toEqual(Error('401 Unauthorized'));
+      expect(executeSwapTransaction('quoteId', [], '', '')).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
@@ -159,36 +150,10 @@ describe('Avnu services', () => {
     });
   });
 
-  describe('checkAddress', () => {
-    it('should do nothing when address is whitelisted', () => {
-      // When & Then
-      checkAddress('0x5c614428c49b94ab60c90ea55d366d328921c829bbd3ae81d748723750c0931', StarknetChainId.TESTNET);
-    });
-
-    it('should throw an error when address is not whitelisted', () => {
-      let thrownError;
-
-      // When
-      try {
-        checkAddress('0x1', StarknetChainId.TESTNET);
-      } catch (error) {
-        thrownError = error;
-      }
-
-      // Then
-      expect(thrownError).toEqual(Error('0x1 is not whitelisted'));
-    });
-  });
-
   describe('buildApproveTx', () => {
     it('should build approve', () => {
       // When
-      const result = buildApproveTx(
-        '0x1',
-        '0x5c614428c49b94ab60c90ea55d366d328921c829bbd3ae81d748723750c0931',
-        '1',
-        StarknetChainId.TESTNET,
-      );
+      const result = buildApproveTx('0x1', BigNumber.from('1'), StarknetChainId.TESTNET);
 
       // Then
       expect(result).toStrictEqual({
@@ -197,64 +162,19 @@ describe('Avnu services', () => {
         entrypoint: 'approve',
       });
     });
-
-    it('should throw an error when contractAddress is not whitelisted', () => {
-      let thrownError;
-
-      // When
-      try {
-        buildApproveTx('0x1', '0x1', '1', StarknetChainId.TESTNET);
-      } catch (error) {
-        thrownError = error;
-      }
-
-      // Then
-      expect(thrownError).toEqual(Error('0x1 is not whitelisted'));
-    });
   });
 
-  describe('executeSwap', () => {
-    it('should throw an error when swapTransaction.contractAddress is not whitelisted', () => {
-      // given
-      let thrownError;
-      const account: AccountInterface = { chainId: StarknetChainId.TESTNET } as AccountInterface;
-      const swapTransaction: Transaction = {
-        chainId: StarknetChainId.TESTNET,
-        contractAddress: '0x1',
-        entrypoint: 'approve',
-        calldata: [],
-      };
-
+  describe('buildGetNonce', () => {
+    it('should build getNonce', () => {
       // When
-      try {
-        executeSwap(account, swapTransaction, '0x1', '1');
-      } catch (error) {
-        thrownError = error;
-      }
+      const result = buildGetNonce('0x1', StarknetChainId.TESTNET);
 
       // Then
-      expect(thrownError).toEqual(Error('0x1 is not whitelisted'));
-    });
-    it('should throw an error when invalid chainId', () => {
-      // given
-      let thrownError;
-      const account: AccountInterface = { chainId: StarknetChainId.MAINNET } as AccountInterface;
-      const swapTransaction: Transaction = {
-        chainId: StarknetChainId.TESTNET,
-        contractAddress: '0x0',
-        entrypoint: 'approve',
-        calldata: [],
-      };
-
-      // When
-      try {
-        executeSwap(account, swapTransaction, '0x1', '1');
-      } catch (error) {
-        thrownError = error;
-      }
-
-      // Then
-      expect(thrownError).toEqual(Error('Invalid chainId'));
+      expect(result).toStrictEqual({
+        calldata: ['1'],
+        contractAddress: '0x5c614428c49b94ab60c90ea55d366d328921c829bbd3ae81d748723750c0931',
+        entrypoint: 'getNonce',
+      });
     });
   });
 });
