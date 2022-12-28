@@ -78,7 +78,7 @@ describe('Avnu services', () => {
       fetchMock.post(`${baseUrl}/swap/v1/execute`, response);
 
       // When
-      const result = await executeSwapTransaction('quoteId', [], '', '', undefined, { baseUrl });
+      const result = await executeSwapTransaction('quoteId', [], '', '', { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
