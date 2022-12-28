@@ -49,18 +49,13 @@ function App() {
     if (!account || !sellAmount || !quotes || !quotes[0]) return;
     setErrorMessage('')
     setLoading(true)
-    console.log('d', BigNumber.from(account.address).toString())
-    console.log('buildGetNonce(account.address, account.chainId)', buildGetNonce(account.address, account.chainId))
     const nonce = await account.callContract(buildGetNonce(account.address, account.chainId)).then((v)=> v.result[0]);
-    console.log('nonce', nonce)
-    console.log('executeSwap', account, quotes[0], nonce)
     executeSwap(account, quotes[0], nonce)
       .then(() => {
         setLoading(false)
         setQuotes([])
       })
       .catch((error: Error) => {
-        console.log('error', error)
         setLoading(false)
         setErrorMessage(error.message)
       });

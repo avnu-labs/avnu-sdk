@@ -123,14 +123,14 @@ const getPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<Pag
  * @param sellTokenAddress: The sell token address
  * @param sellAmount: The sell amount
  * @param chainId: The chainId
- * @returns Call
+ * @param dev: Specify if you need to use the dev environment  * @returns Call
  */
-const buildApproveTx = (sellTokenAddress: string, sellAmount: BigNumber, chainId: string): Call => {
+const buildApproveTx = (sellTokenAddress: string, sellAmount: BigNumber, chainId: string, dev?: boolean): Call => {
   const uint256 = bnToUint256(sellAmount.toHexString());
   return {
     contractAddress: sellTokenAddress,
     entrypoint: 'approve',
-    calldata: [AVNU_ADDRESS[chainId], uint256.low, uint256.high],
+    calldata: [dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId], uint256.low, uint256.high],
   };
 };
 
@@ -139,10 +139,11 @@ const buildApproveTx = (sellTokenAddress: string, sellAmount: BigNumber, chainId
  *
  * @param takerAddress: The taker's address
  * @param chainId: The chainId
+ * @param dev: Specify if you need to use the dev environment
  * @returns Call
  */
-const buildGetNonce = (takerAddress: string, chainId: string): Call => ({
-  contractAddress: AVNU_ADDRESS[chainId],
+const buildGetNonce = (takerAddress: string, chainId: string, dev?: boolean): Call => ({
+  contractAddress: dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId],
   entrypoint: 'getNonce',
   calldata: [BigNumber.from(takerAddress).toString()],
 });
@@ -163,19 +164,19 @@ const signQuote = (account: AccountInterface, quote: Quote, nonce: string, chain
     message: {
       taker_address: account.address,
       taker_token_address: quote.sellTokenAddress,
-      taker_token_amount: quote.sellAmount.toString(),
+      taker_token_amount: quote.sellAmount.toHexString(),
       maker_token_address: quote.buyTokenAddress,
-      maker_token_amount: quote.buyAmount.toString(),
+      maker_token_amount: quote.buyAmount.toHexString(),
       nonce,
     },
-    primaryType: 'AVNUMessage',
+    primaryType: 'TakerMessage',
     types: {
       StarkNetDomain: [
         { name: 'name', type: 'felt' },
         { name: 'version', type: 'felt' },
         { name: 'chainId', type: 'felt' },
       ],
-      AVNUMessage: [
+      TakerMessage: [
         { name: 'taker_address', type: 'felt' },
         { name: 'taker_token_address', type: 'felt' },
         { name: 'taker_token_amount', type: 'felt' },
@@ -209,7 +210,7 @@ const executeSwap = async (
     throw Error(`Invalid chainId`);
   }
   if (executeApprove) {
-    const approve = buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId);
+    const approve = buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev);
     await account.execute([approve]);
   }
   takerSignature = takerSignature ?? (await signQuote(account, quote, nonce, quote.chainId));

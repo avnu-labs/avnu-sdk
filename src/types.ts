@@ -76,5 +76,6 @@ export interface RequestError {
 
 export interface AvnuOptions {
   baseUrl?: string;
+  dev?: boolean;
   abortSignal?: AbortSignal;
 }
