@@ -50,27 +50,30 @@
       "limit": "250 KB"
     }
   ],
-  "dependencies": {
+  "peerDependencies": {
     "ethers": "^5.7.0",
     "qs": "^6.11.0",
-    "starknet": "^4.9.0"
+    "starknet": "^4.15.0"
   },
   "devDependencies": {
+    "ethers": "5.7.2",
+    "qs": "6.11.0",
+    "starknet": "4.15.1",
     "@size-limit/preset-small-lib": "8.1.0",
-    "@types/jest": "29.2.3",
+    "@types/jest": "29.2.5",
     "@types/qs": "6.9.7",
-    "@typescript-eslint/eslint-plugin": "5.44.0",
-    "@typescript-eslint/parser": "5.44.0",
-    "eslint": "8.28.0",
-    "eslint-config-prettier": "8.5.0",
+    "@typescript-eslint/eslint-plugin": "5.48.0",
+    "@typescript-eslint/parser": "5.48.0",
+    "eslint": "8.31.0",
+    "eslint-config-prettier": "8.6.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-simple-import-sort": "8.0.0",
     "fetch-mock": "9.11.0",
-    "prettier": "2.8.0",
+    "prettier": "2.8.1",
     "size-limit": "8.1.0",
     "tsdx": "0.14.1",
     "tslib": "2.4.1",
-    "typescript": "4.9.3"
+    "typescript": "4.9.4"
   }
 }

@@ -45,6 +45,7 @@ export interface QuoteRequest {
 
 export interface Source {
   name: string;
+  address: string;
   icon?: string;
   percent: number;
   sellTokenAddress: string;
