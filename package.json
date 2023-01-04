@@ -1,6 +1,6 @@
 {
   "name": "@avnu/avnu-sdk",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "license": "MIT",
   "author": "AVNU",
   "description": "TypeScript SDK for building exchange functionality on Layers 2 with the AVNU API",
@@ -56,9 +56,6 @@
     "starknet": "^4.15.0"
   },
   "devDependencies": {
-    "ethers": "5.7.2",
-    "qs": "6.11.0",
-    "starknet": "4.15.1",
     "@size-limit/preset-small-lib": "8.1.0",
     "@types/jest": "29.2.5",
     "@types/qs": "6.9.7",
@@ -69,9 +66,12 @@
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-simple-import-sort": "8.0.0",
+    "ethers": "5.7.2",
     "fetch-mock": "9.11.0",
     "prettier": "2.8.1",
+    "qs": "6.11.0",
     "size-limit": "8.1.0",
+    "starknet": "4.15.1",
     "tsdx": "0.14.1",
     "tslib": "2.4.1",
     "typescript": "4.9.4"
