@@ -1,7 +1,6 @@
 import { BigNumber } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, Call, Signature } from 'starknet';
-import { bnToUint256 } from 'starknet/utils/uint256';
+import { AccountInterface, Call, Signature, uint256 } from 'starknet';
 import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
@@ -126,11 +125,11 @@ const getPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<Pag
  * @param dev: Specify if you need to use the dev environment  * @returns Call
  */
 const buildApproveTx = (sellTokenAddress: string, sellAmount: BigNumber, chainId: string, dev?: boolean): Call => {
-  const uint256 = bnToUint256(sellAmount.toHexString());
+  const value = uint256.bnToUint256(sellAmount.toHexString());
   return {
     contractAddress: sellTokenAddress,
     entrypoint: 'approve',
-    calldata: [dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId], uint256.low, uint256.high],
+    calldata: [dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId], value.low, value.high],
   };
 };
 

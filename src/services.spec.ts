@@ -1,7 +1,7 @@
 import { BigNumber } from 'ethers';
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
-import { StarknetChainId } from 'starknet/dist/constants';
+import { constants } from 'starknet';
 import { BASE_URL } from './constants';
 import { anInvokeSwapResponse, aPage, aPair, aQuote, aQuoteRequest, ethToken } from './fixtures';
 import { buildApproveTx, buildGetNonce, executeSwapTransaction, getPairs, getQuotes, getTokens } from './services';
@@ -153,7 +153,7 @@ describe('Avnu services', () => {
   describe('buildApproveTx', () => {
     it('should build approve', () => {
       // When
-      const result = buildApproveTx('0x1', BigNumber.from('1'), StarknetChainId.TESTNET);
+      const result = buildApproveTx('0x1', BigNumber.from('1'), constants.StarknetChainId.TESTNET);
 
       // Then
       expect(result).toStrictEqual({
@@ -167,7 +167,7 @@ describe('Avnu services', () => {
   describe('buildGetNonce', () => {
     it('should build getNonce', () => {
       // When
-      const result = buildGetNonce('0x1', StarknetChainId.TESTNET);
+      const result = buildGetNonce('0x1', constants.StarknetChainId.TESTNET);
 
       // Then
       expect(result).toStrictEqual({
