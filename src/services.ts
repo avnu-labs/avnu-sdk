@@ -1,6 +1,6 @@
 import { BigNumber } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, Call, Signature, uint256 } from 'starknet';
+import { AccountInterface, Call, Signature, typedData, uint256 } from 'starknet';
 import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
@@ -188,6 +188,40 @@ const signQuote = (account: AccountInterface, quote: Quote, nonce: string, chain
     },
   });
 
+const hashQuote = (accountAddress: string, quote: Quote, nonce: string, chainId: string): string =>
+  typedData.getMessageHash(
+    {
+      domain: { name: 'AVNUFinance', version: '1', chainId: chainId },
+      message: {
+        taker_address: accountAddress,
+        taker_token_address: quote.sellTokenAddress,
+        taker_token_amount: quote.sellAmount.toHexString(),
+        maker_address: quote.sources[0].address,
+        maker_token_address: quote.buyTokenAddress,
+        maker_token_amount: quote.buyAmount.toHexString(),
+        nonce,
+      },
+      primaryType: 'TakerMessage',
+      types: {
+        StarkNetDomain: [
+          { name: 'name', type: 'felt' },
+          { name: 'version', type: 'felt' },
+          { name: 'chainId', type: 'felt' },
+        ],
+        TakerMessage: [
+          { name: 'taker_address', type: 'felt' },
+          { name: 'taker_token_address', type: 'felt' },
+          { name: 'taker_token_amount', type: 'felt' },
+          { name: 'maker_address', type: 'felt' },
+          { name: 'maker_token_address', type: 'felt' },
+          { name: 'maker_token_amount', type: 'felt' },
+          { name: 'nonce', type: 'felt' },
+        ],
+      },
+    },
+    accountAddress,
+  );
+
 /**
  * Execute the exchange
  *
@@ -226,5 +260,6 @@ export {
   getPairs,
   getQuotes,
   getTokens,
+  hashQuote,
   signQuote,
 };

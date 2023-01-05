@@ -2,9 +2,21 @@ import { BigNumber } from 'ethers';
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
 import { constants } from 'starknet';
+import { TextEncoder } from 'util';
 import { BASE_URL } from './constants';
 import { anInvokeSwapResponse, aPage, aPair, aQuote, aQuoteRequest, ethToken } from './fixtures';
-import { buildApproveTx, buildGetNonce, executeSwapTransaction, getPairs, getQuotes, getTokens } from './services';
+import {
+  buildApproveTx,
+  buildGetNonce,
+  executeSwapTransaction,
+  getPairs,
+  getQuotes,
+  getTokens,
+  hashQuote,
+} from './services';
+import { Quote } from './types';
+
+global.TextEncoder = TextEncoder;
 
 describe('Avnu services', () => {
   beforeEach(() => {
@@ -175,6 +187,36 @@ describe('Avnu services', () => {
         contractAddress: '0x5c614428c49b94ab60c90ea55d366d328921c829bbd3ae81d748723750c0931',
         entrypoint: 'getNonce',
       });
+    });
+  });
+
+  describe('hashQuote', () => {
+    it('should return the hash', () => {
+      // Given
+      const quote: Quote = {
+        ...aQuote(),
+        sellTokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+        sellAmount: BigNumber.from('0x0de0b6b3a7640000'),
+        buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
+        buyAmount: BigNumber.from('0x0de0b6b3a7640000'),
+        sources: [
+          {
+            ...aQuote().sources[0],
+            address: '0x02F7944d1ca7e42683d8562397a221a98105b415200BAA056c326Ad639c6ca2E',
+          },
+        ],
+      };
+
+      // When
+      const result = hashQuote(
+        '0x052D8E9778d026588A51595E30B0f45609B4F771eEcF0E335CdeFeD1D84A9d89',
+        quote,
+        '0x0',
+        constants.StarknetChainId.TESTNET,
+      );
+
+      // Then
+      expect(result).toStrictEqual('0xa6b37651d52580635bbd93c0e4008ab939f955ae3914c558865e1870659784');
     });
   });
 });
