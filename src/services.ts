@@ -236,10 +236,10 @@ const hashQuote = (accountAddress: string, quote: Quote, nonce: string, chainId:
 const executeSwap = async (
   account: AccountInterface,
   quote: Quote,
-  nonce: string,
   executeApprove = true,
-  takerSignature?: Signature,
   options?: AvnuOptions,
+  nonce?: string,
+  takerSignature?: Signature,
 ): Promise<InvokeSwapResponse> => {
   if (account.chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
@@ -247,6 +247,12 @@ const executeSwap = async (
   if (executeApprove) {
     const approve = buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev);
     await account.execute([approve]);
+  }
+  // If nonce not given, fetch it
+  if (!nonce) {
+    const getNonce = buildGetNonce(account.address, account.chainId);
+    const response = await account.callContract(getNonce);
+    nonce = response.result[0];
   }
   takerSignature = takerSignature ?? (await signQuote(account, quote, nonce, quote.chainId));
   return executeSwapTransaction(quote.quoteId, takerSignature, nonce, account.address, options);
