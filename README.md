@@ -22,8 +22,7 @@ const params = {
   takerAddress: account.address,
 }
 const quotes = await getQuotes(params);
-const swapTransaction = await buildSwapTransaction(quotes[0].quoteId)
-await executeSwap(account, transaction, ethAddress, parseUnits(sellAmount, 18).toString())
+await executeSwap(account, quotes[0]);
 ```
 
 ## Example

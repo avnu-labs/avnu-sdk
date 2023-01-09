@@ -2,8 +2,9 @@ import React, { ChangeEvent, useState } from 'react';
 import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import type { AccountInterface } from "starknet";
 import { connect } from "get-starknet";
-import { buildGetNonce, executeSwap, getQuotes, Quote } from "@avnu/avnu-sdk";
-import { BigNumber } from "ethers";
+import { executeSwap, getQuotes, Quote } from "@avnu/avnu-sdk";
+
+const AVNU_OPTIONS = { baseUrl: 'https://goerli.api.avnu.fi' };
 
 const ethAddress = "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
 const wBtcAddress = "0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7"
@@ -14,6 +15,7 @@ function App() {
   const [ quotes, setQuotes ] = useState<Quote[]>([])
   const [ loading, setLoading ] = useState<boolean>(false)
   const [ errorMessage, setErrorMessage ] = useState<string>()
+  const [ successMessage, setSuccessMessage ] = useState<string>()
 
   const handleConnect = async () => {
     const starknet = await connect({ modalOptions: { theme: "dark" } });
@@ -37,7 +39,7 @@ function App() {
       takerAddress: account.address,
       size: 1,
     }
-    getQuotes(params)
+    getQuotes(params, AVNU_OPTIONS)
       .then((quotes) => {
         setLoading(false)
         setQuotes(quotes)
@@ -48,10 +50,11 @@ function App() {
   const handleSwap = async () => {
     if (!account || !sellAmount || !quotes || !quotes[0]) return;
     setErrorMessage('')
+    setSuccessMessage('')
     setLoading(true)
-    const nonce = await account.callContract(buildGetNonce(account.address, account.chainId)).then((v)=> v.result[0]);
-    executeSwap(account, quotes[0], nonce)
+    executeSwap(account, quotes[0], true, AVNU_OPTIONS)
       .then(() => {
+        setSuccessMessage('success')
         setLoading(false)
         setQuotes([])
       })
@@ -85,6 +88,7 @@ function App() {
       </div>
       {loading ? <p>Loading...</p> : quotes && quotes[0] && <button onClick={handleSwap}>Swap</button>}
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      {successMessage && <p style={{ color: 'green' }}>Success</p>}
     </div>
   );
 }
