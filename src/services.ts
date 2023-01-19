@@ -250,7 +250,7 @@ const executeSwap = async (
   }
   // If nonce not given, fetch it
   if (!nonce) {
-    const getNonce = buildGetNonce(account.address, account.chainId);
+    const getNonce = buildGetNonce(account.address, account.chainId, options?.dev);
     const response = await account.callContract(getNonce);
     nonce = response.result[0];
   }
