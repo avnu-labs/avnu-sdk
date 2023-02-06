@@ -4,14 +4,15 @@ import qs from 'qs';
 import { constants } from 'starknet';
 import { TextEncoder } from 'util';
 import { BASE_URL } from './constants';
-import { anInvokeSwapResponse, aPage, aPair, aQuote, aQuoteRequest, ethToken } from './fixtures';
+import { aBuildSwapTransaction, anInvokeSwapResponse, aPage, aPair, aQuote, aQuoteRequest, ethToken } from './fixtures';
 import {
   buildApproveTx,
   buildGetNonce,
-  executeSwapTransaction,
-  getPairs,
-  getQuotes,
-  getTokens,
+  fetchBuildExecuteTransaction,
+  fetchExecuteSwapTransaction,
+  fetchPairs,
+  fetchQuotes,
+  fetchTokens,
   hashQuote,
 } from './services';
 import { Quote } from './types';
@@ -23,7 +24,7 @@ describe('Avnu services', () => {
     fetchMock.restore();
   });
 
-  describe('getQuotes', () => {
+  describe('fetchQuotes', () => {
     it('should return a list of quotes', async () => {
       // Given
       const request = aQuoteRequest();
@@ -32,7 +33,7 @@ describe('Avnu services', () => {
       fetchMock.get(`${BASE_URL}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
-      const result = await getQuotes(request);
+      const result = await fetchQuotes(request);
 
       // Then
       expect(result).toStrictEqual(response);
@@ -47,7 +48,7 @@ describe('Avnu services', () => {
       fetchMock.get(`${baseUrl}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
-      const result = await getQuotes(request, { baseUrl });
+      const result = await fetchQuotes(request, { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -61,7 +62,7 @@ describe('Avnu services', () => {
 
       // When
       try {
-        await getQuotes(request);
+        await fetchQuotes(request);
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
@@ -70,14 +71,14 @@ describe('Avnu services', () => {
     });
   });
 
-  describe('executeSwapTransaction', () => {
+  describe('fetchExecuteSwapTransaction', () => {
     it('should return an InvokeSwapResponse', async () => {
       // Given
       const response = anInvokeSwapResponse();
       fetchMock.post(`${BASE_URL}/swap/v1/execute`, response);
 
       // When
-      const result = await executeSwapTransaction('quoteId', [], '', '');
+      const result = await fetchExecuteSwapTransaction('quoteId', [], '', '');
 
       // Then
       expect(result).toStrictEqual(response);
@@ -90,7 +91,7 @@ describe('Avnu services', () => {
       fetchMock.post(`${baseUrl}/swap/v1/execute`, response);
 
       // When
-      const result = await executeSwapTransaction('quoteId', [], '', '', { baseUrl });
+      const result = await fetchExecuteSwapTransaction('quoteId', [], '', '', { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -102,18 +103,54 @@ describe('Avnu services', () => {
 
       // When & Then
       expect.assertions(1);
-      expect(executeSwapTransaction('quoteId', [], '', '')).rejects.toEqual(Error('401 Unauthorized'));
+      expect(fetchExecuteSwapTransaction('quoteId', [], '', '')).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
-  describe('getTokens', () => {
+  describe('fetchBuildExecuteTransaction', () => {
+    it('should return a BuildSwapTransaction', async () => {
+      // Given
+      const response = aBuildSwapTransaction();
+      fetchMock.post(`${BASE_URL}/swap/v1/build`, response);
+
+      // When
+      const result = await fetchBuildExecuteTransaction('quoteId', '', '');
+
+      // Then
+      expect(result).toStrictEqual(response);
+    });
+
+    it('should use baseUrl from AvnuOption when defined', async () => {
+      // Given
+      const baseUrl = 'http://example.com';
+      const response = aBuildSwapTransaction();
+      fetchMock.post(`${baseUrl}/swap/v1/build`, response);
+
+      // When
+      const result = await fetchBuildExecuteTransaction('quoteId', '', '', { baseUrl });
+
+      // Then
+      expect(result).toStrictEqual(response);
+    });
+
+    it('should use throw Error with status code and text when status is higher than 400', () => {
+      // Given
+      fetchMock.post(`${BASE_URL}/swap/v1/build`, 401);
+
+      // When & Then
+      expect.assertions(1);
+      expect(fetchBuildExecuteTransaction('quoteId', '', '')).rejects.toEqual(Error('401 Unauthorized'));
+    });
+  });
+
+  describe('fetchTokens', () => {
     it('should return a page of tokens', async () => {
       // Given
       const response = aPage([ethToken()]);
       fetchMock.get(`${BASE_URL}/swap/v1/tokens?`, response);
 
       // When
-      const result = await getTokens();
+      const result = await fetchTokens();
 
       // Then
       expect(result).toStrictEqual(response);
@@ -125,7 +162,7 @@ describe('Avnu services', () => {
 
       // When
       try {
-        await getTokens();
+        await fetchTokens();
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
@@ -134,14 +171,14 @@ describe('Avnu services', () => {
     });
   });
 
-  describe('getPairs', () => {
+  describe('fetchPairs', () => {
     it('should return a page of pairs', async () => {
       // Given
       const response = aPage([aPair()]);
       fetchMock.get(`${BASE_URL}/swap/v1/pairs?`, response);
 
       // When
-      const result = await getPairs();
+      const result = await fetchPairs();
 
       // Then
       expect(result).toStrictEqual(response);
@@ -153,7 +190,7 @@ describe('Avnu services', () => {
 
       // When
       try {
-        await getPairs();
+        await fetchPairs();
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('This is an error'));

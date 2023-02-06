@@ -35,6 +35,7 @@
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test -i",
+    "test:dev": "tsdx test --watch",
     "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx,json}' --quiet",
     "lint:fix": "tsc --noEmit && prettier --write \"src/**/*.{ts,tsx,js,json,css,yml,md}\" && eslint 'src/**/*.{js,ts,tsx,json}' --quiet --fix",
     "size": "size-limit",
