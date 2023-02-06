@@ -1,14 +1,6 @@
 import { parseUnits } from '@ethersproject/units/src.ts';
 import { constants } from 'starknet';
-import {
-  BuildSwapTransaction,
-  InvokeSwapResponse,
-  Page,
-  Pair,
-  Quote,
-  QuoteRequest,
-  Token,
-} from './types';
+import { BuildSwapTransaction, InvokeSwapResponse, Page, Pair, Quote, QuoteRequest, Token } from './types';
 
 export const aQuoteRequest = (): QuoteRequest => ({
   sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
