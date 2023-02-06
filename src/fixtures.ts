@@ -1,6 +1,14 @@
 import { parseUnits } from '@ethersproject/units/src.ts';
 import { constants } from 'starknet';
-import { InvokeSwapResponse, Page, Pair, Quote, QuoteRequest, Token } from './types';
+import {
+  BuildSwapTransaction,
+  InvokeSwapResponse,
+  Page,
+  Pair,
+  Quote,
+  QuoteRequest,
+  Token,
+} from './types';
 
 export const aQuoteRequest = (): QuoteRequest => ({
   sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
@@ -35,6 +43,13 @@ export const aQuote = (): Quote => ({
 
 export const anInvokeSwapResponse = (): InvokeSwapResponse => ({
   transactionHash: '0x0',
+});
+
+export const aBuildSwapTransaction = (): BuildSwapTransaction => ({
+  chainId: constants.StarknetChainId.TESTNET,
+  contractAddress: '0x0',
+  entrypoint: 'execute',
+  calldata: [],
 });
 
 export const ethToken = (): Token => ({

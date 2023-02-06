@@ -4,6 +4,8 @@ import { AccountInterface, Call, Signature, typedData, uint256 } from 'starknet'
 import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
+  BuildSwapTransaction,
+  ExecuteSwapOptions,
   GetPairsRequest,
   GetTokensRequest,
   InvokeSwapResponse,
@@ -37,7 +39,7 @@ const parseResponse = <T>(response: Response): Promise<T> => {
  * @param options: Optional options.
  * @returns The best quotes
  */
-const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
+const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
   const queryParams = qs.stringify({
     ...request,
     sellAmount: request.sellAmount?.toHexString(),
@@ -65,13 +67,13 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
  * Executing the exchange through AVNU router
  *
  * @param quoteId: The id of the selected quote
- * @param takerSignature: Required when taker address was not provided during the quote request
+ * @param takerSignature: Taker's signature.
  * @param nonce: Taker's address nonce. See `buildGetNonce`
  * @param takerAddress: Required when taker address was not provided during the quote request
  * @param options: Optional options.
  * @returns The transaction hash
  */
-const executeSwapTransaction = (
+const fetchExecuteSwapTransaction = (
   quoteId: string,
   takerSignature: Signature,
   nonce: string,
@@ -93,13 +95,35 @@ const executeSwapTransaction = (
   }).then((response) => parseResponse<InvokeSwapResponse>(response));
 
 /**
+ * Build data for executing the exchange through AVNU router
+ * It allows trader to build the data needed for executing the exchange on AVNU router
+ *
+ * @param quoteId: The id of the selected quote
+ * @param nonce: Taker's address nonce. See `buildGetNonce`
+ * @param takerAddress: Required when taker address was not provided during the quote request
+ * @param options: Optional options.
+ * @returns The calldata
+ */
+const fetchBuildExecuteTransaction = (
+  quoteId: string,
+  nonce: string,
+  takerAddress?: string,
+  options?: AvnuOptions,
+): Promise<BuildSwapTransaction> =>
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/build`, {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quoteId, takerAddress, nonce }),
+  }).then((response) => parseResponse<BuildSwapTransaction>(response));
+
+/**
  * Fetches the supported tokens.
  *
  * @param request: The request params for the avnu API `/swap/v1/tokens` endpoint.
  * @param options: Optional options.
  * @returns The best quotes
  */
-const getTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise<Page<Token>> =>
+const fetchTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise<Page<Token>> =>
   fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/tokens?${qs.stringify(request ?? {})}`, {
     signal: options?.abortSignal,
   }).then((response) => parseResponse<Page<Token>>(response));
@@ -111,10 +135,23 @@ const getTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise<P
  * @param options: Optional options.
  * @returns The best quotes
  */
-const getPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<Page<Pair>> =>
+const fetchPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<Page<Pair>> =>
   fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/pairs?${qs.stringify(request ?? {})}`, {
     signal: options?.abortSignal,
   }).then((response) => parseResponse<Page<Pair>>(response));
+
+/**
+ * Verifies if the address is whitelisted
+ * Throws an error when the contractAddress is not whitelisted
+ *
+ * @param contractAddress: The address to check
+ * @param chainId: The chainId
+ */
+const checkContractAddress = (contractAddress: string, chainId: string, dev?: boolean) => {
+  if (!(dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId])?.includes(contractAddress)) {
+    throw Error(`Contract ${contractAddress} is not whitelisted`);
+  }
+};
 
 /**
  * Build approve call
@@ -229,6 +266,7 @@ const hashQuote = (accountAddress: string, quote: Quote, nonce: string, chainId:
  * @param quote: The selected quote. See `getQuotes`
  * @param nonce: Taker's address nonce. See `buildGetNonce`
  * @param executeApprove: False if the taker already executed `approve`
+ * @param gasless: False if the user wants to execute the transaction himself
  * @param takerSignature: Optional: the function will ask the user tu sign the quote if param is undefined
  * @param options: Optional options.
  * @returns Promise<InvokeSwapResponse>
@@ -236,36 +274,48 @@ const hashQuote = (accountAddress: string, quote: Quote, nonce: string, chainId:
 const executeSwap = async (
   account: AccountInterface,
   quote: Quote,
-  executeApprove = true,
+  { executeApprove = true, gasless = false, nonce, takerSignature }: ExecuteSwapOptions = {},
   options?: AvnuOptions,
-  nonce?: string,
-  takerSignature?: Signature,
 ): Promise<InvokeSwapResponse> => {
   if (account.chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
   }
-  if (executeApprove) {
-    const approve = buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev);
-    await account.execute([approve]);
-  }
+
+  const approve = executeApprove
+    ? buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev)
+    : undefined;
+
   // If nonce not given, fetch it
   if (!nonce) {
     const getNonce = buildGetNonce(account.address, account.chainId, options?.dev);
     const response = await account.callContract(getNonce);
     nonce = response.result[0];
   }
-  takerSignature = takerSignature ?? (await signQuote(account, quote, nonce, quote.chainId));
-  return executeSwapTransaction(quote.quoteId, takerSignature, nonce, account.address, options);
+
+  if (gasless) {
+    if (approve) await account.execute([approve]);
+    takerSignature = takerSignature ?? (await signQuote(account, quote, nonce, quote.chainId));
+    return fetchExecuteSwapTransaction(quote.quoteId, takerSignature, nonce, account.address, options);
+  } else {
+    return fetchBuildExecuteTransaction(quote.quoteId, nonce, account.address, options)
+      .then((call) => {
+        checkContractAddress(call.contractAddress, call.chainId, options?.dev);
+        return account.execute(approve ? [approve, call] : [call]);
+      })
+      .then((value) => ({ transactionHash: value.transaction_hash }));
+  }
 };
 
 export {
   buildApproveTx,
   buildGetNonce,
+  checkContractAddress,
   executeSwap,
-  executeSwapTransaction,
-  getPairs,
-  getQuotes,
-  getTokens,
+  fetchBuildExecuteTransaction,
+  fetchExecuteSwapTransaction,
+  fetchPairs,
+  fetchQuotes,
+  fetchTokens,
   hashQuote,
   signQuote,
 };

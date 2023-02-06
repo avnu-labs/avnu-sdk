@@ -1,4 +1,5 @@
 import { BigNumber } from 'ethers';
+import { Call, Signature } from 'starknet';
 
 export interface Pageable {
   page?: number;
@@ -79,4 +80,15 @@ export interface AvnuOptions {
   baseUrl?: string;
   dev?: boolean;
   abortSignal?: AbortSignal;
+}
+
+export interface ExecuteSwapOptions {
+  executeApprove?: boolean;
+  gasless?: boolean;
+  nonce?: string;
+  takerSignature?: Signature;
+}
+
+export interface BuildSwapTransaction extends Call {
+  chainId: string;
 }
