@@ -54,11 +54,6 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
         ...quote,
         sellAmount: BigNumber.from(quote.sellAmount),
         buyAmount: BigNumber.from(quote.buyAmount),
-        sources: quote.sources.map((source) => ({
-          ...source,
-          sellAmount: BigNumber.from(source.sellAmount),
-          buyAmount: BigNumber.from(source.buyAmount),
-        })),
       })),
     );
 };
