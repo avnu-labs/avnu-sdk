@@ -50,9 +50,7 @@ export interface Source {
   icon?: string;
   percent: number;
   sellTokenAddress: string;
-  sellAmount: BigNumber;
   buyTokenAddress: string;
-  buyAmount: BigNumber;
 }
 
 export interface Quote {
