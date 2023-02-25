@@ -7021,10 +7021,10 @@ stack-utils@^2.0.3:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-starknet@4.15.1:
-  version "4.15.1"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-4.15.1.tgz#fd8c31564424d74650d203c0977f39fc91e99fd0"
-  integrity sha512-TfWtPwl3EK71g4VFhG3h7stF4gXLk26tjMshSZJzmOzq2Ug3QB3AYWlt/kwCHKnV7dtOfham2xnzf1VmORQ6UA==
+starknet@4.22.0:
+  version "4.22.0"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-4.22.0.tgz#8d0c628e2a8e868ee9b4757afe89f07b05ec55ff"
+  integrity sha512-jC9Taxb6a/ht9zmS1LU/DSLfwJKpgCJnE9AktVksc5SE/+jQMpqxsq6fm7PRiqupjiqRC1DOS8N47cj+KaGv4Q==
   dependencies:
     "@ethersproject/bytes" "^5.6.1"
     bn.js "^5.2.1"
