@@ -65,6 +65,8 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
  * @param takerSignature: Taker's signature.
  * @param nonce: Taker's address nonce. See `buildGetNonce`
  * @param takerAddress: Required when taker address was not provided during the quote request
+ * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
+ * This value is ignored if slippage is not applicable to the selected quote
  * @param options: Optional options.
  * @returns The transaction hash
  */
@@ -73,6 +75,7 @@ const fetchExecuteSwapTransaction = (
   takerSignature: Signature,
   nonce: string,
   takerAddress?: string,
+  slippage?: number,
   options?: AvnuOptions,
 ): Promise<InvokeSwapResponse> =>
   fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/execute`, {
@@ -85,6 +88,7 @@ const fetchExecuteSwapTransaction = (
       quoteId,
       takerAddress,
       nonce,
+      slippage,
       takerSignature: takerSignature.map((signature) => BigNumber.from(signature).toHexString()),
     }),
   }).then((response) => parseResponse<InvokeSwapResponse>(response));
@@ -96,6 +100,8 @@ const fetchExecuteSwapTransaction = (
  * @param quoteId: The id of the selected quote
  * @param nonce: Taker's address nonce. See `buildGetNonce`
  * @param takerAddress: Required when taker address was not provided during the quote request
+ * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
+ * This value is ignored if slippage is not applicable to the selected quote
  * @param options: Optional options.
  * @returns The calldata
  */
@@ -103,12 +109,13 @@ const fetchBuildExecuteTransaction = (
   quoteId: string,
   nonce: string,
   takerAddress?: string,
+  slippage?: number,
   options?: AvnuOptions,
 ): Promise<BuildSwapTransaction> =>
   fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/build`, {
     method: 'POST',
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ quoteId, takerAddress, nonce }),
+    body: JSON.stringify({ quoteId, takerAddress, nonce, slippage }),
   }).then((response) => parseResponse<BuildSwapTransaction>(response));
 
 /**
@@ -263,13 +270,15 @@ const hashQuote = (accountAddress: string, quote: Quote, nonce: string, chainId:
  * @param executeApprove: False if the taker already executed `approve`
  * @param gasless: False if the user wants to execute the transaction himself
  * @param takerSignature: Optional: the function will ask the user tu sign the quote if param is undefined
+ * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
+ * This value is ignored if slippage is not applicable to the selected quote
  * @param options: Optional options.
  * @returns Promise<InvokeSwapResponse>
  */
 const executeSwap = async (
   account: AccountInterface,
   quote: Quote,
-  { executeApprove = true, gasless = false, nonce, takerSignature }: ExecuteSwapOptions = {},
+  { executeApprove = true, gasless = false, nonce, takerSignature, slippage }: ExecuteSwapOptions = {},
   options?: AvnuOptions,
 ): Promise<InvokeSwapResponse> => {
   if (account.chainId !== quote.chainId) {
@@ -290,9 +299,9 @@ const executeSwap = async (
   if (gasless) {
     if (approve) await account.execute([approve]);
     takerSignature = takerSignature ?? (await signQuote(account, quote, nonce, quote.chainId));
-    return fetchExecuteSwapTransaction(quote.quoteId, takerSignature, nonce, account.address, options);
+    return fetchExecuteSwapTransaction(quote.quoteId, takerSignature, nonce, account.address, slippage, options);
   } else {
-    return fetchBuildExecuteTransaction(quote.quoteId, nonce, account.address, options)
+    return fetchBuildExecuteTransaction(quote.quoteId, nonce, account.address, slippage, options)
       .then((call) => {
         checkContractAddress(call.contractAddress, call.chainId, options?.dev);
         return account.execute(approve ? [approve, call] : [call]);

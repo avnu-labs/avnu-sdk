@@ -85,6 +85,7 @@ export interface ExecuteSwapOptions {
   gasless?: boolean;
   nonce?: string;
   takerSignature?: Signature;
+  slippage?: number;
 }
 
 export interface BuildSwapTransaction extends Call {
