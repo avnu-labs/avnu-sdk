@@ -1,4 +1,4 @@
-import { parseUnits } from '@ethersproject/units/src.ts';
+import { parseUnits } from 'ethers/lib/utils';
 import { constants } from 'starknet';
 import { BuildSwapTransaction, InvokeSwapResponse, Page, Pair, Quote, QuoteRequest, Token } from './types';
 
