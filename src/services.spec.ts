@@ -236,9 +236,9 @@ describe('Avnu services', () => {
         sellAmount: BigNumber.from('0x0de0b6b3a7640000'),
         buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
         buyAmount: BigNumber.from('0x0de0b6b3a7640000'),
-        sources: [
+        routes: [
           {
-            ...aQuote().sources[0],
+            ...aQuote().routes[0],
             address: '0x02F7944d1ca7e42683d8562397a221a98105b415200BAA056c326Ad639c6ca2E',
           },
         ],
