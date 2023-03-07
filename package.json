@@ -57,7 +57,7 @@
     "starknet": "^4.15.0"
   },
   "devDependencies": {
-    "@size-limit/preset-small-lib": "8.1.0",
+    "@size-limit/preset-small-lib": "8.2.4",
     "@types/jest": "29.4.0",
     "@types/qs": "6.9.7",
     "@typescript-eslint/eslint-plugin": "5.53.0",
@@ -71,7 +71,7 @@
     "fetch-mock": "9.11.0",
     "prettier": "2.8.4",
     "qs": "6.11.0",
-    "size-limit": "8.1.0",
+    "size-limit": "8.2.4",
     "starknet": "4.22.0",
     "tsdx": "0.14.1",
     "tslib": "2.4.1",
