@@ -44,13 +44,14 @@ export interface QuoteRequest {
   size?: number;
 }
 
-export interface Source {
+export interface Route {
   name: string;
   address: string;
   icon?: string;
   percent: number;
   sellTokenAddress: string;
   buyTokenAddress: string;
+  routes: Route[];
 }
 
 export interface Quote {
@@ -63,7 +64,7 @@ export interface Quote {
   chainId: string;
   slippage: number;
   expiry: number;
-  sources: Source[];
+  routes: Route[];
 }
 
 export interface InvokeSwapResponse {
