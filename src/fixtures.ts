@@ -1,6 +1,6 @@
 import { parseUnits } from 'ethers/lib/utils';
 import { constants } from 'starknet';
-import { BuildSwapTransaction, InvokeSwapResponse, Page, Pair, Quote, QuoteRequest, Token } from './types';
+import { BuildSwapTransaction, InvokeSwapResponse, Page, Pair, Quote, QuoteRequest, Source, Token } from './types';
 
 export const aQuoteRequest = (): QuoteRequest => ({
   sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
@@ -24,7 +24,6 @@ export const aQuote = (): Quote => ({
     {
       name: 'AMM1',
       address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-      icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
       percent: 1,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
@@ -47,7 +46,6 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
     {
       name: 'AMM1',
       address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-      icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
       percent: 1,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
@@ -55,7 +53,6 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
         {
           name: 'AMM2',
           address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c662',
-          icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
           percent: 1,
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
@@ -63,7 +60,6 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
             {
               name: 'AMM1',
               address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-              icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
               percent: 1,
               sellTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
               buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
@@ -90,7 +86,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
     {
       name: 'AMM1',
       address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-      icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
       percent: 0.5,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
@@ -98,7 +93,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
         {
           name: 'AMM2',
           address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c662',
-          icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
           percent: 0.5,
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
@@ -106,7 +100,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
             {
               name: 'AMM1',
               address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-              icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
               percent: 1,
               sellTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
               buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
@@ -117,7 +110,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
         {
           name: 'AMM1',
           address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-          icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
           percent: 0.5,
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
@@ -128,7 +120,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
     {
       name: 'AMM1',
       address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-      icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
       percent: 0.2,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
@@ -137,7 +128,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
     {
       name: 'AMM1',
       address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-      icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
       percent: 0.3,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
@@ -145,7 +135,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
         {
           name: 'AMM2',
           address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c662',
-          icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
           percent: 0.2,
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
@@ -154,7 +143,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
         {
           name: 'AMM1',
           address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-          icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
           percent: 0.8,
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
@@ -207,4 +195,10 @@ export const aPage = <T>(content: T[], size = 10, number = 0, totalPages = 1, to
   totalPages,
   number,
   totalElements,
+});
+
+export const aSource = (): Source => ({
+  name: 'AMM1',
+  address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
+  icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
 });

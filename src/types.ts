@@ -38,16 +38,15 @@ export interface Pair {
 export interface QuoteRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
-  sellAmount?: BigNumber;
-  buyAmount?: BigNumber;
+  sellAmount: BigNumber;
   takerAddress?: string;
   size?: number;
+  excludeSources?: string[];
 }
 
 export interface Route {
   name: string;
   address: string;
-  icon?: string;
   percent: number;
   sellTokenAddress: string;
   buyTokenAddress: string;
@@ -91,4 +90,10 @@ export interface ExecuteSwapOptions {
 
 export interface BuildSwapTransaction extends Call {
   chainId: string;
+}
+
+export interface Source {
+  name: string;
+  address: string;
+  icon?: string;
 }

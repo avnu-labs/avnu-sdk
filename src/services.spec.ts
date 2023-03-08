@@ -4,7 +4,16 @@ import qs from 'qs';
 import { constants } from 'starknet';
 import { TextEncoder } from 'util';
 import { BASE_URL } from './constants';
-import { aBuildSwapTransaction, anInvokeSwapResponse, aPage, aPair, aQuote, aQuoteRequest, ethToken } from './fixtures';
+import {
+  aBuildSwapTransaction,
+  anInvokeSwapResponse,
+  aPage,
+  aPair,
+  aQuote,
+  aQuoteRequest,
+  aSource,
+  ethToken,
+} from './fixtures';
 import {
   buildApproveTx,
   buildGetNonce,
@@ -12,10 +21,11 @@ import {
   fetchExecuteSwapTransaction,
   fetchPairs,
   fetchQuotes,
+  fetchSources,
   fetchTokens,
   hashQuote,
 } from './services';
-import { Quote } from './types';
+import { Quote, QuoteRequest } from './types';
 
 global.TextEncoder = TextEncoder;
 
@@ -163,6 +173,34 @@ describe('Avnu services', () => {
       // When
       try {
         await fetchTokens();
+      } catch (error) {
+        // Then
+        expect(error).toStrictEqual(new Error('401 Unauthorized'));
+      }
+      expect.assertions(1);
+    });
+  });
+
+  describe('fetchSources', () => {
+    it('should return a list of sources', async () => {
+      // Given
+      const response = [aSource()];
+      fetchMock.get(`${BASE_URL}/swap/v1/sources`, response);
+
+      // When
+      const result = await fetchSources();
+
+      // Then
+      expect(result).toStrictEqual(response);
+    });
+
+    it('should use throw Error with status code and text when status is higher than 400', async () => {
+      // Given
+      fetchMock.get(`${BASE_URL}/swap/v1/sources`, 401);
+
+      // When
+      try {
+        await fetchSources();
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
