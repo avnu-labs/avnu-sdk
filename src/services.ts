@@ -14,6 +14,7 @@ import {
   Quote,
   QuoteRequest,
   RequestError,
+  Source,
   Token,
 } from './types';
 
@@ -40,11 +41,13 @@ const parseResponse = <T>(response: Response): Promise<T> => {
  * @returns The best quotes
  */
 const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
-  const queryParams = qs.stringify({
-    ...request,
-    sellAmount: request.sellAmount?.toHexString(),
-    buyAmount: request.buyAmount?.toHexString(),
-  });
+  const queryParams = qs.stringify(
+    {
+      ...request,
+      sellAmount: request.sellAmount.toHexString(),
+    },
+    { arrayFormat: 'repeat' },
+  );
   return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/quotes?${queryParams}`, {
     signal: options?.abortSignal,
   })
@@ -141,6 +144,17 @@ const fetchPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<P
   fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/pairs?${qs.stringify(request ?? {})}`, {
     signal: options?.abortSignal,
   }).then((response) => parseResponse<Page<Pair>>(response));
+
+/**
+ * Fetches the supported sources
+ *
+ * @param options: Optional options.
+ * @returns The sources
+ */
+const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/sources`, { signal: options?.abortSignal }).then((response) =>
+    parseResponse<Source[]>(response),
+  );
 
 /**
  * Verifies if the address is whitelisted
@@ -319,6 +333,7 @@ export {
   fetchExecuteSwapTransaction,
   fetchPairs,
   fetchQuotes,
+  fetchSources,
   fetchTokens,
   hashQuote,
   signQuote,
