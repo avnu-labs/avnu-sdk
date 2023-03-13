@@ -92,8 +92,13 @@ export interface BuildSwapTransaction extends Call {
   chainId: string;
 }
 
+export enum SourceType {
+  DEX = 'DEX',
+  MARKET_MAKER = 'MARKET_MAKER',
+}
 export interface Source {
   name: string;
   address: string;
   icon?: string;
+  type: SourceType;
 }
