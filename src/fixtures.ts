@@ -1,6 +1,16 @@
 import { parseUnits } from 'ethers/lib/utils';
 import { constants } from 'starknet';
-import { BuildSwapTransaction, InvokeSwapResponse, Page, Pair, Quote, QuoteRequest, Source, Token } from './types';
+import {
+  BuildSwapTransaction,
+  InvokeSwapResponse,
+  Page,
+  Pair,
+  Quote,
+  QuoteRequest,
+  Source,
+  SourceType,
+  Token,
+} from './types';
 
 export const aQuoteRequest = (): QuoteRequest => ({
   sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
@@ -201,4 +211,5 @@ export const aSource = (): Source => ({
   name: 'AMM1',
   address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
   icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
+  type: SourceType.DEX,
 });
