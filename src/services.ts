@@ -1,6 +1,6 @@
 import { BigNumber } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, Call, Signature, typedData, uint256 } from 'starknet';
+import { AccountInterface, Call, ec, hash, Signature, typedData, uint256 } from 'starknet';
 import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
@@ -20,7 +20,7 @@ import {
 
 const getBaseUrl = (): string => (process.env.NODE_ENV === 'dev' ? STAGING_BASE_URL : BASE_URL);
 
-const parseResponse = <T>(response: Response): Promise<T> => {
+const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T> => {
   if (response.status === 400) {
     return response.json().then((error: RequestError) => {
       throw new Error(error.messages[0]);
@@ -28,6 +28,19 @@ const parseResponse = <T>(response: Response): Promise<T> => {
   }
   if (response.status > 400) {
     throw new Error(`${response.status} ${response.statusText}`);
+  }
+  if (avnuPublicKey) {
+    const signature = response.headers.get('signature');
+    if (!signature) throw new Error('No server signature');
+    const keyPair = ec.getKeyPairFromPublicKey(avnuPublicKey);
+    return response
+      .clone()
+      .text()
+      .then((textResponse) => {
+        const hashResponse = hash.computeHashOnElements([hash.starknetKeccak(textResponse)]);
+        if (!ec.verify(keyPair, hashResponse, signature.split(','))) throw new Error('Invalid server signature');
+      })
+      .then(() => response.json());
   }
   return response.json();
 };
@@ -50,8 +63,9 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
   );
   return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/quotes?${queryParams}`, {
     signal: options?.abortSignal,
+    headers: { ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }) },
   })
-    .then((response) => parseResponse<Quote[]>(response))
+    .then((response) => parseResponse<Quote[]>(response, options?.avnuPublicKey))
     .then((quotes) =>
       quotes.map((quote) => ({
         ...quote,
@@ -86,6 +100,7 @@ const fetchExecuteSwapTransaction = (
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...(options?.avnuPublicKey && { 'ask-signature': 'true' }),
     },
     body: JSON.stringify({
       quoteId,
@@ -94,7 +109,7 @@ const fetchExecuteSwapTransaction = (
       slippage,
       takerSignature: takerSignature.map((signature) => BigNumber.from(signature).toHexString()),
     }),
-  }).then((response) => parseResponse<InvokeSwapResponse>(response));
+  }).then((response) => parseResponse<InvokeSwapResponse>(response, options?.avnuPublicKey));
 
 /**
  * Build data for executing the exchange through AVNU router
@@ -117,9 +132,13 @@ const fetchBuildExecuteTransaction = (
 ): Promise<BuildSwapTransaction> =>
   fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/build`, {
     method: 'POST',
-    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...(options?.avnuPublicKey && { 'ask-signature': 'true' }),
+    },
     body: JSON.stringify({ quoteId, takerAddress, nonce, slippage }),
-  }).then((response) => parseResponse<BuildSwapTransaction>(response));
+  }).then((response) => parseResponse<BuildSwapTransaction>(response, options?.avnuPublicKey));
 
 /**
  * Fetches the supported tokens.
@@ -131,7 +150,8 @@ const fetchBuildExecuteTransaction = (
 const fetchTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise<Page<Token>> =>
   fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/tokens?${qs.stringify(request ?? {})}`, {
     signal: options?.abortSignal,
-  }).then((response) => parseResponse<Page<Token>>(response));
+    headers: { ...(options?.avnuPublicKey && { 'ask-signature': 'true' }) },
+  }).then((response) => parseResponse<Page<Token>>(response, options?.avnuPublicKey));
 
 /**
  * Fetches the supported pairs
@@ -143,7 +163,8 @@ const fetchTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise
 const fetchPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<Page<Pair>> =>
   fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/pairs?${qs.stringify(request ?? {})}`, {
     signal: options?.abortSignal,
-  }).then((response) => parseResponse<Page<Pair>>(response));
+    headers: { ...(options?.avnuPublicKey && { 'ask-signature': 'true' }) },
+  }).then((response) => parseResponse<Page<Pair>>(response, options?.avnuPublicKey));
 
 /**
  * Fetches the supported sources
@@ -152,9 +173,10 @@ const fetchPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<P
  * @returns The sources
  */
 const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
-  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/sources`, { signal: options?.abortSignal }).then((response) =>
-    parseResponse<Source[]>(response),
-  );
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/sources`, {
+    signal: options?.abortSignal,
+    headers: { ...(options?.avnuPublicKey && { 'ask-signature': 'true' }) },
+  }).then((response) => parseResponse<Source[]>(response, options?.avnuPublicKey));
 
 /**
  * Verifies if the address is whitelisted

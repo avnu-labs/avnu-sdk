@@ -78,6 +78,7 @@ export interface AvnuOptions {
   baseUrl?: string;
   dev?: boolean;
   abortSignal?: AbortSignal;
+  avnuPublicKey?: string;
 }
 
 export interface ExecuteSwapOptions {
