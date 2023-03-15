@@ -1,8 +1,8 @@
 import React, { ChangeEvent, useState } from 'react';
-import { formatUnits, parseUnits } from 'ethers/lib/utils';
 import type { AccountInterface } from "starknet";
 import { connect } from "get-starknet";
 import { executeSwap, fetchQuotes, Quote } from "@avnu/avnu-sdk";
+import { formatUnits, parseUnits } from 'ethers';
 
 const AVNU_OPTIONS = { baseUrl: 'https://goerli.api.avnu.fi' };
 
@@ -18,7 +18,7 @@ function App() {
   const [ successMessage, setSuccessMessage ] = useState<string>()
 
   const handleConnect = async () => {
-    const starknet = await connect({ modalOptions: { theme: "dark" } });
+    const starknet = await connect();
     if (!starknet) return;
     await starknet.enable();
     if (starknet.isConnected && starknet.provider && starknet.account.address) {

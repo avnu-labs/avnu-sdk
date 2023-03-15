@@ -1,4 +1,3 @@
-import { BigNumber } from 'ethers';
 import { Call, Signature } from 'starknet';
 
 export interface Pageable {
@@ -38,7 +37,7 @@ export interface Pair {
 export interface QuoteRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
-  sellAmount: BigNumber;
+  sellAmount: bigint;
   takerAddress?: string;
   size?: number;
   excludeSources?: string[];
@@ -56,9 +55,22 @@ export interface Route {
 export interface Quote {
   quoteId: string;
   sellTokenAddress: string;
-  sellAmount: BigNumber;
+  sellAmount: bigint;
   buyTokenAddress: string;
-  buyAmount: BigNumber;
+  buyAmount: bigint;
+  blockNumber?: number;
+  chainId: string;
+  slippage: number;
+  expiry: number;
+  routes: Route[];
+}
+
+export interface Quotee {
+  quoteId: string;
+  sellTokenAddress: string;
+  sellAmount: string;
+  buyTokenAddress: string;
+  buyAmount: string;
   blockNumber?: number;
   chainId: string;
   slippage: number;
