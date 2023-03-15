@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import { toBeHex } from 'ethers';
 import qs from 'qs';
 import { AccountInterface, Call, ec, hash, Signature, typedData, uint256 } from 'starknet';
 import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
@@ -12,6 +12,7 @@ import {
   Page,
   Pair,
   Quote,
+  Quotee,
   QuoteRequest,
   RequestError,
   Source,
@@ -57,7 +58,7 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
   const queryParams = qs.stringify(
     {
       ...request,
-      sellAmount: request.sellAmount.toHexString(),
+      sellAmount: toBeHex(request.sellAmount),
     },
     { arrayFormat: 'repeat' },
   );
@@ -65,12 +66,12 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
     signal: options?.abortSignal,
     headers: { ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }) },
   })
-    .then((response) => parseResponse<Quote[]>(response, options?.avnuPublicKey))
+    .then((response) => parseResponse<Quotee[]>(response, options?.avnuPublicKey))
     .then((quotes) =>
       quotes.map((quote) => ({
         ...quote,
-        sellAmount: BigNumber.from(quote.sellAmount),
-        buyAmount: BigNumber.from(quote.buyAmount),
+        sellAmount: BigInt(quote.sellAmount),
+        buyAmount: BigInt(quote.buyAmount),
       })),
     );
 };
@@ -107,7 +108,7 @@ const fetchExecuteSwapTransaction = (
       takerAddress,
       nonce,
       slippage,
-      takerSignature: takerSignature.map((signature) => BigNumber.from(signature).toHexString()),
+      takerSignature: takerSignature.map((signature) => toBeHex(BigInt(signature))),
     }),
   }).then((response) => parseResponse<InvokeSwapResponse>(response, options?.avnuPublicKey));
 
@@ -199,8 +200,8 @@ const checkContractAddress = (contractAddress: string, chainId: string, dev?: bo
  * @param chainId: The chainId
  * @param dev: Specify if you need to use the dev environment  * @returns Call
  */
-const buildApproveTx = (sellTokenAddress: string, sellAmount: BigNumber, chainId: string, dev?: boolean): Call => {
-  const value = uint256.bnToUint256(sellAmount.toHexString());
+const buildApproveTx = (sellTokenAddress: string, sellAmount: bigint, chainId: string, dev?: boolean): Call => {
+  const value = uint256.bnToUint256(toBeHex(sellAmount));
   return {
     contractAddress: sellTokenAddress,
     entrypoint: 'approve',
@@ -219,7 +220,7 @@ const buildApproveTx = (sellTokenAddress: string, sellAmount: BigNumber, chainId
 const buildGetNonce = (takerAddress: string, chainId: string, dev?: boolean): Call => ({
   contractAddress: dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId],
   entrypoint: 'getNonce',
-  calldata: [BigNumber.from(takerAddress).toString()],
+  calldata: [toBeHex(BigInt(takerAddress))],
 });
 
 /**
@@ -238,10 +239,10 @@ const signQuote = (account: AccountInterface, quote: Quote, nonce: string, chain
     message: {
       taker_address: account.address,
       taker_token_address: quote.sellTokenAddress,
-      taker_token_amount: quote.sellAmount.toHexString(),
+      taker_token_amount: toBeHex(quote.sellAmount),
       maker_address: quote.routes[0].address,
       maker_token_address: quote.buyTokenAddress,
-      maker_token_amount: quote.buyAmount.toHexString(),
+      maker_token_amount: toBeHex(quote.buyAmount),
       nonce,
     },
     primaryType: 'TakerMessage',
@@ -270,10 +271,10 @@ const hashQuote = (accountAddress: string, quote: Quote, nonce: string, chainId:
       message: {
         taker_address: accountAddress,
         taker_token_address: quote.sellTokenAddress,
-        taker_token_amount: quote.sellAmount.toHexString(),
+        taker_token_amount: toBeHex(quote.sellAmount),
         maker_address: quote.routes[0].address,
         maker_token_address: quote.buyTokenAddress,
-        maker_token_amount: quote.buyAmount.toHexString(),
+        maker_token_amount: toBeHex(quote.buyAmount),
         nonce,
       },
       primaryType: 'TakerMessage',

@@ -1,18 +1,18 @@
 {
   "name": "@avnu/avnu-sdk",
   "version": "0.0.17",
+  "description": "TypeScript SDK for building exchange functionality on Layers 2 with the AVNU API",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "jsdelivr": "dist/index.global.js",
+  "unpkg": "dist/index.global.js",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "AVNU",
-  "description": "TypeScript SDK for building exchange functionality on Layers 2 with the AVNU API",
   "keywords": [
-    "dapp",
-    "dex",
-    "erc-20",
-    "ethereum",
-    "exchange",
-    "liquidity aggregator",
-    "tokens",
     "starknet",
+    "l2",
+    "exchange",
     "swap"
   ],
   "homepage": "https://github.com/419Labs/avnu-sdk#readme",
@@ -20,22 +20,18 @@
   "bugs": {
     "url": "https://github.com/419Labs/avnu-sdk/issues/new?template=bug_report.yml&title=[bug]+<replace+this+with+a+title>"
   },
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "module": "dist/avnu-sdk.esm.js",
-  "private": false,
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist"],
   "engines": {
     "node": ">=16"
   },
   "scripts": {
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "test": "tsdx test -i",
-    "test:dev": "tsdx test --watch",
+    "start": "tsup --watch",
+    "build": "tsup && yarn build:esm && yarn build:iife && yarn build:dts",
+    "build:esm": "tsup --clean false --format esm --platform node",
+    "build:iife": "tsup --clean false --format iife --platform browser",
+    "build:dts": "tsup --clean false --dts-only",
+    "test": "jest -i",
+    "test:watch": "jest --watch",
     "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx,json}' --quiet",
     "lint:fix": "tsc --noEmit && prettier --write \"src/**/*.{ts,tsx,js,json,css,yml,md}\" && eslint 'src/**/*.{js,ts,tsx,json}' --quiet --fix",
     "size": "size-limit",
@@ -43,38 +39,42 @@
   },
   "size-limit": [
     {
-      "path": "dist/avnu-sdk.cjs.production.min.js",
+      "path": "dist/index.cjs.production.min.js",
       "limit": "300 KB"
     },
     {
-      "path": "dist/avnu-sdk.esm.js",
+      "path": "dist/index.esm.js",
       "limit": "250 KB"
     }
   ],
   "peerDependencies": {
-    "ethers": "^5.7.0",
+    "ethers": "^6.1.0",
     "qs": "^6.11.0",
-    "starknet": "^4.15.0"
+    "starknet": "^4.22.0"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "7.21.2",
+    "@babel/preset-env": "7.20.2",
+    "@babel/preset-typescript": "7.21.0",
     "@size-limit/preset-small-lib": "8.2.4",
-    "@types/jest": "29.4.0",
+    "@types/jest": "29.4.3",
     "@types/qs": "6.9.7",
-    "@typescript-eslint/eslint-plugin": "5.54.1",
-    "@typescript-eslint/parser": "5.48.0",
-    "eslint": "8.31.0",
+    "@typescript-eslint/eslint-plugin": "5.55.0",
+    "@typescript-eslint/parser": "5.55.0",
+    "eslint": "8.36.0",
     "eslint-config-prettier": "8.7.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-simple-import-sort": "10.0.0",
-    "ethers": "5.7.2",
+    "jest": "29.5.0",
+    "ethers": "6.1.0",
     "fetch-mock": "9.11.0",
     "prettier": "2.8.4",
-    "qs": "6.11.0",
+    "qs": "6.11.1",
     "size-limit": "8.2.4",
     "starknet": "4.22.0",
-    "tsdx": "0.14.1",
-    "tslib": "2.4.1",
+    "tsup": "6.6.3",
+    "typedoc": "0.23.26",
     "typescript": "4.9.5"
   }
 }

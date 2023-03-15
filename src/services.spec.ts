@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
 import { constants } from 'starknet';
@@ -38,7 +38,9 @@ describe('Avnu services', () => {
     it('should return a list of quotes', async () => {
       // Given
       const request = aQuoteRequest();
-      const response = [aQuote()];
+      const response = [
+        { ...aQuote(), sellAmount: toBeHex(parseUnits('1', 18)), buyAmount: toBeHex(parseUnits('2', 18)) },
+      ];
       const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
       fetchMock.get(`${BASE_URL}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
 
@@ -46,14 +48,17 @@ describe('Avnu services', () => {
       const result = await fetchQuotes(request);
 
       // Then
-      expect(result).toStrictEqual(response);
+      const expected = [{ ...aQuote() }];
+      expect(result).toStrictEqual(expected);
     });
 
     it('should use baseUrl from AvnuOption when defined', async () => {
       // Given
       const request = aQuoteRequest();
       const baseUrl = 'http://example.com';
-      const response = [aQuote()];
+      const response = [
+        { ...aQuote(), sellAmount: toBeHex(parseUnits('1', 18)), buyAmount: toBeHex(parseUnits('2', 18)) },
+      ];
       const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
       fetchMock.get(`${baseUrl}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
 
@@ -61,7 +66,8 @@ describe('Avnu services', () => {
       const result = await fetchQuotes(request, { baseUrl });
 
       // Then
-      expect(result).toStrictEqual(response);
+      const expected = [{ ...aQuote() }];
+      expect(result).toStrictEqual(expected);
     });
 
     it('should use throw Error with status code and text when status is higher than 400', async () => {
@@ -240,7 +246,7 @@ describe('Avnu services', () => {
   describe('buildApproveTx', () => {
     it('should build approve', () => {
       // When
-      const result = buildApproveTx('0x1', BigNumber.from('1'), constants.StarknetChainId.TESTNET);
+      const result = buildApproveTx('0x1', BigInt('1'), constants.StarknetChainId.TESTNET);
 
       // Then
       expect(result).toStrictEqual({
@@ -258,7 +264,7 @@ describe('Avnu services', () => {
 
       // Then
       expect(result).toStrictEqual({
-        calldata: ['1'],
+        calldata: ['0x01'],
         contractAddress: '0x5c614428c49b94ab60c90ea55d366d328921c829bbd3ae81d748723750c0931',
         entrypoint: 'getNonce',
       });
@@ -271,9 +277,9 @@ describe('Avnu services', () => {
       const quote: Quote = {
         ...aQuote(),
         sellTokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-        sellAmount: BigNumber.from('0x0de0b6b3a7640000'),
+        sellAmount: BigInt('0x0de0b6b3a7640000'),
         buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
-        buyAmount: BigNumber.from('0x0de0b6b3a7640000'),
+        buyAmount: BigInt('0x0de0b6b3a7640000'),
         routes: [
           {
             ...aQuote().routes[0],
