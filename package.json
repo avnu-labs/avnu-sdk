@@ -1,6 +1,6 @@
 {
   "name": "@avnu/avnu-sdk",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "TypeScript SDK for building exchange functionality on Layers 2 with the AVNU API",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -20,7 +20,9 @@
   "bugs": {
     "url": "https://github.com/419Labs/avnu-sdk/issues/new?template=bug_report.yml&title=[bug]+<replace+this+with+a+title>"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=16"
   },
@@ -66,9 +68,9 @@
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-simple-import-sort": "10.0.0",
-    "jest": "29.5.0",
     "ethers": "6.1.0",
     "fetch-mock": "9.11.0",
+    "jest": "29.5.0",
     "prettier": "2.8.4",
     "qs": "6.11.1",
     "size-limit": "8.2.4",
