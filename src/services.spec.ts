@@ -264,7 +264,7 @@ describe('Avnu services', () => {
 
       // Then
       expect(result).toStrictEqual({
-        calldata: ['0x01'],
+        calldata: ['1'],
         contractAddress: '0x5c614428c49b94ab60c90ea55d366d328921c829bbd3ae81d748723750c0931',
         entrypoint: 'getNonce',
       });
