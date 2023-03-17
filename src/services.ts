@@ -220,7 +220,7 @@ const buildApproveTx = (sellTokenAddress: string, sellAmount: bigint, chainId: s
 const buildGetNonce = (takerAddress: string, chainId: string, dev?: boolean): Call => ({
   contractAddress: dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId],
   entrypoint: 'getNonce',
-  calldata: [toBeHex(BigInt(takerAddress))],
+  calldata: [BigInt(takerAddress).toString()],
 });
 
 /**
