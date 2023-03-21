@@ -59,6 +59,7 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
     {
       ...request,
       sellAmount: toBeHex(request.sellAmount),
+      integratorFees: request.integratorFees ? toBeHex(request.integratorFees) : undefined,
     },
     { arrayFormat: 'repeat' },
   );
@@ -66,12 +67,14 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
     signal: options?.abortSignal,
     headers: { ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }) },
   })
-    .then((response) => parseResponse<Quotee[]>(response, options?.avnuPublicKey))
+    .then((response) => parseResponse<Quote[]>(response, options?.avnuPublicKey))
     .then((quotes) =>
       quotes.map((quote) => ({
         ...quote,
         sellAmount: BigInt(quote.sellAmount),
         buyAmount: BigInt(quote.buyAmount),
+        integratorFees: BigInt(quote.integratorFees),
+        avnuFees: BigInt(quote.avnuFees),
       })),
     );
 };

@@ -41,6 +41,9 @@ export interface QuoteRequest {
   takerAddress?: string;
   size?: number;
   excludeSources?: string[];
+  integratorFees?: bigint;
+  integratorAddress?: string;
+  integratorName?: string;
 }
 
 export interface Route {
@@ -63,6 +66,8 @@ export interface Quote {
   slippage: number;
   expiry: number;
   routes: Route[];
+  avnuFees: bigint;
+  integratorFees: bigint;
 }
 
 export interface Quotee {
@@ -76,6 +81,8 @@ export interface Quotee {
   slippage: number;
   expiry: number;
   routes: Route[];
+  avnuFees: string;
+  integratorFees: string;
 }
 
 export interface InvokeSwapResponse {
