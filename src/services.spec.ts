@@ -262,7 +262,7 @@ describe('Avnu services', () => {
 
       // Then
       expect(result).toStrictEqual({
-        calldata: ['0x06d8cd321dcbbf54512eab67c8a6849faf920077a3996f40bb4761adc4f021d2', '0x1', '0x0'],
+        calldata: ['0x6d8cd321dcbbf54512eab67c8a6849faf920077a3996f40bb4761adc4f021d2', '0x1', '0x0'],
         contractAddress: '0x1',
         entrypoint: 'approve',
       });
@@ -277,7 +277,7 @@ describe('Avnu services', () => {
       // Then
       expect(result).toStrictEqual({
         calldata: ['1'],
-        contractAddress: '0x06d8cd321dcbbf54512eab67c8a6849faf920077a3996f40bb4761adc4f021d2',
+        contractAddress: '0x6d8cd321dcbbf54512eab67c8a6849faf920077a3996f40bb4761adc4f021d2',
         entrypoint: 'getNonce',
       });
     });
