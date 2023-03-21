@@ -39,7 +39,13 @@ describe('Avnu services', () => {
       // Given
       const request = aQuoteRequest();
       const response = [
-        { ...aQuote(), sellAmount: toBeHex(parseUnits('1', 18)), buyAmount: toBeHex(parseUnits('2', 18)) },
+        {
+          ...aQuote(),
+          sellAmount: toBeHex(parseUnits('1', 18)),
+          buyAmount: toBeHex(parseUnits('2', 18)),
+          avnuFees: '0x0',
+          integratorFees: '0x0',
+        },
       ];
       const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
       fetchMock.get(`${BASE_URL}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
@@ -57,7 +63,13 @@ describe('Avnu services', () => {
       const request = aQuoteRequest();
       const baseUrl = 'http://example.com';
       const response = [
-        { ...aQuote(), sellAmount: toBeHex(parseUnits('1', 18)), buyAmount: toBeHex(parseUnits('2', 18)) },
+        {
+          ...aQuote(),
+          sellAmount: toBeHex(parseUnits('1', 18)),
+          buyAmount: toBeHex(parseUnits('2', 18)),
+          avnuFees: '0x0',
+          integratorFees: '0x0',
+        },
       ];
       const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
       fetchMock.get(`${baseUrl}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
