@@ -28,7 +28,6 @@ export const aQuote = (): Quote => ({
   buyAmount: parseUnits('2', 18),
   blockNumber: 1,
   chainId: constants.StarknetChainId.TESTNET,
-  slippage: 0,
   expiry: 100000000000,
   routes: [
     {
@@ -52,7 +51,6 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   buyAmount: parseUnits('2', 18),
   blockNumber: 1,
   chainId: constants.StarknetChainId.TESTNET,
-  slippage: 0,
   expiry: 100000000000,
   routes: [
     {
@@ -94,7 +92,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
   buyAmount: parseUnits('2', 18),
   blockNumber: 1,
   chainId: constants.StarknetChainId.TESTNET,
-  slippage: 0,
   expiry: 100000000000,
   avnuFees: BigInt('0x0'),
   integratorFees: BigInt('0x0'),

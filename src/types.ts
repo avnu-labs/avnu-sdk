@@ -42,7 +42,7 @@ export interface QuoteRequest {
   size?: number;
   excludeSources?: string[];
   integratorFees?: bigint;
-  integratorAddress?: string;
+  integratorFeeRecipient?: string;
   integratorName?: string;
 }
 
@@ -63,8 +63,7 @@ export interface Quote {
   buyAmount: bigint;
   blockNumber?: number;
   chainId: string;
-  slippage: number;
-  expiry: number;
+  expiry?: number;
   routes: Route[];
   avnuFees: bigint;
   integratorFees: bigint;
@@ -78,8 +77,7 @@ export interface Quotee {
   buyAmount: string;
   blockNumber?: number;
   chainId: string;
-  slippage: number;
-  expiry: number;
+  expiry?: number;
   routes: Route[];
   avnuFees: string;
   integratorFees: string;
