@@ -40,7 +40,9 @@ export const aQuote = (): Quote => ({
     },
   ],
   avnuFees: BigInt('0x0'),
+  avnuFeesBps: BigInt('0x0'),
   integratorFees: BigInt('0x0'),
+  integratorFeesBps: BigInt('0x0'),
 });
 
 export const aQuoteWithManySubRoutes = (): Quote => ({
@@ -81,7 +83,9 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
     },
   ],
   avnuFees: BigInt('0x0'),
+  avnuFeesBps: BigInt('0x0'),
   integratorFees: BigInt('0x0'),
+  integratorFeesBps: BigInt('0x0'),
 });
 
 export const aQuoteWithManyComplexRoutes = (): Quote => ({
@@ -94,7 +98,9 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
   chainId: constants.StarknetChainId.TESTNET,
   expiry: 100000000000,
   avnuFees: BigInt('0x0'),
+  avnuFeesBps: BigInt('0x0'),
   integratorFees: BigInt('0x0'),
+  integratorFeesBps: BigInt('0x0'),
   routes: [
     {
       name: 'AMM1',
