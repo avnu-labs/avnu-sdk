@@ -25,7 +25,7 @@ import {
   fetchTokens,
   hashQuote,
 } from './services';
-import { Quote, QuoteRequest } from './types';
+import { Quote } from './types';
 
 global.TextEncoder = TextEncoder;
 
@@ -45,6 +45,8 @@ describe('Avnu services', () => {
           buyAmount: toBeHex(parseUnits('2', 18)),
           avnuFees: '0x0',
           integratorFees: '0x0',
+          avnuFeesBps: '0x0',
+          integratorFeesBps: '0x0',
         },
       ];
       const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
@@ -69,6 +71,8 @@ describe('Avnu services', () => {
           buyAmount: toBeHex(parseUnits('2', 18)),
           avnuFees: '0x0',
           integratorFees: '0x0',
+          avnuFeesBps: '0x0',
+          integratorFeesBps: '0x0',
         },
       ];
       const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };

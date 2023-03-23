@@ -66,7 +66,9 @@ export interface Quote {
   expiry?: number;
   routes: Route[];
   avnuFees: bigint;
+  avnuFeesBps: bigint;
   integratorFees: bigint;
+  integratorFeesBps: bigint;
 }
 
 export interface Quotee {
@@ -81,6 +83,8 @@ export interface Quotee {
   routes: Route[];
   avnuFees: string;
   integratorFees: string;
+  avnuFeesBps: string;
+  integratorFeesBps: string;
 }
 
 export interface InvokeSwapResponse {
