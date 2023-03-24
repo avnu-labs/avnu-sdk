@@ -59,15 +59,19 @@ export interface Quote {
   quoteId: string;
   sellTokenAddress: string;
   sellAmount: bigint;
+  sellAmountInUsd: number;
   buyTokenAddress: string;
   buyAmount: bigint;
+  buyAmountInUsd: number;
   blockNumber?: number;
   chainId: string;
   expiry?: number;
   routes: Route[];
   avnuFees: bigint;
+  avnuFeesInUsd: number;
   avnuFeesBps: bigint;
   integratorFees: bigint;
+  integratorFeesInUsd: number;
   integratorFeesBps: bigint;
 }
 
@@ -75,15 +79,19 @@ export interface Quotee {
   quoteId: string;
   sellTokenAddress: string;
   sellAmount: string;
+  sellAmountInUsd: number;
   buyTokenAddress: string;
   buyAmount: string;
+  buyAmountInUsd: number;
   blockNumber?: number;
   chainId: string;
   expiry?: number;
   routes: Route[];
   avnuFees: string;
+  avnuFeesInUsd: number;
   integratorFees: string;
   avnuFeesBps: string;
+  integratorFeesInUsd: number;
   integratorFeesBps: string;
 }
 

@@ -352,9 +352,20 @@ const executeSwap = async (
   }
 };
 
+/**
+ * Calculate the min amount received from amount and slippage
+ *
+ * @param amount: The amount to apply slippage
+ * @param slippage: The slippage to apply in bps. 10 is 0.1%
+ * @returns bigint
+ */
+const calculateMinAmount = (amount: bigint, slippage: number): bigint =>
+  amount - (amount * BigInt(slippage)) / BigInt(10000);
+
 export {
   buildApproveTx,
   buildGetNonce,
+  calculateMinAmount,
   checkContractAddress,
   executeSwap,
   fetchBuildExecuteTransaction,
