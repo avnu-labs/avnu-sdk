@@ -17,6 +17,7 @@ import {
 import {
   buildApproveTx,
   buildGetNonce,
+  calculateMinAmount,
   fetchBuildExecuteTransaction,
   fetchExecuteSwapTransaction,
   fetchPairs,
@@ -314,6 +315,20 @@ describe('Avnu services', () => {
 
       // Then
       expect(result).toStrictEqual('0xa6b37651d52580635bbd93c0e4008ab939f955ae3914c558865e1870659784');
+    });
+  });
+
+  describe('calculateMinAmount', () => {
+    it('should return min amount', () => {
+      // Given
+      const amount = BigInt(1000000);
+      const slippage = 30;
+
+      // When
+      const result = calculateMinAmount(amount, slippage);
+
+      // Then
+      expect(result).toBe(BigInt(997000));
     });
   });
 });
