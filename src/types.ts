@@ -73,6 +73,7 @@ export interface Quote {
   integratorFees: bigint;
   integratorFeesInUsd: number;
   integratorFeesBps: bigint;
+  priceRatioUsd: number;
 }
 
 export interface Quotee {
@@ -93,6 +94,7 @@ export interface Quotee {
   avnuFeesBps: string;
   integratorFeesInUsd: number;
   integratorFeesBps: string;
+  priceRatioUsd: number;
 }
 
 export interface InvokeSwapResponse {

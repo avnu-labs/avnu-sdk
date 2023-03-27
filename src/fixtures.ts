@@ -47,6 +47,7 @@ export const aQuote = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
+  priceRatioUsd: 0,
 });
 
 export const aQuoteWithManySubRoutes = (): Quote => ({
@@ -60,6 +61,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   blockNumber: 1,
   chainId: constants.StarknetChainId.TESTNET,
   expiry: 100000000000,
+  priceRatioUsd: 0,
   routes: [
     {
       name: 'AMM1',
@@ -113,6 +115,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
+  priceRatioUsd: 0,
   routes: [
     {
       name: 'AMM1',
