@@ -21,7 +21,7 @@ const params = {
   sellAmount: '200000000000000000',
   takerAddress: account.address,
 }
-const quotes = await getQuotes(params);
+const quotes = await fetchQuotes(params);
 await executeSwap(account, quotes[0]);
 ```
 

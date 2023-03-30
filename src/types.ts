@@ -34,6 +34,12 @@ export interface Pair {
   token2: Token;
 }
 
+export interface PriceRequest {
+  sellTokenAddress: string;
+  buyTokenAddress: string;
+  sellAmount: bigint;
+}
+
 export interface QuoteRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
@@ -53,6 +59,19 @@ export interface Route {
   sellTokenAddress: string;
   buyTokenAddress: string;
   routes: Route[];
+}
+
+export interface Price {
+  sellTokenAddress: string;
+  sellAmount: bigint;
+  sellAmountInUsd: number;
+  buyTokenAddress: string;
+  buyAmount: bigint;
+  buyAmountInUsd: number;
+  blockNumber?: number;
+  chainId: string;
+  sourceName: string;
+  priceRatioUsd: number;
 }
 
 export interface Quote {

@@ -11,6 +11,8 @@ import {
   InvokeSwapResponse,
   Page,
   Pair,
+  Price,
+  PriceRequest,
   Quote,
   Quotee,
   QuoteRequest,
@@ -44,6 +46,26 @@ const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T
       .then(() => response.json());
   }
   return response.json();
+};
+
+/**
+ * Fetches the prices of DEX applications.
+ * It allows to find the prices of AMM without any path optimization. It allows to measure the performance of the results from the getQuotes endpoints. The prices are sorted (best first).
+ *
+ * @param request: The request params for the avnu API `/swap/v1/prices` endpoint.
+ * @param options: Optional options.
+ * @returns The best quotes
+ */
+const fetchPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Price[]> => {
+  const queryParams = qs.stringify({ ...request, sellAmount: toBeHex(request.sellAmount) }, { arrayFormat: 'repeat' });
+  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/prices?${queryParams}`, {
+    signal: options?.abortSignal,
+    headers: { ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }) },
+  })
+    .then((response) => parseResponse<Price[]>(response, options?.avnuPublicKey))
+    .then((prices) =>
+      prices.map((price) => ({ ...price, sellAmount: BigInt(price.sellAmount), buyAmount: BigInt(price.buyAmount) })),
+    );
 };
 
 /**
@@ -371,6 +393,7 @@ export {
   fetchBuildExecuteTransaction,
   fetchExecuteSwapTransaction,
   fetchPairs,
+  fetchPrices,
   fetchQuotes,
   fetchSources,
   fetchTokens,
