@@ -15,10 +15,10 @@
     "exchange",
     "swap"
   ],
-  "homepage": "https://github.com/419Labs/avnu-sdk#readme",
-  "repository": "https://github.com/419Labs/avnu-sdk.git",
+  "homepage": "https://github.com/avnu-labs/avnu-sdk#readme",
+  "repository": "https://github.com/avnu-labs/avnu-sdk.git",
   "bugs": {
-    "url": "https://github.com/419Labs/avnu-sdk/issues/new?template=bug_report.yml&title=[bug]+<replace+this+with+a+title>"
+    "url": "https://github.com/avnu-labs/avnu-sdk/issues/new?template=bug_report.yml&title=[bug]+<replace+this+with+a+title>"
   },
   "files": [
     "dist"
