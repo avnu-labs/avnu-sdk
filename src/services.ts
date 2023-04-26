@@ -14,7 +14,6 @@ import {
   Price,
   PriceRequest,
   Quote,
-  Quotee,
   QuoteRequest,
   RequestError,
   Source,
