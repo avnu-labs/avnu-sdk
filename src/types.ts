@@ -93,27 +93,7 @@ export interface Quote {
   integratorFeesInUsd: number;
   integratorFeesBps: bigint;
   priceRatioUsd: number;
-}
-
-export interface Quotee {
-  quoteId: string;
-  sellTokenAddress: string;
-  sellAmount: string;
-  sellAmountInUsd: number;
-  buyTokenAddress: string;
-  buyAmount: string;
-  buyAmountInUsd: number;
-  blockNumber?: number;
-  chainId: string;
-  expiry?: number;
-  routes: Route[];
-  avnuFees: string;
-  avnuFeesInUsd: number;
-  integratorFees: string;
-  avnuFeesBps: string;
-  integratorFeesInUsd: number;
-  integratorFeesBps: string;
-  priceRatioUsd: number;
+  liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER';
 }
 
 export interface InvokeSwapResponse {
