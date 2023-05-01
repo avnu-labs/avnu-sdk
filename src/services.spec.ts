@@ -22,7 +22,6 @@ import {
   calculateMinAmount,
   fetchBuildExecuteTransaction,
   fetchExecuteSwapTransaction,
-  fetchPairs,
   fetchPrices,
   fetchQuotes,
   fetchSources,
@@ -289,34 +288,6 @@ describe('Avnu services', () => {
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
-      }
-      expect.assertions(1);
-    });
-  });
-
-  describe('fetchPairs', () => {
-    it('should return a page of pairs', async () => {
-      // Given
-      const response = aPage([aPair()]);
-      fetchMock.get(`${BASE_URL}/swap/v1/pairs?`, response);
-
-      // When
-      const result = await fetchPairs();
-
-      // Then
-      expect(result).toStrictEqual(response);
-    });
-
-    it('should use throw Error with status code and text when status is higher than 400', async () => {
-      // Given
-      fetchMock.get(`${BASE_URL}/swap/v1/pairs?`, { status: 400, body: { messages: ['This is an error'] } });
-
-      // When
-      try {
-        await fetchPairs();
-      } catch (error) {
-        // Then
-        expect(error).toStrictEqual(new Error('This is an error'));
       }
       expect.assertions(1);
     });

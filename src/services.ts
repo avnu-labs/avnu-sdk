@@ -143,7 +143,7 @@ const fetchExecuteSwapTransaction = (
  * It allows trader to build the data needed for executing the exchange on AVNU router
  *
  * @param quoteId: The id of the selected quote
- * @param nonce: Taker's address nonce. See `buildGetNonce`
+ * @param nonce: Taker's address nonce. See `buildGetNonce`. Warning: the nonce mechanism will change
  * @param takerAddress: Required when taker address was not provided during the quote request
  * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
  * This value is ignored if slippage is not applicable to the selected quote
@@ -152,7 +152,7 @@ const fetchExecuteSwapTransaction = (
  */
 const fetchBuildExecuteTransaction = (
   quoteId: string,
-  nonce: string,
+  nonce?: string,
   takerAddress?: string,
   slippage?: number,
   options?: AvnuOptions,
@@ -179,19 +179,6 @@ const fetchTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise
     signal: options?.abortSignal,
     headers: { ...(options?.avnuPublicKey && { 'ask-signature': 'true' }) },
   }).then((response) => parseResponse<Page<Token>>(response, options?.avnuPublicKey));
-
-/**
- * Fetches the supported pairs
- *
- * @param request: The request params for the avnu API `/swap/v1/pairs` endpoint.
- * @param options: Optional options.
- * @returns The best quotes
- */
-const fetchPairs = (request?: GetPairsRequest, options?: AvnuOptions): Promise<Page<Pair>> =>
-  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/pairs?${qs.stringify(request ?? {})}`, {
-    signal: options?.abortSignal,
-    headers: { ...(options?.avnuPublicKey && { 'ask-signature': 'true' }) },
-  }).then((response) => parseResponse<Page<Pair>>(response, options?.avnuPublicKey));
 
 /**
  * Fetches the supported sources
@@ -341,7 +328,7 @@ const hashQuote = (accountAddress: string, quote: Quote, nonce: string, chainId:
 const executeSwap = async (
   account: AccountInterface,
   quote: Quote,
-  { executeApprove = true, gasless = false, nonce, takerSignature, slippage }: ExecuteSwapOptions = {},
+  { executeApprove = true, gasless = false, takerSignature, slippage }: ExecuteSwapOptions = {},
   options?: AvnuOptions,
 ): Promise<InvokeSwapResponse> => {
   if (account.chainId !== quote.chainId) {
@@ -352,8 +339,9 @@ const executeSwap = async (
     ? buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev)
     : undefined;
 
-  // If nonce not given, fetch it
-  if (!nonce) {
+  // /!\ Do not implement this yourself. It will change /!\
+  let nonce = undefined;
+  if (quote.liquiditySource === 'MARKET_MAKER' || gasless) {
     const getNonce = buildGetNonce(account.address, account.chainId, options?.dev);
     const response = await account.callContract(getNonce);
     nonce = response.result[0];
@@ -361,8 +349,8 @@ const executeSwap = async (
 
   if (gasless) {
     if (approve) await account.execute([approve]);
-    takerSignature = takerSignature ?? (await signQuote(account, quote, nonce, quote.chainId));
-    return fetchExecuteSwapTransaction(quote.quoteId, takerSignature, nonce, account.address, slippage, options);
+    takerSignature = takerSignature ?? (await signQuote(account, quote, nonce!, quote.chainId));
+    return fetchExecuteSwapTransaction(quote.quoteId, takerSignature, nonce!, account.address, slippage, options);
   } else {
     return fetchBuildExecuteTransaction(quote.quoteId, nonce, account.address, slippage, options)
       .then((call) => {
@@ -391,7 +379,6 @@ export {
   executeSwap,
   fetchBuildExecuteTransaction,
   fetchExecuteSwapTransaction,
-  fetchPairs,
   fetchPrices,
   fetchQuotes,
   fetchSources,

@@ -114,7 +114,6 @@ export interface AvnuOptions {
 export interface ExecuteSwapOptions {
   executeApprove?: boolean;
   gasless?: boolean;
-  nonce?: string;
   takerSignature?: Signature;
   slippage?: number;
 }
