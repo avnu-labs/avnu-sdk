@@ -93,6 +93,8 @@ export interface Quote {
   integratorFeesInUsd: number;
   integratorFeesBps: bigint;
   priceRatioUsd: number;
+  sellTokenPriceInUsd?: number;
+  buyTokenPriceInUsd?: number;
   liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER';
 }
 
