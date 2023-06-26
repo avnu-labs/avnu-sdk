@@ -77,6 +77,6 @@
     "starknet": "4.22.0",
     "tsup": "7.0.0",
     "typedoc": "0.24.8",
-    "typescript": "5.0.4"
+    "typescript": "5.1.3"
   }
 }
