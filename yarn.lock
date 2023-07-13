@@ -4510,10 +4510,10 @@ stack-utils@^2.0.3:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-starknet@5.16.0:
-  version "5.16.0"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.16.0.tgz#17f1d882de194b469ed1e45fa7288bc04cf5fa9f"
-  integrity sha512-V88cljrjHTnGLogJecSmt0W+Lc+QZBttJfM2rwtGRyzTTGslYplCoCN5fGnpN+WKSgx7XyYaHFE7xeo15z2lwA==
+starknet@5.14.1:
+  version "5.14.1"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.14.1.tgz#97fa5f99c4c24e42ffa315cfda525461d09d6087"
+  integrity sha512-EtJwQ6RmFsqSLGuMP+PRp4DwNsMYXy63HDnd1plLCdQKl3FMYajqNKf5RbDl03uGU0uE5ctGp+OW3firHuv6IA==
   dependencies:
     "@noble/curves" "~1.0.0"
     isomorphic-fetch "^3.0.0"

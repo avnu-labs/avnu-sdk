@@ -1,6 +1,6 @@
 import { toBeHex } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, Call, ec, hash, Signature, typedData, uint256 } from 'starknet';
+import { AccountInterface, Call, ec, hash, Signature, stark, typedData, uint256 } from 'starknet';
 import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
@@ -37,12 +37,10 @@ const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T
       .text()
       .then((textResponse) => {
         const hashResponse = hash.computeHashOnElements([hash.starknetKeccak(textResponse)]);
-        const sig = signature.split(',');
-
+        const formattedSig = signature.split(',').map((s) => BigInt(s));
+        const signatureType = new ec.starkCurve.Signature(formattedSig[0], formattedSig[1]);
         if (
-          !ec.weierstrass
-            .weierstrass(ec.starkCurve.CURVE)
-            .verify({ r: BigInt(sig[0]), s: BigInt(sig[1]) }, hashResponse, avnuPublicKey)
+          !ec.starkCurve.verify(signatureType, '0x' + hashResponse.replace('0x', '').padStart(64, '0'), avnuPublicKey)
         )
           throw new Error('Invalid server signature');
       })
