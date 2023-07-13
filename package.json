@@ -52,7 +52,7 @@
   "peerDependencies": {
     "ethers": "^6.2.0",
     "qs": "^6.11.0",
-    "starknet": "^5.16.0"
+    "starknet": "^5.14.1"
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.22.5",
