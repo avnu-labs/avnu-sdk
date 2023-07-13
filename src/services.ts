@@ -39,9 +39,7 @@ const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T
         const hashResponse = hash.computeHashOnElements([hash.starknetKeccak(textResponse)]);
         const formattedSig = signature.split(',').map((s) => BigInt(s));
         const signatureType = new ec.starkCurve.Signature(formattedSig[0], formattedSig[1]);
-        if (
-          !ec.starkCurve.verify(signatureType, '0x' + hashResponse.replace('0x', '').padStart(64, '0'), avnuPublicKey)
-        )
+        if (!ec.starkCurve.verify(signatureType, hashResponse, avnuPublicKey))
           throw new Error('Invalid server signature');
       })
       .then(() => response.json());
