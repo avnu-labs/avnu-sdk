@@ -75,7 +75,7 @@
     "qs": "6.11.2",
     "size-limit": "8.2.6",
     "starknet": "5.14.1",
-    "tsup": "7.0.0",
+    "tsup": "7.1.0",
     "typedoc": "0.24.8",
     "typescript": "5.0.4"
   }
