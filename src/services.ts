@@ -6,11 +6,9 @@ import {
   AvnuOptions,
   BuildSwapTransaction,
   ExecuteSwapOptions,
-  GetPairsRequest,
   GetTokensRequest,
   InvokeSwapResponse,
   Page,
-  Pair,
   Price,
   PriceRequest,
   Quote,
@@ -34,13 +32,19 @@ const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T
   if (avnuPublicKey) {
     const signature = response.headers.get('signature');
     if (!signature) throw new Error('No server signature');
-    const keyPair = ec.getKeyPairFromPublicKey(avnuPublicKey);
     return response
       .clone()
       .text()
       .then((textResponse) => {
         const hashResponse = hash.computeHashOnElements([hash.starknetKeccak(textResponse)]);
-        if (!ec.verify(keyPair, hashResponse, signature.split(','))) throw new Error('Invalid server signature');
+        const sig = signature.split(',');
+
+        if (
+          !ec.weierstrass
+            .weierstrass(ec.starkCurve.CURVE)
+            .verify({ r: BigInt(sig[0]), s: BigInt(sig[1]) }, hashResponse, avnuPublicKey)
+        )
+          throw new Error('Invalid server signature');
       })
       .then(() => response.json());
   }
@@ -121,8 +125,15 @@ const fetchExecuteSwapTransaction = (
   takerAddress?: string,
   slippage?: number,
   options?: AvnuOptions,
-): Promise<InvokeSwapResponse> =>
-  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/execute`, {
+): Promise<InvokeSwapResponse> => {
+  let signature: string[] = [];
+
+  if (Array.isArray(takerSignature)) {
+    signature = takerSignature.map((sig) => toBeHex(BigInt(sig)));
+  } else if (takerSignature.r && takerSignature.s) {
+    signature = [toBeHex(BigInt(takerSignature.r)), toBeHex(BigInt(takerSignature.s))];
+  }
+  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/execute`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -134,9 +145,10 @@ const fetchExecuteSwapTransaction = (
       takerAddress,
       nonce,
       slippage,
-      takerSignature: takerSignature.map((signature) => toBeHex(BigInt(signature))),
+      takerSignature: signature,
     }),
   }).then((response) => parseResponse<InvokeSwapResponse>(response, options?.avnuPublicKey));
+};
 
 /**
  * Build data for executing the exchange through AVNU router
@@ -331,7 +343,8 @@ const executeSwap = async (
   { executeApprove = true, gasless = false, takerSignature, slippage }: ExecuteSwapOptions = {},
   options?: AvnuOptions,
 ): Promise<InvokeSwapResponse> => {
-  if (account.chainId !== quote.chainId) {
+  const chainId = await account.getChainId();
+  if (chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
   }
 
@@ -342,7 +355,7 @@ const executeSwap = async (
   // /!\ Do not implement this yourself. It will change /!\
   let nonce = undefined;
   if (quote.liquiditySource === 'MARKET_MAKER' || gasless) {
-    const getNonce = buildGetNonce(account.address, account.chainId, options?.dev);
+    const getNonce = buildGetNonce(account.address, chainId, options?.dev);
     const response = await account.callContract(getNonce);
     nonce = response.result[0];
   }

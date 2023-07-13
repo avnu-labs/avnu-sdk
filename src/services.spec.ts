@@ -2,13 +2,11 @@ import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
 import { constants } from 'starknet';
-import { TextEncoder } from 'util';
 import { BASE_URL } from './constants';
 import {
   aBuildSwapTransaction,
   anInvokeSwapResponse,
   aPage,
-  aPair,
   aPrice,
   aPriceRequest,
   aQuote,
@@ -296,7 +294,7 @@ describe('Avnu services', () => {
   describe('buildApproveTx', () => {
     it('should build approve', () => {
       // When
-      const result = buildApproveTx('0x1', BigInt('1'), constants.StarknetChainId.TESTNET);
+      const result = buildApproveTx('0x1', BigInt('1'), constants.StarknetChainId.SN_GOERLI);
 
       // Then
       expect(result).toStrictEqual({
@@ -310,7 +308,7 @@ describe('Avnu services', () => {
   describe('buildGetNonce', () => {
     it('should build getNonce', () => {
       // When
-      const result = buildGetNonce('0x1', constants.StarknetChainId.TESTNET);
+      const result = buildGetNonce('0x1', constants.StarknetChainId.SN_GOERLI);
 
       // Then
       expect(result).toStrictEqual({
@@ -343,7 +341,7 @@ describe('Avnu services', () => {
         '0x052D8E9778d026588A51595E30B0f45609B4F771eEcF0E335CdeFeD1D84A9d89',
         quote,
         '0x0',
-        constants.StarknetChainId.TESTNET,
+        constants.StarknetChainId.SN_GOERLI,
       );
 
       // Then
