@@ -1,6 +1,6 @@
 import { toBeHex } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, Call, ec, hash, Signature, stark, typedData, uint256 } from 'starknet';
+import { AccountInterface, Call, ec, hash, Signature, typedData, uint256 } from 'starknet';
 import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
