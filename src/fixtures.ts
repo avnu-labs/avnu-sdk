@@ -36,7 +36,7 @@ export const aPrice = (): Price => ({
   buyAmount: parseUnits('2', 18),
   buyAmountInUsd: 1700,
   blockNumber: 1,
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
   sourceName: 'AMM1',
   priceRatioUsd: 0,
 });
@@ -50,7 +50,7 @@ export const aQuote = (): Quote => ({
   buyAmount: parseUnits('2', 18),
   buyAmountInUsd: 1700,
   blockNumber: 1,
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
   expiry: 100000000000,
   routes: [
     {
@@ -81,7 +81,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   buyAmount: parseUnits('2', 18),
   buyAmountInUsd: 1700,
   blockNumber: 1,
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
   expiry: 100000000000,
   priceRatioUsd: 0,
   liquiditySource: 'DEX_AGGREGATOR',
@@ -130,7 +130,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
   buyAmount: parseUnits('2', 18),
   buyAmountInUsd: 1700,
   blockNumber: 1,
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
   expiry: 100000000000,
   avnuFees: BigInt('0x0'),
   avnuFeesInUsd: 0,
@@ -216,7 +216,7 @@ export const anInvokeSwapResponse = (): InvokeSwapResponse => ({
 });
 
 export const aBuildSwapTransaction = (): BuildSwapTransaction => ({
-  chainId: constants.StarknetChainId.TESTNET,
+  chainId: constants.StarknetChainId.SN_GOERLI,
   contractAddress: '0x0',
   entrypoint: 'execute',
   calldata: [],

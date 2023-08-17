@@ -6,11 +6,9 @@ import {
   AvnuOptions,
   BuildSwapTransaction,
   ExecuteSwapOptions,
-  GetPairsRequest,
   GetTokensRequest,
   InvokeSwapResponse,
   Page,
-  Pair,
   Price,
   PriceRequest,
   Quote,
@@ -19,6 +17,7 @@ import {
   Source,
   Token,
 } from './types';
+// import { _starkCurve } from "micro-starknet";
 
 const getBaseUrl = (): string => (process.env.NODE_ENV === 'dev' ? STAGING_BASE_URL : BASE_URL);
 
@@ -34,13 +33,18 @@ const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T
   if (avnuPublicKey) {
     const signature = response.headers.get('signature');
     if (!signature) throw new Error('No server signature');
-    const keyPair = ec.getKeyPairFromPublicKey(avnuPublicKey);
+    // const keyPair = ec.starkCurve.getKeyPairFromPublicKey(avnuPublicKey);
     return response
       .clone()
       .text()
       .then((textResponse) => {
         const hashResponse = hash.computeHashOnElements([hash.starknetKeccak(textResponse)]);
-        if (!ec.verify(keyPair, hashResponse, signature.split(','))) throw new Error('Invalid server signature');
+        const signatureType = new ec.starkCurve.Signature(
+          BigInt(signature.split(',')[0]),
+          BigInt(signature.split(',')[1]),
+        );
+        if (!ec.starkCurve.verify(signatureType, hashResponse, avnuPublicKey))
+          throw new Error('Invalid server signature');
       })
       .then(() => response.json());
   }
@@ -134,7 +138,9 @@ const fetchExecuteSwapTransaction = (
       takerAddress,
       nonce,
       slippage,
-      takerSignature: takerSignature.map((signature) => toBeHex(BigInt(signature))),
+      takerSignature: Array.isArray(takerSignature)
+        ? takerSignature.map((signature) => toBeHex(BigInt(signature)))
+        : takerSignature,
     }),
   }).then((response) => parseResponse<InvokeSwapResponse>(response, options?.avnuPublicKey));
 
@@ -331,7 +337,8 @@ const executeSwap = async (
   { executeApprove = true, gasless = false, takerSignature, slippage }: ExecuteSwapOptions = {},
   options?: AvnuOptions,
 ): Promise<InvokeSwapResponse> => {
-  if (account.chainId !== quote.chainId) {
+  const chainId = await account.getChainId();
+  if (chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
   }
 
@@ -342,7 +349,7 @@ const executeSwap = async (
   // /!\ Do not implement this yourself. It will change /!\
   let nonce = undefined;
   if (quote.liquiditySource === 'MARKET_MAKER' || gasless) {
-    const getNonce = buildGetNonce(account.address, account.chainId, options?.dev);
+    const getNonce = buildGetNonce(account.address, chainId, options?.dev);
     const response = await account.callContract(getNonce);
     nonce = response.result[0];
   }
