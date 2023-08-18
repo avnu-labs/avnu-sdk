@@ -70,6 +70,7 @@ export const aQuote = (): Quote => ({
   integratorFeesBps: BigInt('0x0'),
   priceRatioUsd: 0,
   liquiditySource: 'DEX_AGGREGATOR',
+  suggestedSolution: undefined,
 });
 
 export const aQuoteWithManySubRoutes = (): Quote => ({
@@ -119,6 +120,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
+  suggestedSolution: undefined,
 });
 
 export const aQuoteWithManyComplexRoutes = (): Quote => ({
@@ -209,6 +211,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
       ],
     },
   ],
+  suggestedSolution: undefined,
 });
 
 export const anInvokeSwapResponse = (): InvokeSwapResponse => ({

@@ -98,6 +98,13 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
         integratorFees: BigInt(quote.integratorFees),
         avnuFeesBps: BigInt(quote.avnuFeesBps),
         integratorFeesBps: BigInt(quote.integratorFeesBps),
+        suggestedSolution: quote.suggestedSolution
+          ? {
+              ...quote.suggestedSolution,
+              sellAmount: BigInt(quote.suggestedSolution.sellAmount),
+              buyAmount: BigInt(quote.suggestedSolution.buyAmount),
+            }
+          : undefined,
       })),
     );
 };

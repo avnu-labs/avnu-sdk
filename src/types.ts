@@ -96,6 +96,14 @@ export interface Quote {
   sellTokenPriceInUsd?: number;
   buyTokenPriceInUsd?: number;
   liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER';
+  suggestedSolution?: SuggestedSolution;
+}
+
+export interface SuggestedSolution {
+  sellAmount: bigint;
+  sellAmountInUsd?: number;
+  buyAmount: bigint;
+  buyAmountInUsd?: number;
 }
 
 export interface InvokeSwapResponse {
