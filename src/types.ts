@@ -136,6 +136,7 @@ export interface BuildSwapTransaction extends Call {
 export enum SourceType {
   DEX = 'DEX',
   MARKET_MAKER = 'MARKET_MAKER',
+  SOLVER = 'SOLVER',
 }
 
 export interface Source {
