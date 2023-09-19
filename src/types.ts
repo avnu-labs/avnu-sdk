@@ -50,6 +50,7 @@ export interface QuoteRequest {
   integratorFees?: bigint;
   integratorFeeRecipient?: string;
   integratorName?: string;
+  mode?: 'CLASSIC' | 'TURBO';
 }
 
 export interface Route {
@@ -136,6 +137,7 @@ export enum SourceType {
   DEX = 'DEX',
   MARKET_MAKER = 'MARKET_MAKER',
 }
+
 export interface Source {
   name: string;
   address: string;
