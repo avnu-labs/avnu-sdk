@@ -96,7 +96,7 @@ export interface Quote {
   priceRatioUsd: number;
   sellTokenPriceInUsd?: number;
   buyTokenPriceInUsd?: number;
-  liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER';
+  liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER';
   suggestedSolution?: SuggestedSolution;
 }
 
