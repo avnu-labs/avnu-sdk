@@ -59,6 +59,7 @@ export interface Route {
   percent: number;
   sellTokenAddress: string;
   buyTokenAddress: string;
+  routeInfo?: Map<string, string>;
   routes: Route[];
 }
 
