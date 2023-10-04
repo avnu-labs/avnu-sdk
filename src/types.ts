@@ -53,20 +53,13 @@ export interface QuoteRequest {
   mode?: 'CLASSIC' | 'TURBO';
 }
 
-export interface RouteInfo {
-  token0: string;
-  token1: string;
-  fee: string;
-  tickSpacing: string;
-  extension: string;
-}
 export interface Route {
   name: string;
   address: string;
   percent: number;
   sellTokenAddress: string;
   buyTokenAddress: string;
-  routeInfo?: RouteInfo;
+  routeInfo?: Map<string, string>;
   routes: Route[];
 }
 
