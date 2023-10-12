@@ -84,6 +84,8 @@ export interface Quote {
   buyTokenAddress: string;
   buyAmount: bigint;
   buyAmountInUsd: number;
+  buyAmountWithoutFees: bigint;
+  buyAmountWithoutFeesInUsd: number;
   blockNumber?: number;
   chainId: string;
   expiry?: number;
