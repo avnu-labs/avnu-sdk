@@ -60,7 +60,7 @@
     "@babel/preset-typescript": "7.22.5",
     "@size-limit/preset-small-lib": "8.2.6",
     "@types/jest": "29.5.3",
-    "@types/qs": "6.9.7",
+    "@types/qs": "6.9.9",
     "@typescript-eslint/eslint-plugin": "6.7.2",
     "@typescript-eslint/parser": "6.4.0",
     "eslint": "8.50.0",
