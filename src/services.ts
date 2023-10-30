@@ -94,6 +94,7 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
         ...quote,
         sellAmount: BigInt(quote.sellAmount),
         buyAmount: BigInt(quote.buyAmount),
+        buyAmountWithoutFees: BigInt(quote.buyAmountWithoutFees),
         avnuFees: BigInt(quote.avnuFees),
         integratorFees: BigInt(quote.integratorFees),
         avnuFeesBps: BigInt(quote.avnuFeesBps),
