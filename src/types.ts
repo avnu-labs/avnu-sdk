@@ -90,6 +90,8 @@ export interface Quote {
   chainId: string;
   expiry?: number;
   routes: Route[];
+  gasFees: bigint;
+  gasFeesInUsd: number;
   avnuFees: bigint;
   avnuFeesInUsd: number;
   avnuFeesBps: bigint;
