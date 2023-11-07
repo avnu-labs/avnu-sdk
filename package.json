@@ -50,9 +50,9 @@
     }
   ],
   "peerDependencies": {
-    "ethers": "^6.7.0",
-    "qs": "^6.11.0",
-    "starknet": "^5.14.0"
+    "ethers": "^6.7.1",
+    "qs": "^6.11.2",
+    "starknet": "^5.19.5"
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.23.0",
