@@ -16,7 +16,6 @@ import {
 } from './fixtures';
 import {
   buildApproveTx,
-  buildGetNonce,
   calculateMinAmount,
   fetchBuildExecuteTransaction,
   fetchExecuteSwapTransaction,
@@ -24,9 +23,7 @@ import {
   fetchQuotes,
   fetchSources,
   fetchTokens,
-  hashQuote,
 } from './services';
-import { Quote } from './types';
 
 describe('Avnu services', () => {
   beforeEach(() => {
@@ -176,7 +173,7 @@ describe('Avnu services', () => {
       fetchMock.post(`${BASE_URL}/swap/v1/execute`, response);
 
       // When
-      const result = await fetchExecuteSwapTransaction('quoteId', [], '', '');
+      const result = await fetchExecuteSwapTransaction('quoteId', []);
 
       // Then
       expect(result).toStrictEqual(response);
@@ -189,7 +186,7 @@ describe('Avnu services', () => {
       fetchMock.post(`${baseUrl}/swap/v1/execute`, response);
 
       // When
-      const result = await fetchExecuteSwapTransaction('quoteId', [], '', '', undefined, { baseUrl });
+      const result = await fetchExecuteSwapTransaction('quoteId', [], { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -201,7 +198,7 @@ describe('Avnu services', () => {
 
       // When & Then
       expect.assertions(1);
-      expect(fetchExecuteSwapTransaction('quoteId', [], '', '')).rejects.toEqual(Error('401 Unauthorized'));
+      expect(fetchExecuteSwapTransaction('quoteId', [])).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
@@ -212,7 +209,7 @@ describe('Avnu services', () => {
       fetchMock.post(`${BASE_URL}/swap/v1/build`, response);
 
       // When
-      const result = await fetchBuildExecuteTransaction('quoteId', '', '');
+      const result = await fetchBuildExecuteTransaction('quoteId', '');
 
       // Then
       expect(result).toStrictEqual(response);
@@ -225,7 +222,7 @@ describe('Avnu services', () => {
       fetchMock.post(`${baseUrl}/swap/v1/build`, response);
 
       // When
-      const result = await fetchBuildExecuteTransaction('quoteId', '', '', undefined, { baseUrl });
+      const result = await fetchBuildExecuteTransaction('quoteId', '', undefined, { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -237,7 +234,7 @@ describe('Avnu services', () => {
 
       // When & Then
       expect.assertions(1);
-      expect(fetchBuildExecuteTransaction('quoteId', '', '')).rejects.toEqual(Error('401 Unauthorized'));
+      expect(fetchBuildExecuteTransaction('quoteId', '')).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
@@ -308,50 +305,6 @@ describe('Avnu services', () => {
         contractAddress: '0x1',
         entrypoint: 'approve',
       });
-    });
-  });
-
-  describe('buildGetNonce', () => {
-    it('should build getNonce', () => {
-      // When
-      const result = buildGetNonce('0x1', constants.StarknetChainId.SN_GOERLI);
-
-      // Then
-      expect(result).toStrictEqual({
-        calldata: ['1'],
-        contractAddress: '0x7e36202ace0ab52bf438bd8a8b64b3731c48d09f0d8879f5b006384c2f35032',
-        entrypoint: 'getNonce',
-      });
-    });
-  });
-
-  describe('hashQuote', () => {
-    it('should return the hash', () => {
-      // Given
-      const quote: Quote = {
-        ...aQuote(),
-        sellTokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-        sellAmount: BigInt('0x0de0b6b3a7640000'),
-        buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
-        buyAmount: BigInt('0x0de0b6b3a7640000'),
-        routes: [
-          {
-            ...aQuote().routes[0],
-            address: '0x02F7944d1ca7e42683d8562397a221a98105b415200BAA056c326Ad639c6ca2E',
-          },
-        ],
-      };
-
-      // When
-      const result = hashQuote(
-        '0x052D8E9778d026588A51595E30B0f45609B4F771eEcF0E335CdeFeD1D84A9d89',
-        quote,
-        '0x0',
-        constants.StarknetChainId.SN_GOERLI,
-      );
-
-      // Then
-      expect(result).toStrictEqual('0xa6b37651d52580635bbd93c0e4008ab939f955ae3914c558865e1870659784');
     });
   });
 

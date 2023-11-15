@@ -1,6 +1,6 @@
 import { toBeHex } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, Call, ec, hash, Signature, typedData, uint256 } from 'starknet';
+import { AccountInterface, Call, ec, hash, Signature, TypedData, uint256 } from 'starknet';
 import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
@@ -105,6 +105,13 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
         integratorFees: BigInt(quote.integratorFees),
         avnuFeesBps: BigInt(quote.avnuFeesBps),
         integratorFeesBps: BigInt(quote.integratorFeesBps),
+        gasless: {
+          active: quote.gasless.active,
+          gasTokenPrices: quote.gasless.gasTokenPrices.map((gasTokenPrice) => ({
+            tokenAddress: gasTokenPrice.tokenAddress,
+            price: BigInt(gasTokenPrice.price),
+          })),
+        },
         suggestedSolution: quote.suggestedSolution
           ? {
               ...quote.suggestedSolution,
@@ -130,18 +137,13 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
  */
 const fetchExecuteSwapTransaction = (
   quoteId: string,
-  takerSignature: Signature,
-  nonce: string,
-  takerAddress?: string,
-  slippage?: number,
+  signature: Signature,
   options?: AvnuOptions,
 ): Promise<InvokeSwapResponse> => {
-  let signature: string[] = [];
-
-  if (Array.isArray(takerSignature)) {
-    signature = takerSignature.map((sig) => toBeHex(BigInt(sig)));
-  } else if (takerSignature.r && takerSignature.s) {
-    signature = [toBeHex(BigInt(takerSignature.r)), toBeHex(BigInt(takerSignature.s))];
+  if (Array.isArray(signature)) {
+    signature = signature.map((sig) => toBeHex(BigInt(sig)));
+  } else if (signature.r && signature.s) {
+    signature = [toBeHex(BigInt(signature.r)), toBeHex(BigInt(signature.s))];
   }
   return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/execute`, {
     method: 'POST',
@@ -150,13 +152,7 @@ const fetchExecuteSwapTransaction = (
       'Content-Type': 'application/json',
       ...(options?.avnuPublicKey && { 'ask-signature': 'true' }),
     },
-    body: JSON.stringify({
-      quoteId,
-      takerAddress,
-      nonce,
-      slippage,
-      takerSignature: signature,
-    }),
+    body: JSON.stringify({ quoteId, signature }),
   }).then((response) => parseResponse<InvokeSwapResponse>(response, options?.avnuPublicKey));
 };
 
@@ -165,7 +161,6 @@ const fetchExecuteSwapTransaction = (
  * It allows trader to build the data needed for executing the exchange on AVNU router
  *
  * @param quoteId: The id of the selected quote
- * @param nonce: Taker's address nonce. See `buildGetNonce`. Warning: the nonce mechanism will change
  * @param takerAddress: Required when taker address was not provided during the quote request
  * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
  * This value is ignored if slippage is not applicable to the selected quote
@@ -174,7 +169,6 @@ const fetchExecuteSwapTransaction = (
  */
 const fetchBuildExecuteTransaction = (
   quoteId: string,
-  nonce?: string,
   takerAddress?: string,
   slippage?: number,
   options?: AvnuOptions,
@@ -186,8 +180,45 @@ const fetchBuildExecuteTransaction = (
       'Content-Type': 'application/json',
       ...(options?.avnuPublicKey && { 'ask-signature': 'true' }),
     },
-    body: JSON.stringify({ quoteId, takerAddress, nonce, slippage }),
+    body: JSON.stringify({ quoteId, takerAddress, slippage }),
   }).then((response) => parseResponse<BuildSwapTransaction>(response, options?.avnuPublicKey));
+
+/**
+ * Build typed-data. Once signed by the user, the signature can be sent to the API to be executed by AVNU
+ *
+ * @param quoteId: The id of the selected quote
+ * @param withApprove: If true, the typed data will contains the approve call
+ * @param takerAddress: Required when taker address was not provided during the quote request
+ * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
+ * This value is ignored if slippage is not applicable to the selected quote
+ * @param options: Optional options.
+ * @returns The calldata
+ */
+const fetchBuildSwapTypedData = (
+  quoteId: string,
+  gasTokenAddress: string,
+  maxGasTokenAmount: bigint,
+  includeApprove: boolean = true,
+  takerAddress?: string,
+  slippage?: number,
+  options?: AvnuOptions,
+): Promise<TypedData> =>
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/build-typed-data`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...(options?.avnuPublicKey && { 'ask-signature': 'true' }),
+    },
+    body: JSON.stringify({
+      quoteId,
+      takerAddress,
+      slippage,
+      includeApprove,
+      gasTokenAddress,
+      maxGasTokenAmount: toBeHex(maxGasTokenAmount),
+    }),
+  }).then((response) => parseResponse<TypedData>(response, options?.avnuPublicKey));
 
 /**
  * Fetches the supported tokens.
@@ -245,95 +276,6 @@ const buildApproveTx = (sellTokenAddress: string, sellAmount: bigint, chainId: s
 };
 
 /**
- * Build getNonce call
- *
- * @param takerAddress: The taker's address
- * @param chainId: The chainId
- * @param dev: Specify if you need to use the dev environment
- * @returns Call
- */
-const buildGetNonce = (takerAddress: string, chainId: string, dev?: boolean): Call => ({
-  contractAddress: dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId],
-  entrypoint: 'getNonce',
-  calldata: [BigInt(takerAddress).toString()],
-});
-
-/**
- * Sign the quote
- * The signature will be used in the AVNU contract
- *
- * @param account: The account of the trader
- * @param quote: The selected quote. See `getQuotes`
- * @param nonce: Taker's address nonce. See `buildGetNonce`
- * @param chainId: The chainId
- * @returns Call
- */
-const signQuote = (account: AccountInterface, quote: Quote, nonce: string, chainId: string): Promise<Signature> =>
-  account.signMessage({
-    domain: { name: 'AVNUFinance', version: '1', chainId: chainId },
-    message: {
-      taker_address: account.address,
-      taker_token_address: quote.sellTokenAddress,
-      taker_token_amount: toBeHex(quote.sellAmount),
-      maker_address: quote.routes[0].address,
-      maker_token_address: quote.buyTokenAddress,
-      maker_token_amount: toBeHex(quote.buyAmount),
-      nonce,
-    },
-    primaryType: 'TakerMessage',
-    types: {
-      StarkNetDomain: [
-        { name: 'name', type: 'felt' },
-        { name: 'version', type: 'felt' },
-        { name: 'chainId', type: 'felt' },
-      ],
-      TakerMessage: [
-        { name: 'taker_address', type: 'felt' },
-        { name: 'taker_token_address', type: 'felt' },
-        { name: 'taker_token_amount', type: 'felt' },
-        { name: 'maker_address', type: 'felt' },
-        { name: 'maker_token_address', type: 'felt' },
-        { name: 'maker_token_amount', type: 'felt' },
-        { name: 'nonce', type: 'felt' },
-      ],
-    },
-  });
-
-const hashQuote = (accountAddress: string, quote: Quote, nonce: string, chainId: string): string =>
-  typedData.getMessageHash(
-    {
-      domain: { name: 'AVNUFinance', version: '1', chainId: chainId },
-      message: {
-        taker_address: accountAddress,
-        taker_token_address: quote.sellTokenAddress,
-        taker_token_amount: toBeHex(quote.sellAmount),
-        maker_address: quote.routes[0].address,
-        maker_token_address: quote.buyTokenAddress,
-        maker_token_amount: toBeHex(quote.buyAmount),
-        nonce,
-      },
-      primaryType: 'TakerMessage',
-      types: {
-        StarkNetDomain: [
-          { name: 'name', type: 'felt' },
-          { name: 'version', type: 'felt' },
-          { name: 'chainId', type: 'felt' },
-        ],
-        TakerMessage: [
-          { name: 'taker_address', type: 'felt' },
-          { name: 'taker_token_address', type: 'felt' },
-          { name: 'taker_token_amount', type: 'felt' },
-          { name: 'maker_address', type: 'felt' },
-          { name: 'maker_token_address', type: 'felt' },
-          { name: 'maker_token_amount', type: 'felt' },
-          { name: 'nonce', type: 'felt' },
-        ],
-      },
-    },
-    accountAddress,
-  );
-
-/**
  * Execute the exchange
  *
  * @param account: The account of the trader
@@ -350,7 +292,7 @@ const hashQuote = (accountAddress: string, quote: Quote, nonce: string, chainId:
 const executeSwap = async (
   account: AccountInterface,
   quote: Quote,
-  { executeApprove = true, gasless = false, takerSignature, slippage }: ExecuteSwapOptions = {},
+  { executeApprove = true, gasless = false, gasTokenAddress, maxGasTokenAmount, slippage }: ExecuteSwapOptions = {},
   options?: AvnuOptions,
 ): Promise<InvokeSwapResponse> => {
   const chainId = await account.getChainId();
@@ -358,27 +300,31 @@ const executeSwap = async (
     throw Error(`Invalid chainId`);
   }
 
-  const approve = executeApprove
-    ? buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev)
-    : undefined;
-
-  // /!\ Do not implement this yourself. It will change /!\
-  let nonce = undefined;
-  if (quote.liquiditySource === 'MARKET_MAKER' || gasless) {
-    const getNonce = buildGetNonce(account.address, chainId, options?.dev);
-    const response = await account.callContract(getNonce);
-    nonce = response.result[0];
-  }
-
   if (gasless) {
-    if (approve) await account.execute([approve]);
-    takerSignature = takerSignature ?? (await signQuote(account, quote, nonce!, quote.chainId));
-    return fetchExecuteSwapTransaction(quote.quoteId, takerSignature, nonce!, account.address, slippage, options);
+    if (!gasTokenAddress || !maxGasTokenAmount) {
+      throw Error(`Should provide gasTokenAddress and maxGasTokenAmount when gasless is true`);
+    }
+    const typedData = await fetchBuildSwapTypedData(
+      quote.quoteId,
+      gasTokenAddress,
+      maxGasTokenAmount,
+      executeApprove,
+      account.address,
+      slippage,
+      options,
+    );
+    const signature = await account.signMessage(typedData);
+    return fetchExecuteSwapTransaction(quote.quoteId, signature, options).then((value) => ({
+      transactionHash: value.transactionHash,
+    }));
   } else {
-    return fetchBuildExecuteTransaction(quote.quoteId, nonce, account.address, slippage, options)
+    return fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, options)
       .then((call) => {
+        const calls = executeApprove
+          ? [buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev), call]
+          : [call];
         checkContractAddress(call.contractAddress, call.chainId, options?.dev);
-        return account.execute(approve ? [approve, call] : [call]);
+        return account.execute(calls);
       })
       .then((value) => ({ transactionHash: value.transaction_hash }));
   }
@@ -396,16 +342,14 @@ const calculateMinAmount = (amount: bigint, slippage: number): bigint =>
 
 export {
   buildApproveTx,
-  buildGetNonce,
   calculateMinAmount,
   checkContractAddress,
   executeSwap,
   fetchBuildExecuteTransaction,
+  fetchBuildSwapTypedData,
   fetchExecuteSwapTransaction,
   fetchPrices,
   fetchQuotes,
   fetchSources,
   fetchTokens,
-  hashQuote,
-  signQuote,
 };

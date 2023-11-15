@@ -1,4 +1,4 @@
-import { Call, Signature } from 'starknet';
+import { Call } from 'starknet';
 
 export interface Pageable {
   page?: number;
@@ -105,6 +105,12 @@ export interface Quote {
   buyTokenPriceInUsd?: number;
   liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER';
   suggestedSolution?: SuggestedSolution;
+  gasless: Gasless;
+}
+
+export interface Gasless {
+  active: boolean;
+  gasTokenPrices: { tokenAddress: string; price: bigint }[];
 }
 
 export interface SuggestedSolution {
@@ -132,7 +138,8 @@ export interface AvnuOptions {
 export interface ExecuteSwapOptions {
   executeApprove?: boolean;
   gasless?: boolean;
-  takerSignature?: Signature;
+  gasTokenAddress?: string;
+  maxGasTokenAmount?: bigint;
   slippage?: number;
 }
 

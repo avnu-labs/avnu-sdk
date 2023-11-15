@@ -77,6 +77,10 @@ export const aQuote = (): Quote => ({
   priceRatioUsd: 0,
   liquiditySource: 'DEX_AGGREGATOR',
   suggestedSolution: undefined,
+  gasless: {
+    active: false,
+    gasTokenPrices: [],
+  },
 });
 
 export const aQuoteWithManySubRoutes = (): Quote => ({
@@ -131,6 +135,10 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
   suggestedSolution: undefined,
+  gasless: {
+    active: false,
+    gasTokenPrices: [],
+  },
 });
 
 export const aQuoteWithManyComplexRoutes = (): Quote => ({
@@ -226,6 +234,10 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
     },
   ],
   suggestedSolution: undefined,
+  gasless: {
+    active: false,
+    gasTokenPrices: [],
+  },
 });
 
 export const anInvokeSwapResponse = (): InvokeSwapResponse => ({
