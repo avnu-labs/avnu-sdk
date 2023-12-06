@@ -39,6 +39,8 @@ export const aPrice = (): Price => ({
   chainId: constants.StarknetChainId.SN_GOERLI,
   sourceName: 'AMM1',
   priceRatioUsd: 0,
+  gasFees: BigInt(0),
+  gasFeesInUsd: 0,
 });
 
 export const aQuote = (): Quote => ({

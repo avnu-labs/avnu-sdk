@@ -74,6 +74,8 @@ export interface Price {
   chainId: string;
   sourceName: string;
   priceRatioUsd: number;
+  gasFees: bigint;
+  gasFeesInUsd: number;
 }
 
 export interface Quote {

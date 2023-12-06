@@ -63,7 +63,12 @@ const fetchPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Pric
   })
     .then((response) => parseResponse<Price[]>(response, options?.avnuPublicKey))
     .then((prices) =>
-      prices.map((price) => ({ ...price, sellAmount: BigInt(price.sellAmount), buyAmount: BigInt(price.buyAmount) })),
+      prices.map((price) => ({
+        ...price,
+        sellAmount: BigInt(price.sellAmount),
+        buyAmount: BigInt(price.buyAmount),
+        gasFees: BigInt(price.gasFees),
+      })),
     );
 };
 
