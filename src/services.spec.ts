@@ -42,6 +42,7 @@ describe('Avnu services', () => {
           ...aPrice(),
           sellAmount: toBeHex(parseUnits('1', 18)),
           buyAmount: toBeHex(parseUnits('2', 18)),
+          gasFees: '0x0',
         },
       ];
       const queryParams = { ...aPriceRequest(), sellAmount: '0x0de0b6b3a7640000' };
@@ -64,6 +65,7 @@ describe('Avnu services', () => {
           ...aPrice(),
           sellAmount: toBeHex(parseUnits('1', 18)),
           buyAmount: toBeHex(parseUnits('2', 18)),
+          gasFees: '0x0',
         },
       ];
       const queryParams = { ...aPriceRequest(), sellAmount: '0x0de0b6b3a7640000' };
