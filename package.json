@@ -76,7 +76,7 @@
     "size-limit": "8.2.6",
     "starknet": "5.19.5",
     "tsup": "7.2.0",
-    "typedoc": "0.24.8",
+    "typedoc": "0.25.4",
     "typescript": "5.1.6"
   }
 }
