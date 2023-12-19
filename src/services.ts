@@ -84,7 +84,8 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
   const queryParams = qs.stringify(
     {
       ...request,
-      sellAmount: toBeHex(request.sellAmount),
+      ...(request.sellAmount && { sellAmount: toBeHex(request.sellAmount) }),
+      ...(request.buyAmount && { buyAmount: toBeHex(request.buyAmount) }),
       integratorFees: request.integratorFees ? toBeHex(request.integratorFees) : undefined,
     },
     { arrayFormat: 'repeat' },
@@ -112,6 +113,47 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
             price: BigInt(gasTokenPrice.price),
           })),
         },
+        suggestedSolution: quote.suggestedSolution
+          ? {
+              ...quote.suggestedSolution,
+              sellAmount: BigInt(quote.suggestedSolution.sellAmount),
+              buyAmount: BigInt(quote.suggestedSolution.buyAmount),
+            }
+          : undefined,
+      })),
+    );
+};
+
+const fetchQuotesLucky = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
+  if (request.sellAmount == undefined) {
+    throw Error(`sell amount should be defined`);
+  }
+  const queryParams = qs.stringify(
+    {
+      sellTokenAddress: request.sellTokenAddress,
+      sellAmountMax: toBeHex(request.sellAmount!),
+      takerAddress: request.takerAddress,
+      excludeSources: request.excludeSources,
+      size: request.size,
+    },
+    { arrayFormat: 'repeat' },
+  );
+  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/quotes-lucky?${queryParams}`, {
+    signal: options?.abortSignal,
+    headers: { ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }) },
+  })
+    .then((response) => parseResponse<Quote[]>(response))
+    .then((quotes) =>
+      quotes.map((quote) => ({
+        ...quote,
+        sellAmount: BigInt(quote.sellAmount),
+        buyAmount: BigInt(quote.buyAmount),
+        buyAmountWithoutFees: BigInt(quote.buyAmountWithoutFees),
+        gasFees: BigInt(quote.gasFees),
+        avnuFees: BigInt(quote.avnuFees),
+        integratorFees: BigInt(quote.integratorFees),
+        avnuFeesBps: BigInt(quote.avnuFeesBps),
+        integratorFeesBps: BigInt(quote.integratorFeesBps),
         suggestedSolution: quote.suggestedSolution
           ? {
               ...quote.suggestedSolution,
@@ -292,13 +334,30 @@ const buildApproveTx = (sellTokenAddress: string, sellAmount: bigint, chainId: s
 const executeSwap = async (
   account: AccountInterface,
   quote: Quote,
-  { executeApprove = true, gasless = false, gasTokenAddress, maxGasTokenAmount, slippage }: ExecuteSwapOptions = {},
+  {
+    executeApprove = true,
+    gasless = false,
+    gasTokenAddress,
+    maxGasTokenAmount,
+    slippage = 0.005,
+  }: ExecuteSwapOptions = {},
   options?: AvnuOptions,
 ): Promise<InvokeSwapResponse> => {
   const chainId = await account.getChainId();
   if (chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
   }
+
+  const approve = executeApprove
+    ? quote.exactTokenTo == true
+      ? buildApproveTx(
+          quote.sellTokenAddress,
+          quote.sellAmount + computeSlippageAmount(quote.sellAmount, slippage),
+          quote.chainId,
+          options?.dev,
+        )
+      : buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev)
+    : undefined;
 
   if (gasless) {
     if (!gasTokenAddress || !maxGasTokenAmount) {
@@ -320,11 +379,8 @@ const executeSwap = async (
   } else {
     return fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, options)
       .then((call) => {
-        const calls = executeApprove
-          ? [buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev), call]
-          : [call];
         checkContractAddress(call.contractAddress, call.chainId, options?.dev);
-        return account.execute(calls);
+        return account.execute(approve ? [approve, call] : [call]);
       })
       .then((value) => ({ transactionHash: value.transaction_hash }));
   }
@@ -340,6 +396,9 @@ const executeSwap = async (
 const calculateMinAmount = (amount: bigint, slippage: number): bigint =>
   amount - (amount * BigInt(slippage)) / BigInt(10000);
 
+const computeSlippageAmount = (amount: bigint, slippage: number): bigint =>
+  BigInt(Math.floor(Number(amount) * slippage));
+
 export {
   buildApproveTx,
   calculateMinAmount,
@@ -350,6 +409,7 @@ export {
   fetchExecuteSwapTransaction,
   fetchPrices,
   fetchQuotes,
+  fetchQuotesLucky,
   fetchSources,
   fetchTokens,
 };

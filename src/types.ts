@@ -43,7 +43,8 @@ export interface PriceRequest {
 export interface QuoteRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
-  sellAmount: bigint;
+  sellAmount?: bigint;
+  buyAmount?: bigint;
   takerAddress?: string;
   size?: number;
   excludeSources?: string[];
@@ -106,6 +107,7 @@ export interface Quote {
   liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER';
   suggestedSolution?: SuggestedSolution;
   gasless: Gasless;
+  exactTokenTo?: boolean;
 }
 
 export interface Gasless {
