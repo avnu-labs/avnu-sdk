@@ -106,13 +106,13 @@ export interface Quote {
   buyTokenPriceInUsd?: number;
   liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER';
   suggestedSolution?: SuggestedSolution;
-  gasless: Gasless;
+  gasless?: Gasless;
   exactTokenTo?: boolean;
 }
 
 export interface Gasless {
   active: boolean;
-  gasTokenPrices: { tokenAddress: string; price: bigint }[];
+  gasTokenPrices: { tokenAddress: string; price: bigint; gasFeesInGasToken: bigint }[];
 }
 
 export interface SuggestedSolution {
@@ -128,6 +128,7 @@ export interface InvokeSwapResponse {
 
 export interface RequestError {
   messages: string[];
+  revertError: string | undefined;
 }
 
 export interface AvnuOptions {
@@ -143,6 +144,7 @@ export interface ExecuteSwapOptions {
   gasTokenAddress?: string;
   maxGasTokenAmount?: bigint;
   slippage?: number;
+  executeGaslessTxCallback?: () => unknown;
 }
 
 export interface BuildSwapTransaction extends Call {
@@ -160,4 +162,11 @@ export interface Source {
   address: string;
   icon?: string;
   type: SourceType;
+}
+
+export class ContractError {
+  constructor(
+    public message: string,
+    public revertError: string,
+  ) {}
 }

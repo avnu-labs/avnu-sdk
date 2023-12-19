@@ -5,6 +5,7 @@ import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
   BuildSwapTransaction,
+  ContractError,
   ExecuteSwapOptions,
   GetTokensRequest,
   InvokeSwapResponse,
@@ -24,6 +25,15 @@ const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T
   if (response.status === 400) {
     return response.json().then((error: RequestError) => {
       throw new Error(error.messages[0]);
+    });
+  }
+  if (response.status === 500) {
+    return response.json().then((error: RequestError) => {
+      if (error.messages.length >= 0 && error.messages[0].includes('Contract error')) {
+        throw new ContractError(error.messages[0], error.revertError || '');
+      } else {
+        throw new Error(error.messages[0]);
+      }
     });
   }
   if (response.status > 400) {
@@ -106,20 +116,19 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
         integratorFees: BigInt(quote.integratorFees),
         avnuFeesBps: BigInt(quote.avnuFeesBps),
         integratorFeesBps: BigInt(quote.integratorFeesBps),
-        gasless: {
+        gasless: quote.gasless && {
           active: quote.gasless.active,
           gasTokenPrices: quote.gasless.gasTokenPrices.map((gasTokenPrice) => ({
             tokenAddress: gasTokenPrice.tokenAddress,
             price: BigInt(gasTokenPrice.price),
+            gasFeesInGasToken: BigInt(gasTokenPrice.gasFeesInGasToken),
           })),
         },
-        suggestedSolution: quote.suggestedSolution
-          ? {
-              ...quote.suggestedSolution,
-              sellAmount: BigInt(quote.suggestedSolution.sellAmount),
-              buyAmount: BigInt(quote.suggestedSolution.buyAmount),
-            }
-          : undefined,
+        suggestedSolution: quote.suggestedSolution && {
+          ...quote.suggestedSolution,
+          sellAmount: BigInt(quote.suggestedSolution.sellAmount),
+          buyAmount: BigInt(quote.suggestedSolution.buyAmount),
+        },
       })),
     );
 };
@@ -320,15 +329,16 @@ const buildApproveTx = (sellTokenAddress: string, sellAmount: bigint, chainId: s
 /**
  * Execute the exchange
  *
- * @param account: The account of the trader
- * @param quote: The selected quote. See `getQuotes`
- * @param nonce: Taker's address nonce. See `buildGetNonce`
- * @param executeApprove: False if the taker already executed `approve`
- * @param gasless: False if the user wants to execute the transaction himself
- * @param takerSignature: Optional: the function will ask the user tu sign the quote if param is undefined
- * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
+ * @param account The account of the trader
+ * @param quote The selected quote. See `getQuotes`
+ * @param executeApprove False if the taker already executed `approve`
+ * @param gasless False if the user wants to execute the transaction himself
+ * @param gasTokenAddress The gas token address that will be used to pay the gas fees (required when gasless is true)
+ * @param maxGasTokenAmount The maximum amount of gas token that the user is willing to spend (required when gasless is true)
+ * @param executeGaslessTxCallback This function is called after the user signed the typed data and just before calling the API to execute the transaction
+ * @param slippage The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
  * This value is ignored if slippage is not applicable to the selected quote
- * @param options: Optional options.
+ * @param options Optional options.
  * @returns Promise<InvokeSwapResponse>
  */
 const executeSwap = async (
@@ -340,6 +350,7 @@ const executeSwap = async (
     gasTokenAddress,
     maxGasTokenAmount,
     slippage = 0.005,
+    executeGaslessTxCallback,
   }: ExecuteSwapOptions = {},
   options?: AvnuOptions,
 ): Promise<InvokeSwapResponse> => {
@@ -373,6 +384,9 @@ const executeSwap = async (
       options,
     );
     const signature = await account.signMessage(typedData);
+    if (executeGaslessTxCallback) {
+      executeGaslessTxCallback();
+    }
     return fetchExecuteSwapTransaction(quote.quoteId, signature, options).then((value) => ({
       transactionHash: value.transactionHash,
     }));
