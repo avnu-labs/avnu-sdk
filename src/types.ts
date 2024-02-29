@@ -112,7 +112,7 @@ export interface Quote {
 
 export interface Gasless {
   active: boolean;
-  gasTokenPrices: { tokenAddress: string; price: bigint; gasFeesInGasToken: bigint }[];
+  gasTokenPrices: { tokenAddress: string; gasFeesInUsd: number; gasFeesInGasToken: bigint }[];
 }
 
 export interface SuggestedSolution {
@@ -124,6 +124,8 @@ export interface SuggestedSolution {
 
 export interface InvokeSwapResponse {
   transactionHash: string;
+  gasTokenAddress?: string;
+  gasTokenAmount?: bigint;
 }
 
 export interface RequestError {

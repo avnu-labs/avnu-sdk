@@ -120,7 +120,7 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
           active: quote.gasless.active,
           gasTokenPrices: quote.gasless.gasTokenPrices.map((gasTokenPrice) => ({
             tokenAddress: gasTokenPrice.tokenAddress,
-            price: BigInt(gasTokenPrice.price),
+            gasFeesInUsd: gasTokenPrice.gasFeesInUsd,
             gasFeesInGasToken: BigInt(gasTokenPrice.gasFeesInGasToken),
           })),
         },
@@ -389,6 +389,8 @@ const executeSwap = async (
     }
     return fetchExecuteSwapTransaction(quote.quoteId, signature, options).then((value) => ({
       transactionHash: value.transactionHash,
+      gasTokenAddress: value.gasTokenAddress,
+      gasTokenAmount: BigInt(value.gasTokenAmount!),
     }));
   } else {
     return fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, options)
