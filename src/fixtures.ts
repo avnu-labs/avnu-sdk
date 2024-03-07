@@ -246,9 +246,13 @@ export const anInvokeSwapResponse = (): InvokeSwapResponse => ({
 
 export const aBuildSwapTransaction = (): BuildSwapTransaction => ({
   chainId: constants.StarknetChainId.SN_GOERLI,
-  contractAddress: '0x0',
-  entrypoint: 'execute',
-  calldata: [],
+  calls: [
+    {
+      contractAddress: '0x0',
+      entrypoint: 'execute',
+      calldata: [],
+    },
+  ],
 });
 
 export const ethToken = (): Token => ({

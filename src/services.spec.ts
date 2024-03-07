@@ -1,7 +1,6 @@
 import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
-import { constants } from 'starknet';
 import { BASE_URL } from './constants';
 import {
   aBuildSwapTransaction,
@@ -15,7 +14,6 @@ import {
   ethToken,
 } from './fixtures';
 import {
-  buildApproveTx,
   calculateMinAmount,
   fetchBuildExecuteTransaction,
   fetchExecuteSwapTransaction,
@@ -43,7 +41,7 @@ describe('Avnu services', () => {
         },
       ];
       const queryParams = { ...aPriceRequest(), sellAmount: '0x0de0b6b3a7640000' };
-      fetchMock.get(`${BASE_URL}/swap/v1/prices?${qs.stringify(queryParams)}`, response);
+      fetchMock.get(`${BASE_URL}/swap/v2/prices?${qs.stringify(queryParams)}`, response);
 
       // When
       const result = await fetchPrices(request);
@@ -66,7 +64,7 @@ describe('Avnu services', () => {
         },
       ];
       const queryParams = { ...aPriceRequest(), sellAmount: '0x0de0b6b3a7640000' };
-      fetchMock.get(`${baseUrl}/swap/v1/prices?${qs.stringify(queryParams)}`, response);
+      fetchMock.get(`${baseUrl}/swap/v2/prices?${qs.stringify(queryParams)}`, response);
 
       // When
       const result = await fetchPrices(request, { baseUrl });
@@ -80,7 +78,7 @@ describe('Avnu services', () => {
       // Given
       const request = aPriceRequest();
       const queryParams = { ...aPriceRequest(), sellAmount: '0x0de0b6b3a7640000' };
-      fetchMock.get(`${BASE_URL}/swap/v1/prices?${qs.stringify(queryParams)}`, 401);
+      fetchMock.get(`${BASE_URL}/swap/v2/prices?${qs.stringify(queryParams)}`, 401);
 
       // When
       try {
@@ -111,7 +109,7 @@ describe('Avnu services', () => {
         },
       ];
       const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
-      fetchMock.get(`${BASE_URL}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
+      fetchMock.get(`${BASE_URL}/swap/v2/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
       const result = await fetchQuotes(request);
@@ -139,7 +137,7 @@ describe('Avnu services', () => {
         },
       ];
       const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
-      fetchMock.get(`${baseUrl}/swap/v1/quotes?${qs.stringify(queryParams)}`, response);
+      fetchMock.get(`${baseUrl}/swap/v2/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
       const result = await fetchQuotes(request, { baseUrl });
@@ -153,7 +151,7 @@ describe('Avnu services', () => {
       // Given
       const request = aQuoteRequest();
       const queryParams = { ...aQuoteRequest(), sellAmount: '0x0de0b6b3a7640000' };
-      fetchMock.get(`${BASE_URL}/swap/v1/quotes?${qs.stringify(queryParams)}`, 401);
+      fetchMock.get(`${BASE_URL}/swap/v2/quotes?${qs.stringify(queryParams)}`, 401);
 
       // When
       try {
@@ -170,7 +168,7 @@ describe('Avnu services', () => {
     it('should return an InvokeSwapResponse', async () => {
       // Given
       const response = anInvokeSwapResponse();
-      fetchMock.post(`${BASE_URL}/swap/v1/execute`, response);
+      fetchMock.post(`${BASE_URL}/swap/v2/execute`, response);
 
       // When
       const result = await fetchExecuteSwapTransaction('quoteId', []);
@@ -183,7 +181,7 @@ describe('Avnu services', () => {
       // Given
       const baseUrl = 'https://example.com';
       const response = anInvokeSwapResponse();
-      fetchMock.post(`${baseUrl}/swap/v1/execute`, response);
+      fetchMock.post(`${baseUrl}/swap/v2/execute`, response);
 
       // When
       const result = await fetchExecuteSwapTransaction('quoteId', [], { baseUrl });
@@ -194,7 +192,7 @@ describe('Avnu services', () => {
 
     it('should use throw Error with status code and text when status is higher than 400', () => {
       // Given
-      fetchMock.post(`${BASE_URL}/swap/v1/execute`, 401);
+      fetchMock.post(`${BASE_URL}/swap/v2/execute`, 401);
 
       // When & Then
       expect.assertions(1);
@@ -206,7 +204,7 @@ describe('Avnu services', () => {
     it('should return a BuildSwapTransaction', async () => {
       // Given
       const response = aBuildSwapTransaction();
-      fetchMock.post(`${BASE_URL}/swap/v1/build`, response);
+      fetchMock.post(`${BASE_URL}/swap/v2/build`, response);
 
       // When
       const result = await fetchBuildExecuteTransaction('quoteId', '');
@@ -219,10 +217,10 @@ describe('Avnu services', () => {
       // Given
       const baseUrl = 'https://example.com';
       const response = aBuildSwapTransaction();
-      fetchMock.post(`${baseUrl}/swap/v1/build`, response);
+      fetchMock.post(`${baseUrl}/swap/v2/build`, response);
 
       // When
-      const result = await fetchBuildExecuteTransaction('quoteId', '', undefined, { baseUrl });
+      const result = await fetchBuildExecuteTransaction('quoteId', '', undefined, true, { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -230,7 +228,7 @@ describe('Avnu services', () => {
 
     it('should use throw Error with status code and text when status is higher than 400', () => {
       // Given
-      fetchMock.post(`${BASE_URL}/swap/v1/build`, 401);
+      fetchMock.post(`${BASE_URL}/swap/v2/build`, 401);
 
       // When & Then
       expect.assertions(1);
@@ -242,7 +240,7 @@ describe('Avnu services', () => {
     it('should return a page of tokens', async () => {
       // Given
       const response = aPage([ethToken()]);
-      fetchMock.get(`${BASE_URL}/swap/v1/tokens?`, response);
+      fetchMock.get(`${BASE_URL}/swap/v2/tokens?`, response);
 
       // When
       const result = await fetchTokens();
@@ -253,7 +251,7 @@ describe('Avnu services', () => {
 
     it('should use throw Error with status code and text when status is higher than 400', async () => {
       // Given
-      fetchMock.get(`${BASE_URL}/swap/v1/tokens?`, 401);
+      fetchMock.get(`${BASE_URL}/swap/v2/tokens?`, 401);
 
       // When
       try {
@@ -270,7 +268,7 @@ describe('Avnu services', () => {
     it('should return a list of sources', async () => {
       // Given
       const response = [aSource()];
-      fetchMock.get(`${BASE_URL}/swap/v1/sources`, response);
+      fetchMock.get(`${BASE_URL}/swap/v2/sources`, response);
 
       // When
       const result = await fetchSources();
@@ -281,7 +279,7 @@ describe('Avnu services', () => {
 
     it('should use throw Error with status code and text when status is higher than 400', async () => {
       // Given
-      fetchMock.get(`${BASE_URL}/swap/v1/sources`, 401);
+      fetchMock.get(`${BASE_URL}/swap/v2/sources`, 401);
 
       // When
       try {
@@ -291,20 +289,6 @@ describe('Avnu services', () => {
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
       }
       expect.assertions(1);
-    });
-  });
-
-  describe('buildApproveTx', () => {
-    it('should build approve', () => {
-      // When
-      const result = buildApproveTx('0x1', BigInt('1'), constants.StarknetChainId.SN_GOERLI);
-
-      // Then
-      expect(result).toStrictEqual({
-        calldata: ['0x7e36202ace0ab52bf438bd8a8b64b3731c48d09f0d8879f5b006384c2f35032', '0x1', '0x0'],
-        contractAddress: '0x1',
-        entrypoint: 'approve',
-      });
     });
   });
 

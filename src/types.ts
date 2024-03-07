@@ -149,8 +149,9 @@ export interface ExecuteSwapOptions {
   executeGaslessTxCallback?: () => unknown;
 }
 
-export interface BuildSwapTransaction extends Call {
+export interface BuildSwapTransaction {
   chainId: string;
+  calls: Call[];
 }
 
 export enum SourceType {

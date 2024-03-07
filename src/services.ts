@@ -1,7 +1,7 @@
 import { toBeHex } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, Call, ec, hash, Signature, TypedData, uint256 } from 'starknet';
-import { AVNU_ADDRESS, BASE_URL, STAGING_BASE_URL } from './constants';
+import { AccountInterface, ec, hash, Signature, TypedData } from 'starknet';
+import { BASE_URL, STAGING_BASE_URL } from './constants';
 import {
   AvnuOptions,
   BuildSwapTransaction,
@@ -61,13 +61,13 @@ const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T
  * Fetches the prices of DEX applications.
  * It allows to find the prices of AMM without any path optimization. It allows to measure the performance of the results from the getQuotes endpoints. The prices are sorted (best first).
  *
- * @param request: The request params for the avnu API `/swap/v1/prices` endpoint.
+ * @param request: The request params for the avnu API `/swap/v2/prices` endpoint.
  * @param options: Optional options.
  * @returns The best quotes
  */
 const fetchPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Price[]> => {
   const queryParams = qs.stringify({ ...request, sellAmount: toBeHex(request.sellAmount) }, { arrayFormat: 'repeat' });
-  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/prices?${queryParams}`, {
+  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v2/prices?${queryParams}`, {
     signal: options?.abortSignal,
     headers: { ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }) },
   })
@@ -86,7 +86,7 @@ const fetchPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Pric
  * Fetches the best quotes.
  * It allows to find the best quotes from on-chain and off-chain liquidity. The best quotes will be returned and are sorted (best first).
  *
- * @param request: The request params for the avnu API `/swap/v1/quotes` endpoint.
+ * @param request: The request params for the avnu API `/swap/v2/quotes` endpoint.
  * @param options: Optional options.
  * @returns The best quotes
  */
@@ -100,7 +100,7 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
     },
     { arrayFormat: 'repeat' },
   );
-  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/quotes?${queryParams}`, {
+  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v2/quotes?${queryParams}`, {
     signal: options?.abortSignal,
     headers: { ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }) },
   })
@@ -147,7 +147,7 @@ const fetchQuotesLucky = (request: QuoteRequest, options?: AvnuOptions): Promise
     },
     { arrayFormat: 'repeat' },
   );
-  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/quotes-lucky?${queryParams}`, {
+  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v2/quotes-lucky?${queryParams}`, {
     signal: options?.abortSignal,
     headers: { ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }) },
   })
@@ -196,7 +196,7 @@ const fetchExecuteSwapTransaction = (
   } else if (signature.r && signature.s) {
     signature = [toBeHex(BigInt(signature.r)), toBeHex(BigInt(signature.s))];
   }
-  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/execute`, {
+  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v2/execute`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -215,6 +215,7 @@ const fetchExecuteSwapTransaction = (
  * @param takerAddress: Required when taker address was not provided during the quote request
  * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
  * This value is ignored if slippage is not applicable to the selected quote
+ * @param includeApprove: If true, the response will contains the approve call
  * @param options: Optional options.
  * @returns The calldata
  */
@@ -222,16 +223,17 @@ const fetchBuildExecuteTransaction = (
   quoteId: string,
   takerAddress?: string,
   slippage?: number,
+  includeApprove?: boolean,
   options?: AvnuOptions,
 ): Promise<BuildSwapTransaction> =>
-  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/build`, {
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v2/build`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
       ...(options?.avnuPublicKey && { 'ask-signature': 'true' }),
     },
-    body: JSON.stringify({ quoteId, takerAddress, slippage }),
+    body: JSON.stringify({ quoteId, takerAddress, slippage, includeApprove }),
   }).then((response) => parseResponse<BuildSwapTransaction>(response, options?.avnuPublicKey));
 
 /**
@@ -254,7 +256,7 @@ const fetchBuildSwapTypedData = (
   slippage?: number,
   options?: AvnuOptions,
 ): Promise<TypedData> =>
-  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/build-typed-data`, {
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v2/build-typed-data`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -274,12 +276,12 @@ const fetchBuildSwapTypedData = (
 /**
  * Fetches the supported tokens.
  *
- * @param request: The request params for the avnu API `/swap/v1/tokens` endpoint.
+ * @param request: The request params for the avnu API `/swap/v2/tokens` endpoint.
  * @param options: Optional options.
  * @returns The best quotes
  */
 const fetchTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise<Page<Token>> =>
-  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/tokens?${qs.stringify(request ?? {})}`, {
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v2/tokens?${qs.stringify(request ?? {})}`, {
     signal: options?.abortSignal,
     headers: { ...(options?.avnuPublicKey && { 'ask-signature': 'true' }) },
   }).then((response) => parseResponse<Page<Token>>(response, options?.avnuPublicKey));
@@ -291,40 +293,10 @@ const fetchTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise
  * @returns The sources
  */
 const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
-  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v1/sources`, {
+  fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v2/sources`, {
     signal: options?.abortSignal,
     headers: { ...(options?.avnuPublicKey && { 'ask-signature': 'true' }) },
   }).then((response) => parseResponse<Source[]>(response, options?.avnuPublicKey));
-
-/**
- * Verifies if the address is whitelisted
- * Throws an error when the contractAddress is not whitelisted
- *
- * @param contractAddress: The address to check
- * @param chainId: The chainId
- */
-const checkContractAddress = (contractAddress: string, chainId: string, dev?: boolean) => {
-  if (!(dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId])?.includes(contractAddress)) {
-    throw Error(`Contract ${contractAddress} is not whitelisted`);
-  }
-};
-
-/**
- * Build approve call
- *
- * @param sellTokenAddress: The sell token address
- * @param sellAmount: The sell amount
- * @param chainId: The chainId
- * @param dev: Specify if you need to use the dev environment  * @returns Call
- */
-const buildApproveTx = (sellTokenAddress: string, sellAmount: bigint, chainId: string, dev?: boolean): Call => {
-  const value = uint256.bnToUint256(toBeHex(sellAmount));
-  return {
-    contractAddress: sellTokenAddress,
-    entrypoint: 'approve',
-    calldata: [dev ? AVNU_ADDRESS[`${chainId}-dev`] : AVNU_ADDRESS[chainId], value.low, value.high],
-  };
-};
 
 /**
  * Execute the exchange
@@ -359,17 +331,6 @@ const executeSwap = async (
     throw Error(`Invalid chainId`);
   }
 
-  const approve = executeApprove
-    ? quote.exactTokenTo == true
-      ? buildApproveTx(
-          quote.sellTokenAddress,
-          quote.sellAmount + computeSlippageAmount(quote.sellAmount, slippage),
-          quote.chainId,
-          options?.dev,
-        )
-      : buildApproveTx(quote.sellTokenAddress, quote.sellAmount, quote.chainId, options?.dev)
-    : undefined;
-
   if (gasless) {
     if (!gasTokenAddress || !maxGasTokenAmount) {
       throw Error(`Should provide gasTokenAddress and maxGasTokenAmount when gasless is true`);
@@ -393,11 +354,8 @@ const executeSwap = async (
       gasTokenAmount: BigInt(value.gasTokenAmount!),
     }));
   } else {
-    return fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, options)
-      .then((call) => {
-        checkContractAddress(call.contractAddress, call.chainId, options?.dev);
-        return account.execute(approve ? [approve, call] : [call]);
-      })
+    return fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, executeApprove, options)
+      .then(({ calls }) => account.execute(calls))
       .then((value) => ({ transactionHash: value.transaction_hash }));
   }
 };
@@ -412,13 +370,8 @@ const executeSwap = async (
 const calculateMinAmount = (amount: bigint, slippage: number): bigint =>
   amount - (amount * BigInt(slippage)) / BigInt(10000);
 
-const computeSlippageAmount = (amount: bigint, slippage: number): bigint =>
-  BigInt(Math.floor(Number(amount) * slippage));
-
 export {
-  buildApproveTx,
   calculateMinAmount,
-  checkContractAddress,
   executeSwap,
   fetchBuildExecuteTransaction,
   fetchBuildSwapTypedData,
