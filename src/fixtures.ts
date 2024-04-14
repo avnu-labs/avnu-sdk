@@ -4,7 +4,6 @@ import {
   BuildSwapTransaction,
   InvokeSwapResponse,
   Page,
-  Pair,
   Price,
   PriceRequest,
   Quote,
@@ -36,7 +35,7 @@ export const aPrice = (): Price => ({
   buyAmount: parseUnits('2', 18),
   buyAmountInUsd: 1700,
   blockNumber: 1,
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
   sourceName: 'AMM1',
   priceRatioUsd: 0,
   gasFees: BigInt(0),
@@ -54,7 +53,7 @@ export const aQuote = (): Quote => ({
   buyAmountWithoutFees: parseUnits('2', 18),
   buyAmountWithoutFeesInUsd: 1700,
   blockNumber: 1,
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
   expiry: 100000000000,
   routes: [
     {
@@ -76,7 +75,6 @@ export const aQuote = (): Quote => ({
   integratorFeesBps: BigInt('0x0'),
   priceRatioUsd: 0,
   liquiditySource: 'DEX_AGGREGATOR',
-  suggestedSolution: undefined,
   gasless: {
     active: false,
     gasTokenPrices: [],
@@ -94,7 +92,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   buyAmountWithoutFees: parseUnits('2', 18),
   buyAmountWithoutFeesInUsd: 1700,
   blockNumber: 1,
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
   expiry: 100000000000,
   priceRatioUsd: 0,
   liquiditySource: 'DEX_AGGREGATOR',
@@ -134,7 +132,6 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
-  suggestedSolution: undefined,
   gasless: {
     active: false,
     gasTokenPrices: [],
@@ -152,7 +149,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
   buyAmountWithoutFees: parseUnits('2', 18),
   buyAmountWithoutFeesInUsd: 1700,
   blockNumber: 1,
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
   expiry: 100000000000,
   gasFees: BigInt('0x0'),
   gasFeesInUsd: 0,
@@ -233,7 +230,6 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
       ],
     },
   ],
-  suggestedSolution: undefined,
   gasless: {
     active: false,
     gasTokenPrices: [],
@@ -245,7 +241,7 @@ export const anInvokeSwapResponse = (): InvokeSwapResponse => ({
 });
 
 export const aBuildSwapTransaction = (): BuildSwapTransaction => ({
-  chainId: constants.StarknetChainId.SN_GOERLI,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
   calls: [
     {
       contractAddress: '0x0',
@@ -273,11 +269,6 @@ export const btcToken = (): Token => ({
   chainId: '0x534e5f474f45524c49',
   logoUri:
     'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png',
-});
-
-export const aPair = (): Pair => ({
-  token1: ethToken(),
-  token2: btcToken(),
 });
 
 export const aPage = <T>(content: T[], size = 10, number = 0, totalPages = 1, totalElements = 1): Page<T> => ({

@@ -1,7 +1,7 @@
 import { toBeHex } from 'ethers';
 import qs from 'qs';
 import { AccountInterface, ec, hash, Signature, TypedData } from 'starknet';
-import { BASE_URL, STAGING_BASE_URL } from './constants';
+import { BASE_URL, SEPOLIA_BASE_URL } from './constants';
 import {
   AvnuOptions,
   BuildSwapTransaction,
@@ -19,7 +19,7 @@ import {
   Token,
 } from './types';
 
-const getBaseUrl = (): string => (process.env.NODE_ENV === 'dev' ? STAGING_BASE_URL : BASE_URL);
+const getBaseUrl = (): string => (process.env.NODE_ENV === 'dev' ? SEPOLIA_BASE_URL : BASE_URL);
 
 const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T> => {
   if (response.status === 400) {
@@ -61,9 +61,9 @@ const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T
  * Fetches the prices of DEX applications.
  * It allows to find the prices of AMM without any path optimization. It allows to measure the performance of the results from the getQuotes endpoints. The prices are sorted (best first).
  *
- * @param request: The request params for the avnu API `/swap/v2/prices` endpoint.
- * @param options: Optional options.
  * @returns The best quotes
+ * @param request The request params for the avnu API `/swap/v2/prices` endpoint.
+ * @param options Optional options.
  */
 const fetchPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Price[]> => {
   const queryParams = qs.stringify({ ...request, sellAmount: toBeHex(request.sellAmount) }, { arrayFormat: 'repeat' });
@@ -86,16 +86,15 @@ const fetchPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Pric
  * Fetches the best quotes.
  * It allows to find the best quotes from on-chain and off-chain liquidity. The best quotes will be returned and are sorted (best first).
  *
- * @param request: The request params for the avnu API `/swap/v2/quotes` endpoint.
- * @param options: Optional options.
+ * @param request The request params for the avnu API `/swap/v2/quotes` endpoint.
+ * @param options Optional options.
  * @returns The best quotes
  */
 const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
   const queryParams = qs.stringify(
     {
       ...request,
-      ...(request.sellAmount && { sellAmount: toBeHex(request.sellAmount) }),
-      ...(request.buyAmount && { buyAmount: toBeHex(request.buyAmount) }),
+      sellAmount: toBeHex(request.sellAmount),
       integratorFees: request.integratorFees ? toBeHex(request.integratorFees) : undefined,
     },
     { arrayFormat: 'repeat' },
@@ -124,52 +123,6 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
             gasFeesInGasToken: BigInt(gasTokenPrice.gasFeesInGasToken),
           })),
         },
-        suggestedSolution: quote.suggestedSolution && {
-          ...quote.suggestedSolution,
-          sellAmount: BigInt(quote.suggestedSolution.sellAmount),
-          buyAmount: BigInt(quote.suggestedSolution.buyAmount),
-        },
-      })),
-    );
-};
-
-const fetchQuotesLucky = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
-  if (request.sellAmount == undefined) {
-    throw Error(`sell amount should be defined`);
-  }
-  const queryParams = qs.stringify(
-    {
-      sellTokenAddress: request.sellTokenAddress,
-      sellAmountMax: toBeHex(request.sellAmount!),
-      takerAddress: request.takerAddress,
-      excludeSources: request.excludeSources,
-      size: request.size,
-    },
-    { arrayFormat: 'repeat' },
-  );
-  return fetch(`${options?.baseUrl ?? getBaseUrl()}/swap/v2/quotes-lucky?${queryParams}`, {
-    signal: options?.abortSignal,
-    headers: { ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }) },
-  })
-    .then((response) => parseResponse<Quote[]>(response))
-    .then((quotes) =>
-      quotes.map((quote) => ({
-        ...quote,
-        sellAmount: BigInt(quote.sellAmount),
-        buyAmount: BigInt(quote.buyAmount),
-        buyAmountWithoutFees: BigInt(quote.buyAmountWithoutFees),
-        gasFees: BigInt(quote.gasFees),
-        avnuFees: BigInt(quote.avnuFees),
-        integratorFees: BigInt(quote.integratorFees),
-        avnuFeesBps: BigInt(quote.avnuFeesBps),
-        integratorFeesBps: BigInt(quote.integratorFeesBps),
-        suggestedSolution: quote.suggestedSolution
-          ? {
-              ...quote.suggestedSolution,
-              sellAmount: BigInt(quote.suggestedSolution.sellAmount),
-              buyAmount: BigInt(quote.suggestedSolution.buyAmount),
-            }
-          : undefined,
       })),
     );
 };
@@ -177,13 +130,9 @@ const fetchQuotesLucky = (request: QuoteRequest, options?: AvnuOptions): Promise
 /**
  * Executing the exchange through AVNU router
  *
- * @param quoteId: The id of the selected quote
- * @param takerSignature: Taker's signature.
- * @param nonce: Taker's address nonce. See `buildGetNonce`
- * @param takerAddress: Required when taker address was not provided during the quote request
- * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
- * This value is ignored if slippage is not applicable to the selected quote
- * @param options: Optional options.
+ * @param quoteId The id of the selected quote
+ * @param signature The typed data's signature
+ * @param options Optional options.
  * @returns The transaction hash
  */
 const fetchExecuteSwapTransaction = (
@@ -211,12 +160,12 @@ const fetchExecuteSwapTransaction = (
  * Build data for executing the exchange through AVNU router
  * It allows trader to build the data needed for executing the exchange on AVNU router
  *
- * @param quoteId: The id of the selected quote
- * @param takerAddress: Required when taker address was not provided during the quote request
- * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
+ * @param quoteId The id of the selected quote
+ * @param takerAddress Required when taker address was not provided during the quote request
+ * @param slippage The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
  * This value is ignored if slippage is not applicable to the selected quote
- * @param includeApprove: If true, the response will contains the approve call
- * @param options: Optional options.
+ * @param includeApprove If true, the response will contain the approve call. True by default.
+ * @param options Optional options.
  * @returns The calldata
  */
 const fetchBuildExecuteTransaction = (
@@ -239,12 +188,14 @@ const fetchBuildExecuteTransaction = (
 /**
  * Build typed-data. Once signed by the user, the signature can be sent to the API to be executed by AVNU
  *
- * @param quoteId: The id of the selected quote
- * @param withApprove: If true, the typed data will contains the approve call
- * @param takerAddress: Required when taker address was not provided during the quote request
- * @param slippage: The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
+ * @param quoteId The id of the selected quote
+ * @param gasTokenAddress The gas token address that will be used to pay the gas fees
+ * @param maxGasTokenAmount The maximum amount of gas token the user accepts to spend
+ * @param includeApprove If true, the typed data will contains the approve call
+ * @param takerAddress Required when taker address was not provided during the quote request
+ * @param slippage The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
  * This value is ignored if slippage is not applicable to the selected quote
- * @param options: Optional options.
+ * @param options Optional options.
  * @returns The calldata
  */
 const fetchBuildSwapTypedData = (
@@ -276,8 +227,8 @@ const fetchBuildSwapTypedData = (
 /**
  * Fetches the supported tokens.
  *
- * @param request: The request params for the avnu API `/swap/v2/tokens` endpoint.
- * @param options: Optional options.
+ * @param request The request params for the avnu API `/swap/v2/tokens` endpoint.
+ * @param options Optional options.
  * @returns The best quotes
  */
 const fetchTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise<Page<Token>> =>
@@ -289,7 +240,7 @@ const fetchTokens = (request?: GetTokensRequest, options?: AvnuOptions): Promise
 /**
  * Fetches the supported sources
  *
- * @param options: Optional options.
+ * @param options Optional options.
  * @returns The sources
  */
 const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
@@ -363,8 +314,8 @@ const executeSwap = async (
 /**
  * Calculate the min amount received from amount and slippage
  *
- * @param amount: The amount to apply slippage
- * @param slippage: The slippage to apply in bps. 10 is 0.1%
+ * @param amount The amount to apply slippage
+ * @param slippage The slippage to apply in bps. 10 is 0.1%
  * @returns bigint
  */
 const calculateMinAmount = (amount: bigint, slippage: number): bigint =>
@@ -378,7 +329,6 @@ export {
   fetchExecuteSwapTransaction,
   fetchPrices,
   fetchQuotes,
-  fetchQuotesLucky,
   fetchSources,
   fetchTokens,
 };

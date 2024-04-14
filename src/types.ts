@@ -8,10 +8,6 @@ export interface Pageable {
 
 export type GetTokensRequest = Pageable;
 
-export interface GetPairsRequest extends Pageable {
-  token?: string;
-}
-
 export interface Page<T> {
   content: T[];
   totalPages: number;
@@ -29,11 +25,6 @@ export interface Token {
   logoUri: string;
 }
 
-export interface Pair {
-  token1: Token;
-  token2: Token;
-}
-
 export interface PriceRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
@@ -43,15 +34,13 @@ export interface PriceRequest {
 export interface QuoteRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
-  sellAmount?: bigint;
-  buyAmount?: bigint;
+  sellAmount: bigint;
   takerAddress?: string;
   size?: number;
   excludeSources?: string[];
   integratorFees?: bigint;
   integratorFeeRecipient?: string;
   integratorName?: string;
-  mode?: 'CLASSIC' | 'TURBO';
 }
 
 export interface Route {
@@ -105,21 +94,12 @@ export interface Quote {
   sellTokenPriceInUsd?: number;
   buyTokenPriceInUsd?: number;
   liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER';
-  suggestedSolution?: SuggestedSolution;
-  gasless?: Gasless;
-  exactTokenTo?: boolean;
+  gasless: Gasless;
 }
 
 export interface Gasless {
   active: boolean;
   gasTokenPrices: { tokenAddress: string; gasFeesInUsd: number; gasFeesInGasToken: bigint }[];
-}
-
-export interface SuggestedSolution {
-  sellAmount: bigint;
-  sellAmountInUsd?: number;
-  buyAmount: bigint;
-  buyAmountInUsd?: number;
 }
 
 export interface InvokeSwapResponse {
@@ -135,7 +115,6 @@ export interface RequestError {
 
 export interface AvnuOptions {
   baseUrl?: string;
-  dev?: boolean;
   abortSignal?: AbortSignal;
   avnuPublicKey?: string;
 }
