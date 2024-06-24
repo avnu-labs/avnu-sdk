@@ -74,7 +74,7 @@
     "prettier": "3.2.5",
     "qs": "6.12.0",
     "size-limit": "11.1.2",
-    "starknet": "6.6.0",
+    "starknet": "6.10.0",
     "tsup": "8.0.2",
     "typedoc": "0.25.13",
     "typescript": "5.4.5"
