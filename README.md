@@ -18,7 +18,7 @@ yarn add @avnu/avnu-sdk
 const params = {
   sellTokenAddress: ethAddress,
   buyTokenAddress: wBtcAddress,
-  sellAmount: '200000000000000000',
+  sellAmount: formatUnits('200000000000000000', 18),
   takerAddress: account.address,
 }
 const quotes = await fetchQuotes(params);
