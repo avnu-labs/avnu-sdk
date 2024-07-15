@@ -91,10 +91,12 @@ const fetchPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Pric
  * @returns The best quotes
  */
 const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
+  if (!request.sellAmount && !request.buyAmount) throw new Error('Sell amount or buy amount is required');
   const queryParams = qs.stringify(
     {
       ...request,
-      sellAmount: toBeHex(request.sellAmount),
+      buyAmount: request.buyAmount ? toBeHex(request.buyAmount) : undefined,
+      sellAmount: request.sellAmount ? toBeHex(request.sellAmount) : undefined,
       integratorFees: request.integratorFees ? toBeHex(request.integratorFees) : undefined,
     },
     { arrayFormat: 'repeat' },

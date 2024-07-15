@@ -34,7 +34,8 @@ export interface PriceRequest {
 export interface QuoteRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
-  sellAmount: bigint;
+  sellAmount?: bigint;
+  buyAmount?: bigint;
   takerAddress?: string;
   size?: number;
   excludeSources?: string[];
