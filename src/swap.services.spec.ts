@@ -5,13 +5,11 @@ import { BASE_URL } from './constants';
 import {
   aBuildSwapTransaction,
   anInvokeSwapResponse,
-  aPage,
   aPrice,
   aPriceRequest,
   aQuote,
   aQuoteRequest,
   aSource,
-  ethToken,
 } from './fixtures';
 import {
   calculateMinAmount,
@@ -20,10 +18,9 @@ import {
   fetchPrices,
   fetchQuotes,
   fetchSources,
-  fetchTokens,
-} from './services';
+} from './swap.services';
 
-describe('Avnu services', () => {
+describe('Swap services', () => {
   beforeEach(() => {
     fetchMock.restore();
   });
@@ -233,34 +230,6 @@ describe('Avnu services', () => {
       // When & Then
       expect.assertions(1);
       expect(fetchBuildExecuteTransaction('quoteId', '')).rejects.toEqual(Error('401 Unauthorized'));
-    });
-  });
-
-  describe('fetchTokens', () => {
-    it('should return a page of tokens', async () => {
-      // Given
-      const response = aPage([ethToken()]);
-      fetchMock.get(`${BASE_URL}/swap/v2/tokens?`, response);
-
-      // When
-      const result = await fetchTokens();
-
-      // Then
-      expect(result).toStrictEqual(response);
-    });
-
-    it('should use throw Error with status code and text when status is higher than 400', async () => {
-      // Given
-      fetchMock.get(`${BASE_URL}/swap/v2/tokens?`, 401);
-
-      // When
-      try {
-        await fetchTokens();
-      } catch (error) {
-        // Then
-        expect(error).toStrictEqual(new Error('401 Unauthorized'));
-      }
-      expect.assertions(1);
     });
   });
 

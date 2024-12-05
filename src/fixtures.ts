@@ -256,9 +256,11 @@ export const ethToken = (): Token => ({
   address: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
   symbol: 'ETH',
   decimals: 18,
-  chainId: '0x534e5f474f45524c49',
   logoUri:
     'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png',
+  tags: ['AVNU'],
+  lastDailyVolumeUsd: 0,
+  extensions: {},
 });
 
 export const btcToken = (): Token => ({
@@ -266,9 +268,11 @@ export const btcToken = (): Token => ({
   address: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
   symbol: 'WBTC',
   decimals: 18,
-  chainId: '0x534e5f474f45524c49',
   logoUri:
     'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png',
+  tags: ['AVNU'],
+  lastDailyVolumeUsd: 0,
+  extensions: {},
 });
 
 export const aPage = <T>(content: T[], size = 10, number = 0, totalPages = 1, totalElements = 1): Page<T> => ({

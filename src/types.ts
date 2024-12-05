@@ -6,7 +6,10 @@ export interface Pageable {
   sort?: string;
 }
 
-export type GetTokensRequest = Pageable;
+export interface GetTokensRequest extends Pageable {
+  search?: string;
+  tags?: TokenTag[];
+}
 
 export interface Page<T> {
   content: T[];
@@ -17,13 +20,17 @@ export interface Page<T> {
 }
 
 export interface Token {
-  name: string;
   address: string;
+  name: string;
   symbol: string;
   decimals: number;
-  chainId: string;
   logoUri: string;
+  lastDailyVolumeUsd: number;
+  extensions: { [key: string]: string };
+  tags: TokenTag[];
 }
+
+export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
 
 export interface PriceRequest {
   sellTokenAddress: string;
