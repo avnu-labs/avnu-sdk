@@ -1,3 +1,4 @@
+import type { Duration } from 'moment';
 import { Call } from 'starknet';
 
 export interface Pageable {
@@ -159,4 +160,110 @@ export class ContractError {
     public message: string,
     public revertError: string,
   ) {}
+}
+
+export interface GetOrdersParams {
+  traderAddress: string;
+  status?: OrderStatus;
+  page?: number;
+  size?: number;
+  sort?: Sort;
+}
+
+export interface Sort {
+  field: string;
+  label: string;
+  direction: 'ASC' | 'DESC';
+}
+
+interface PricingStrategy {
+  tokenToMinAmount: string | undefined;
+  tokenToMaxAmount: string | undefined;
+}
+
+export enum TradeStatus {
+  CANCELLED = 'CANCELLED',
+  PENDING = 'PENDING',
+  SUCCEEDED = 'SUCCEEDED',
+}
+
+interface Trade {
+  sellAmount: bigint;
+  sellAmountInUsd: number;
+  buyAmount?: bigint;
+  buyAmountInUsd?: number;
+  expectedTradeDate: Date;
+  actualTradeDate?: Date;
+  status: TradeStatus;
+  txHash?: string;
+  errorReason?: string;
+}
+
+export enum OrderStatus {
+  INDEXING = 'INDEXING',
+  ACTIVE = 'ACTIVE',
+  CLOSED = 'CLOSED',
+}
+
+export interface OrderReceipt {
+  id: string;
+  blockNumber: number;
+  timestamp: Date;
+  traderAddress: string;
+  orderAddress: string;
+  creationTransactionHash: string;
+  orderClassHash: string;
+  sellTokenAddress: string;
+  sellAmount: bigint;
+  sellAmountPerCycle: bigint;
+  buyTokenAddress: string;
+  startDate: Date;
+  endDate: Date;
+  closeDate?: Date;
+  frequency: string;
+  iterations: number;
+  status: OrderStatus;
+  pricingStrategy: PricingStrategy | Record<string, never>;
+  amountSold: bigint;
+  amountBought: bigint;
+  averageAmountBought: bigint;
+  executedTradesCount: number;
+  cancelledTradesCount: number;
+  pendingTradesCount: number;
+  trades: Trade[];
+}
+
+export interface EstimatedGasFees {
+  overallFee: bigint;
+  overallFeeInUsd: number;
+  paymaster: EstimatedGasFeesPaymaster;
+}
+
+export interface EstimatedGasFeesPaymaster {
+  active: boolean;
+  gasTokenPrices: EstimateFeeGasTokenPrice[];
+}
+
+export interface EstimateFeeGasTokenPrice {
+  tokenAddress: string;
+  gasFeesInGasToken: bigint;
+  gasFeesInUsd: number;
+}
+
+export interface PaymasterOptions {
+  gasless?: boolean;
+  gasfree?: boolean;
+  gasTokenAddress?: string;
+  maxGasTokenAmount?: bigint;
+  executeGaslessTxCallback?: () => unknown;
+}
+
+export interface CreateOrderDto {
+  sellTokenAddress: string | undefined;
+  buyTokenAddress: string | undefined;
+  sellAmount: string;
+  sellAmountPerCycle: string;
+  frequency: Duration;
+  pricingStrategy: PricingStrategy | Record<string, never>;
+  traderAddress: string;
 }
