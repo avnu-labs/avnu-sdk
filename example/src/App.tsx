@@ -1,13 +1,13 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import type { AccountInterface } from "starknet";
 import { connect } from "get-starknet";
-import { executeSwap, fetchQuotes, Quote } from "@avnu/avnu-sdk";
+import { executeSwap, fetchQuotes, fetchTokens, Quote } from "@avnu/avnu-sdk";
 import { formatUnits, parseUnits } from 'ethers';
 
-const AVNU_OPTIONS = { baseUrl: 'https://goerli.api.avnu.fi' };
+const AVNU_OPTIONS = { baseUrl: 'https://sepolia.api.avnu.fi' };
 
 const ethAddress = "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
-const usdcAddress = "0x005a643907b9a4bc6a55e9069c4fd5fd1f5c79a22470690f75556c4736e34426"
+const strkAddress = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
 
 function App() {
   const [ account, setAccount ] = useState<AccountInterface>()
@@ -16,6 +16,7 @@ function App() {
   const [ loading, setLoading ] = useState<boolean>(false)
   const [ errorMessage, setErrorMessage ] = useState<string>()
   const [ successMessage, setSuccessMessage ] = useState<string>()
+  const [ tokenSize, setTokenSize ] = useState(0);
 
   const handleConnect = async () => {
     const starknet = await connect();
@@ -26,6 +27,10 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    fetchTokens({page: 0, size: 50, tags: ['Verified']}).then((page) => setTokenSize(page.totalElements));
+  }, []);
+
   const handleChangeInput = (event: ChangeEvent<HTMLInputElement>) => {
     if (!account) return;
     setErrorMessage('')
@@ -34,7 +39,7 @@ function App() {
     setLoading(true)
     const params = {
       sellTokenAddress: ethAddress,
-      buyTokenAddress: usdcAddress,
+      buyTokenAddress: strkAddress,
       sellAmount: parseUnits(event.target.value, 18),
       takerAddress: account.address,
       size: 1,
@@ -78,7 +83,7 @@ function App() {
       <div>&darr;</div>
       <div>
         <h2>Buy Token</h2>
-        <h3>USDC</h3>
+        <h3>STRK</h3>
         <input
           readOnly
           type="text"
@@ -89,6 +94,7 @@ function App() {
       {loading ? <p>Loading...</p> : quotes && quotes[0] && <button onClick={handleSwap}>Swap</button>}
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       {successMessage && <p style={{ color: 'green' }}>Success</p>}
+      {tokenSize && <p>Found {tokenSize} Verified tokens</p>}
     </div>
   );
 }
