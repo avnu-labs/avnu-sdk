@@ -1542,18 +1542,6 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@module-federation/runtime@^0.1.2":
-  version "0.1.21"
-  resolved "https://registry.yarnpkg.com/@module-federation/runtime/-/runtime-0.1.21.tgz#1d233b29dd136488f2ba682017b53f13e015788a"
-  integrity sha512-/p4BhZ0SnjJuiL0wwu+FebFgIUJ9vM+oCY7CyprUHImyi/Y23ulI61WNWMVrKQGgdMoXQDQCL8RH4EnrVP2ZFw==
-  dependencies:
-    "@module-federation/sdk" "0.1.21"
-
-"@module-federation/sdk@0.1.21":
-  version "0.1.21"
-  resolved "https://registry.yarnpkg.com/@module-federation/sdk/-/sdk-0.1.21.tgz#adb15c38ddfea65f45bd989a94c3a575c8df6991"
-  integrity sha512-r7xPiAm+O4e+8Zvw+8b4ToeD0D0VJD004nHmt+Y8r/l98J2eA6di72Vn1FeyjtQbCrFtiMw3ts/dlqtcmIBipw==
-
 "@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1":
   version "5.1.1-v1"
   resolved "https://registry.yarnpkg.com/@nicolo-ribaudo/eslint-scope-5-internals/-/eslint-scope-5-internals-5.1.1-v1.tgz#dbf733a965ca47b1973177dc0bb6c889edcfb129"
@@ -3108,11 +3096,6 @@ boolbase@^1.0.0, boolbase@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
   integrity sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==
-
-bowser@^2.11.0:
-  version "2.11.0"
-  resolved "https://registry.yarnpkg.com/bowser/-/bowser-2.11.0.tgz#5ca3c35757a7aa5771500c70a73a9f91ef420a8f"
-  integrity sha512-AlcaJBi/pqqJBIQ8U9Mcpc9i8Aqxn88Skv5d+xBX006BY5u8N3mGLHa5Lgppa7L/HfwgwLgZ6NYs+Ag6uUmJRA==
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -4877,21 +4860,6 @@ get-starknet-core@4.0.0, get-starknet-core@^4.0.0-next.3:
   integrity sha512-6pLmidQZkC3wZsrHY99grQHoGpuuXqkbSP65F8ov1/JsEI8DDLkhsAuLCKFzNOK56cJp+f1bWWfTJ57e9r5eqQ==
   dependencies:
     "@starknet-io/types-js" "^0.7.7"
-
-get-starknet-core@^3.3.3:
-  version "3.3.4"
-  resolved "https://registry.yarnpkg.com/get-starknet-core/-/get-starknet-core-3.3.4.tgz#9ef9a7940156844d769dc8323ca4e2e9137568bf"
-  integrity sha512-KEnzAMr4f7z7dMh4g5lWDZ+eXtOEl++VPN5Flmmj8HiPmRrPOINEIwwNL/dN+Ey1kBxQOtOMQwCxJ9qlkRIgFw==
-  dependencies:
-    "@module-federation/runtime" "^0.1.2"
-
-get-starknet@3.3.3:
-  version "3.3.3"
-  resolved "https://registry.yarnpkg.com/get-starknet/-/get-starknet-3.3.3.tgz#5cac8c9551e84bb596d5ee3d507fb121b7142b8b"
-  integrity sha512-SdxNGKFmynRRf3p2VtaBEc1P/VbQHIt8igZC4+xCkKipm/DtZ5jptLXWhqTMYF9vARAmUNZsj8HGujKpqGEBEA==
-  dependencies:
-    bowser "^2.11.0"
-    get-starknet-core "^3.3.3"
 
 get-stream@^6.0.0:
   version "6.0.1"
