@@ -3,6 +3,8 @@ import { constants } from 'starknet';
 import {
   BuildSwapTransaction,
   InvokeSwapResponse,
+  OrderReceipt,
+  OrderStatus,
   Page,
   Price,
   PriceRequest,
@@ -12,6 +14,8 @@ import {
   SourceType,
   Token,
 } from './types';
+
+/* SWAP PART */
 
 export const aPriceRequest = (): PriceRequest => ({
   sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
@@ -288,4 +292,37 @@ export const aSource = (): Source => ({
   address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
   icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
   type: SourceType.DEX,
+});
+
+/* DCA PART */
+
+export const anOrderReceipt = (): OrderReceipt => ({
+  id: '1',
+  blockNumber: 1,
+  timestamp: new Date(),
+  traderAddress: '0x0',
+  orderAddress: '0x123',
+  creationTransactionHash: '0x123',
+  orderClassHash: '0x123',
+  sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+  sellAmount: parseUnits('1', 18),
+  sellAmountPerCycle: parseUnits('1', 18),
+  buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
+  startDate: new Date(),
+  endDate: new Date(),
+  closeDate: new Date(),
+  frequency: '1',
+  iterations: 1,
+  status: OrderStatus.ACTIVE,
+  pricingStrategy: {
+    tokenToMinAmount: '1',
+    tokenToMaxAmount: '1',
+  },
+  amountSold: parseUnits('1', 18),
+  amountBought: parseUnits('1', 18),
+  averageAmountBought: parseUnits('1', 18),
+  executedTradesCount: 1,
+  cancelledTradesCount: 1,
+  pendingTradesCount: 1,
+  trades: [],
 });
