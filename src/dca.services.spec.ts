@@ -1,25 +1,10 @@
 import fetchMock from 'fetch-mock';
 import { BASE_URL } from './constants';
-import { fetchGetOrders } from './dca.services';
-import { anOrderReceipt, aPage, aPrice } from './fixtures';
-import { OrderReceipt } from './types';
-import qs from 'qs';
-import { parseUnits, toBeHex } from 'ethers';
+import { fetchBuildCreateOrderTypedData, fetchCreateOrder, fetchGetOrders } from './dca.services';
+import { aDCACreateOrder, anOrderReceipt, aPage, aPrice } from './fixtures';
 
-const serializeBigInts = (obj: any): any => {
-    if (typeof obj === 'bigint') {
-      return obj.toString();
-    }
-    if (Array.isArray(obj)) {
-      return obj.map(serializeBigInts);
-    }
-    if (typeof obj === 'object' && obj !== null) {
-      return Object.fromEntries(
-        Object.entries(obj).map(([key, value]) => [key, serializeBigInts(value)])
-      );
-    }
-    return obj;
-  };
+import { parseUnits, toBeHex } from 'ethers';
+import { TypedData } from 'starknet';
 
 describe('DCA services', () => {
   beforeEach(() => {
@@ -57,10 +42,49 @@ describe('DCA services', () => {
       expect(result).toStrictEqual(expected);
     });
 
-    describe('executeCreateOrder', () => {
-      it('should return a list of prices', async () => {
+    describe('fetchCreateOrder', () => {
+      it('should return an array of calls', async () => {
         // Given
+        const createOrder = aDCACreateOrder();
+        const response = [
+            {
+                contractAddress: '0x0',
+                calldata: '0x0',
+                value: '0x0',
+            }
+        ];
+        fetchMock.post(`begin:${BASE_URL}/dca/v1/orders`, response);
+
+        // When
+        const result = await fetchCreateOrder(createOrder);
+
+        // Then
+        expect(result).toStrictEqual(response);
       });
     });
+
+    describe('fetchBuildCreateOrderTypedData', () => {
+        it('should return an array of calls', async () => {
+          // Given
+          const createOrder = aDCACreateOrder();
+          const response: TypedData = {
+              domain: {
+                name: 'Starknet DCA',
+                version: '1',
+                chainId: '1',
+              },
+              types: {},
+              primaryType: 'CreateOrder',
+              message: {},
+          };
+          fetchMock.post(`begin:${BASE_URL}/dca/v1/orders`, response);
+  
+          // When
+          const result = await fetchBuildCreateOrderTypedData(createOrder, undefined, undefined);
+          
+          // Then
+          expect(result).toStrictEqual(response);
+        });
+      });
   });
 });

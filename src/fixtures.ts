@@ -1,7 +1,8 @@
-import { parseUnits } from 'ethers';
+import { parseUnits, toBeHex } from 'ethers';
 import { constants } from 'starknet';
 import {
   BuildSwapTransaction,
+  CreateOrderDto,
   InvokeSwapResponse,
   OrderReceipt,
   OrderStatus,
@@ -14,6 +15,7 @@ import {
   SourceType,
   Token,
 } from './types';
+import { duration } from 'moment';
 
 /* SWAP PART */
 
@@ -295,6 +297,19 @@ export const aSource = (): Source => ({
 });
 
 /* DCA PART */
+
+export const aDCACreateOrder = (): CreateOrderDto => ({
+  sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+  sellAmount: toBeHex(parseUnits('1', 18)),
+  buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
+  sellAmountPerCycle: toBeHex(parseUnits('1', 18)),
+  frequency: duration('1'),
+  pricingStrategy: {
+    tokenToMinAmount: toBeHex(parseUnits('1', 18)),
+    tokenToMaxAmount: toBeHex(parseUnits('1', 18)),
+  },
+  traderAddress: '0x0',
+});
 
 export const anOrderReceipt = (): OrderReceipt => ({
   id: '1',

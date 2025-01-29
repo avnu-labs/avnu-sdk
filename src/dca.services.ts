@@ -166,15 +166,7 @@ const fetchGetOrders = async (
   const params = qs.stringify({ traderAddress, status, page, size, sort }, { arrayFormat: 'repeat' });
   
   return fetch(`${getBaseUrl(options)}/dca/v1/orders?${params}`, getRequest(options))
-    .then((response) => {
-      console.log(response);
-      return response;
-    })
     .then((response) => parseResponse<Page<OrderReceipt>>(response, options?.avnuPublicKey))
-    .then((result) => {
-      console.log(result);
-      return result;
-    })
     .then((result) => ({
       ...result,
       content: result.content.map((order) => ({
