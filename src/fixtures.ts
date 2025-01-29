@@ -1,4 +1,5 @@
 import { parseUnits, toBeHex } from 'ethers';
+import { duration } from 'moment';
 import { constants } from 'starknet';
 import {
   BuildSwapTransaction,
@@ -15,7 +16,6 @@ import {
   SourceType,
   Token,
 } from './types';
-import { duration } from 'moment';
 
 /* SWAP PART */
 
