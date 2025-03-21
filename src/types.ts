@@ -104,6 +104,7 @@ export interface Quote {
   buyTokenPriceInUsd?: number;
   liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER' | 'ORDERBOOK';
   gasless: Gasless;
+  exactTokenTo?: boolean;
 }
 
 export interface Gasless {
