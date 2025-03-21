@@ -102,7 +102,7 @@ export interface Quote {
   priceRatioUsd: number;
   sellTokenPriceInUsd?: number;
   buyTokenPriceInUsd?: number;
-  liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER';
+  liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER' | 'ORDERBOOK';
   gasless: Gasless;
 }
 
@@ -146,6 +146,7 @@ export enum SourceType {
   DEX = 'DEX',
   MARKET_MAKER = 'MARKET_MAKER',
   SOLVER = 'SOLVER',
+  ORDERBOOK = 'ORDERBOOK',
 }
 
 export interface Source {
