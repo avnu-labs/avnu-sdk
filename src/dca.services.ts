@@ -164,6 +164,7 @@ const fetchGetOrders = async (
   options?: AvnuOptions,
 ): Promise<Page<OrderReceipt>> => {
   const params = qs.stringify({ traderAddress, status, page, size, sort }, { arrayFormat: 'repeat' });
+
   return fetch(`${getBaseUrl(options)}/dca/v1/orders?${params}`, getRequest(options))
     .then((response) => parseResponse<Page<OrderReceipt>>(response, options?.avnuPublicKey))
     .then((result) => ({
