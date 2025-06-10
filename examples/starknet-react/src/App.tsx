@@ -81,6 +81,7 @@ function App() {
   return (
     <div>
       <div>
+        <p>{address}</p>
         <h2>Sell Token</h2>
         <h3>ETH</h3>
         <input onChange={(event) => setSellAmount(event.target.value)} disabled={loading}/>
