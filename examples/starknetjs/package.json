@@ -1,5 +1,5 @@
 {
-  "name": "starknet-react-example",
+  "name": "starknetjs-example",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@avnu/avnu-sdk": "file:../../",
-    "@starknet-react/chains": "4.0.1-beta.2",
-    "@starknet-react/core": "4.0.1-beta.3",
     "ethers": "6.13.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
