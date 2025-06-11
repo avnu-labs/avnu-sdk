@@ -1,4 +1,4 @@
-# AVNU SDK Example using get-starknet
+# AVNU SDK Example using Starknet.js
 
 ## Getting started
 

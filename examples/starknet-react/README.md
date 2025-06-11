@@ -1,4 +1,4 @@
-# AVNU SDK Example
+# AVNU SDK Example using starknet-react
 
 ## Getting started
 

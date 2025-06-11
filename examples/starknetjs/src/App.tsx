@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { executeSwap, fetchQuotes, fetchTokens, Quote } from "@avnu/avnu-sdk";
 import { formatUnits, parseUnits } from 'ethers';
-import { useAccount, useConnect } from "@starknet-react/core";
+import { RpcProvider, Account } from 'starknet';
 
 const AVNU_OPTIONS = { baseUrl: 'https://sepolia.api.avnu.fi' };
-
+const providerBlastMainnet = new RpcProvider({
+  nodeUrl: 'https://starknet-sepolia.public.blastapi.io/rpc/v0_8',
+});
 const ethAddress = "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
 const strkAddress = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
+const accountAddress = "YOUR_ACCOUNT_ADDRESS";
+const accountPrivateKey = "YOUR_PRIVATE_KEY";
+const account = new Account(providerBlastMainnet, accountAddress, accountPrivateKey);
 
 function App() {
-  const { account, address } = useAccount();
-  const { connectors, connectAsync } = useConnect();
   const [sellAmount, setSellAmount] = useState<string>('')
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [loading, setLoading] = useState<boolean>(false)
@@ -24,7 +27,7 @@ function App() {
 
   // Fetch quotes
   useEffect(() => {
-    if (!sellAmount || !Number(sellAmount) || !address) return;
+    if (!sellAmount || !Number(sellAmount) || !accountAddress) return;
     const abortController = new AbortController();
     setErrorMessage('')
     setLoading(true)
@@ -32,7 +35,7 @@ function App() {
       sellTokenAddress: ethAddress,
       buyTokenAddress: strkAddress,
       sellAmount: parseUnits(sellAmount, 18),
-      takerAddress: address,
+      takerAddress: accountAddress,
       size: 1,
     }
     fetchQuotes(params, { ...AVNU_OPTIONS, abortSignal: abortController.signal })
@@ -47,7 +50,7 @@ function App() {
         }
       });
     return () => abortController.abort();
-  }, [address, sellAmount]);
+  }, [sellAmount]);
 
 
   const handleSwap = async () => {
@@ -67,21 +70,10 @@ function App() {
       });
   }
 
-  if (!address) {
-    return (
-      <>
-        {connectors.map((connector) => (
-          <button key={connector.name}
-                  onClick={async () => await connectAsync({ connector })}>Connect {connector.name}</button>
-        ))}
-      </>
-    )
-  }
-
   return (
     <div>
       <div>
-        <p>{address}</p>
+        <p>{accountAddress}</p>
         <h2>Sell Token</h2>
         <h3>ETH</h3>
         <input onChange={(event) => setSellAmount(event.target.value)} disabled={loading}/>
