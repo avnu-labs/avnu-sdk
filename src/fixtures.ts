@@ -1,5 +1,5 @@
 import { parseUnits, toBeHex } from 'ethers';
-import { duration } from 'moment';
+import moment from 'moment';
 import { constants } from 'starknet';
 import {
   BuildSwapTransaction,
@@ -303,7 +303,7 @@ export const aDCACreateOrder = (): CreateOrderDto => ({
   sellAmount: toBeHex(parseUnits('1', 18)),
   buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
   sellAmountPerCycle: toBeHex(parseUnits('1', 18)),
-  frequency: duration('1'),
+  frequency: moment.duration('1'),
   pricingStrategy: {
     tokenToMinAmount: toBeHex(parseUnits('1', 18)),
     tokenToMaxAmount: toBeHex(parseUnits('1', 18)),
