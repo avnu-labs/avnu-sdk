@@ -244,11 +244,22 @@ const executeSwap = async (
  * @param slippage The slippage to apply in bps. 10 is 0.1%
  * @returns bigint
  */
-const calculateMinAmount = (amount: bigint, slippage: number): bigint =>
+const calculateMinReceivedAmount = (amount: bigint, slippage: number): bigint =>
   amount - (amount * BigInt(slippage)) / BigInt(10000);
 
+/**
+ * Calculate the max amount spent from amount and slippage
+ *
+ * @param amount The amount to apply slippage
+ * @param slippage The slippage to apply in bps. 10 is 0.1%
+ * @returns bigint
+ */
+const calculateMaxSpendAmount = (amount: bigint, slippage: number): bigint =>
+  amount + (amount * BigInt(slippage)) / BigInt(10000);
+
 export {
-  calculateMinAmount,
+  calculateMinReceivedAmount,
+  calculateMaxSpendAmount,
   executeSwap,
   fetchBuildExecuteTransaction,
   fetchBuildSwapTypedData,
