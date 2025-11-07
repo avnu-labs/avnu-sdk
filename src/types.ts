@@ -1,5 +1,5 @@
 import type { Duration } from 'moment';
-import { Call } from 'starknet';
+import { AccountInterface, Call, ExecutionParameters, PaymasterInterface } from 'starknet';
 
 export interface Pageable {
   page?: number;
@@ -112,10 +112,8 @@ export interface Gasless {
   gasTokenPrices: { tokenAddress: string; gasFeesInUsd: number; gasFeesInGasToken: bigint }[];
 }
 
-export interface InvokeSwapResponse {
+export interface InvokeTransactionResponse {
   transactionHash: string;
-  gasTokenAddress?: string;
-  gasTokenAmount?: bigint;
 }
 
 export interface RequestError {
@@ -138,7 +136,19 @@ export interface ExecuteSwapOptions {
   executeGaslessTxCallback?: () => unknown;
 }
 
-export interface BuildSwapTransaction {
+export interface InvokeSwapParams {
+  provider: AccountInterface;
+  paymaster?: {
+    active: boolean;
+    provider: PaymasterInterface;
+    params: ExecutionParameters;
+  };
+  quote: Quote;
+  slippage: number;
+  executeApprove?: boolean;
+}
+
+export interface SwapCalls {
   chainId: string;
   calls: Call[];
 }

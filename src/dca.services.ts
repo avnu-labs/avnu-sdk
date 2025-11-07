@@ -6,7 +6,7 @@ import {
   CreateOrderDto,
   EstimatedGasFees,
   GetOrdersParams,
-  InvokeSwapResponse,
+  InvokeTransactionResponse,
   OrderReceipt,
   Page,
   PaymasterOptions,
@@ -61,7 +61,7 @@ const fetchExecute = async (
   typedData: string,
   signature: Signature,
   options?: AvnuOptions,
-): Promise<InvokeSwapResponse> => {
+): Promise<InvokeTransactionResponse> => {
   if (Array.isArray(signature)) {
     // eslint-disable-next-line no-param-reassign
     signature = signature.map((sig) => toBeHex(BigInt(sig)));
@@ -72,16 +72,16 @@ const fetchExecute = async (
   return fetch(
     `${getBaseUrl(options)}/dca/v1/${url}`,
     postRequest({ userAddress, typedData, signature }, options),
-  ).then((response) => parseResponse<InvokeSwapResponse>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponse<InvokeTransactionResponse>(response, options?.avnuPublicKey));
 };
 
 const executeDca = async (
   account: AccountInterface,
   buildCalls: () => Promise<Call[]>,
   buildTypedData: () => Promise<TypedData>,
-  executeTypedData: (typedData: string, signature: Signature) => Promise<InvokeSwapResponse>,
+  executeTypedData: (typedData: string, signature: Signature) => Promise<InvokeTransactionResponse>,
   { gasless = false, gasfree = false, gasTokenAddress, maxGasTokenAmount, executeGaslessTxCallback }: PaymasterOptions,
-): Promise<InvokeSwapResponse> => {
+): Promise<InvokeTransactionResponse> => {
   if (gasless || gasfree) {
     // gasTokenAddress and maxGasTokenAmount are not required for gasfree
     if (!gasfree && (!gasTokenAddress || !maxGasTokenAmount)) {
@@ -123,7 +123,7 @@ const fetchExecuteCreateOrder = async (
   typedData: string,
   signature: Signature,
   options?: AvnuOptions,
-): Promise<InvokeSwapResponse> => fetchExecute('orders/execute', userAddress, typedData, signature, options);
+): Promise<InvokeTransactionResponse> => fetchExecute('orders/execute', userAddress, typedData, signature, options);
 
 const fetchCancelOrder = async (orderAddress: string, options?: AvnuOptions): Promise<Call[]> =>
   fetchBuildCalls(`orders/${orderAddress}/cancel`, undefined, options);
@@ -156,7 +156,7 @@ const fetchExecuteCancelOrder = async (
   typedData: string,
   signature: Signature,
   options?: AvnuOptions,
-): Promise<InvokeSwapResponse> =>
+): Promise<InvokeTransactionResponse> =>
   fetchExecute(`orders/${orderAddress}/cancel/execute`, userAddress, typedData, signature, options);
 
 const fetchGetOrders = async (
@@ -190,7 +190,7 @@ const executeCreateOrder = async (
   order: CreateOrderDto,
   { gasless = false, gasfree = false, gasTokenAddress, maxGasTokenAmount, executeGaslessTxCallback }: PaymasterOptions,
   options?: AvnuOptions,
-): Promise<InvokeSwapResponse> => {
+): Promise<InvokeTransactionResponse> => {
   return executeDca(
     account,
     () => fetchCreateOrder(order, options),
@@ -205,7 +205,7 @@ const executeCancelOrder = async (
   orderAddress: string,
   { gasless = false, gasfree = false, gasTokenAddress, maxGasTokenAmount, executeGaslessTxCallback }: PaymasterOptions,
   options?: AvnuOptions,
-): Promise<InvokeSwapResponse> =>
+): Promise<InvokeTransactionResponse> =>
   executeDca(
     account,
     () => fetchCancelOrder(orderAddress, options),

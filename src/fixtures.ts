@@ -2,9 +2,8 @@ import { parseUnits, toBeHex } from 'ethers';
 import moment from 'moment';
 import { constants } from 'starknet';
 import {
-  BuildSwapTransaction,
   CreateOrderDto,
-  InvokeSwapResponse,
+  InvokeTransactionResponse,
   OrderReceipt,
   OrderStatus,
   Page,
@@ -14,6 +13,7 @@ import {
   QuoteRequest,
   Source,
   SourceType,
+  SwapCalls,
   Token,
 } from './types';
 
@@ -242,11 +242,11 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
   },
 });
 
-export const anInvokeSwapResponse = (): InvokeSwapResponse => ({
+export const anInvokeTransactionResponse = (): InvokeTransactionResponse => ({
   transactionHash: '0x0',
 });
 
-export const aBuildSwapTransaction = (): BuildSwapTransaction => ({
+export const aSwapCalls = (): SwapCalls => ({
   chainId: constants.StarknetChainId.SN_SEPOLIA,
   calls: [
     {

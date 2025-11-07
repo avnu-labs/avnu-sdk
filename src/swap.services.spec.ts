@@ -3,21 +3,22 @@ import fetchMock from 'fetch-mock';
 import qs from 'qs';
 import { BASE_URL } from './constants';
 import {
-  aBuildSwapTransaction,
-  anInvokeSwapResponse,
+  anInvokeTransactionResponse,
   aPrice,
   aPriceRequest,
   aQuote,
   aQuoteRequest,
   aSource,
+  aSwapCalls,
 } from './fixtures';
 import {
-  calculateMinAmount,
-  fetchBuildExecuteTransaction,
+  calculateMaxSpendAmount,
+  calculateMinReceivedAmount,
   fetchExecuteSwapTransaction,
   fetchPrices,
   fetchQuotes,
   fetchSources,
+  quoteToCalls,
 } from './swap.services';
 
 describe('Swap services', () => {
@@ -164,7 +165,7 @@ describe('Swap services', () => {
   describe('fetchExecuteSwapTransaction', () => {
     it('should return an InvokeSwapResponse', async () => {
       // Given
-      const response = anInvokeSwapResponse();
+      const response = anInvokeTransactionResponse();
       fetchMock.post(`${BASE_URL}/swap/v2/execute`, response);
 
       // When
@@ -177,7 +178,7 @@ describe('Swap services', () => {
     it('should use baseUrl from AvnuOption when defined', async () => {
       // Given
       const baseUrl = 'https://example.com';
-      const response = anInvokeSwapResponse();
+      const response = anInvokeTransactionResponse();
       fetchMock.post(`${baseUrl}/swap/v2/execute`, response);
 
       // When
@@ -198,13 +199,13 @@ describe('Swap services', () => {
   });
 
   describe('fetchBuildExecuteTransaction', () => {
-    it('should return a BuildSwapTransaction', async () => {
+    it('should return a SwapCalls', async () => {
       // Given
-      const response = aBuildSwapTransaction();
+      const response = aSwapCalls();
       fetchMock.post(`${BASE_URL}/swap/v2/build`, response);
 
       // When
-      const result = await fetchBuildExecuteTransaction('quoteId', '');
+      const result = await quoteToCalls('quoteId', '');
 
       // Then
       expect(result).toStrictEqual(response);
@@ -213,11 +214,11 @@ describe('Swap services', () => {
     it('should use baseUrl from AvnuOption when defined', async () => {
       // Given
       const baseUrl = 'https://example.com';
-      const response = aBuildSwapTransaction();
+      const response = aSwapCalls();
       fetchMock.post(`${baseUrl}/swap/v2/build`, response);
 
       // When
-      const result = await fetchBuildExecuteTransaction('quoteId', '', undefined, true, { baseUrl });
+      const result = await quoteToCalls('quoteId', '', undefined, true, { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -229,7 +230,7 @@ describe('Swap services', () => {
 
       // When & Then
       expect.assertions(1);
-      expect(fetchBuildExecuteTransaction('quoteId', '')).rejects.toEqual(Error('401 Unauthorized'));
+      expect(quoteToCalls('quoteId', '')).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
@@ -268,10 +269,24 @@ describe('Swap services', () => {
       const slippage = 30;
 
       // When
-      const result = calculateMinAmount(amount, slippage);
+      const result = calculateMinReceivedAmount(amount, slippage);
 
       // Then
       expect(result).toBe(BigInt(997000));
+    });
+  });
+
+  describe('calculateMaxSpendAmount', () => {
+    it('should return max spend amount', () => {
+      // Given
+      const amount = BigInt(1000000);
+      const slippage = 30;
+
+      // When
+      const result = calculateMaxSpendAmount(amount, slippage);
+
+      // Then
+      expect(result).toBe(BigInt(1030000));
     });
   });
 });

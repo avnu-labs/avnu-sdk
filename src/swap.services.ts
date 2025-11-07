@@ -1,16 +1,17 @@
+import { PAYMASTER_API } from '@starknet-io/starknet-types-08';
 import { toBeHex } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, Signature, TypedData } from 'starknet';
+import { PreparedInvokeTransaction, Signature, TypedData } from 'starknet';
 import {
   AvnuOptions,
-  BuildSwapTransaction,
-  ExecuteSwapOptions,
-  InvokeSwapResponse,
+  InvokeSwapParams,
+  InvokeTransactionResponse,
   Price,
   PriceRequest,
   Quote,
   QuoteRequest,
   Source,
+  SwapCalls,
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, postRequest } from './utils';
 
@@ -92,14 +93,14 @@ const fetchExecuteSwapTransaction = (
   quoteId: string,
   signature: Signature,
   options?: AvnuOptions,
-): Promise<InvokeSwapResponse> => {
+): Promise<InvokeTransactionResponse> => {
   if (Array.isArray(signature)) {
     signature = signature.map((sig) => toBeHex(BigInt(sig)));
   } else if (signature.r && signature.s) {
     signature = [toBeHex(BigInt(signature.r)), toBeHex(BigInt(signature.s))];
   }
   return fetch(`${getBaseUrl(options)}/swap/v2/execute`, postRequest({ quoteId, signature }, options)).then(
-    (response) => parseResponse<InvokeSwapResponse>(response, options?.avnuPublicKey),
+    (response) => parseResponse<InvokeTransactionResponse>(response, options?.avnuPublicKey),
   );
 };
 
@@ -115,17 +116,17 @@ const fetchExecuteSwapTransaction = (
  * @param options Optional options.
  * @returns The calldata
  */
-const fetchBuildExecuteTransaction = (
+const quoteToCalls = (
   quoteId: string,
   takerAddress?: string,
   slippage?: number,
   includeApprove?: boolean,
   options?: AvnuOptions,
-): Promise<BuildSwapTransaction> =>
+): Promise<SwapCalls> =>
   fetch(
     `${getBaseUrl(options)}/swap/v2/build`,
     postRequest({ quoteId, takerAddress, slippage, includeApprove }, options),
-  ).then((response) => parseResponse<BuildSwapTransaction>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponse<SwapCalls>(response, options?.avnuPublicKey));
 
 /**
  * Build typed-data. Once signed by the user, the signature can be sent to the API to be executed by AVNU
@@ -178,63 +179,59 @@ const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
 /**
  * Execute the exchange
  *
- * @param account The account of the trader
+ * @param provider The account which will execute/sign the transaction, must implement the AccountInterface
+ * @param paymaster The paymaster information, if needed
+ * @param paymaster.active True if the the tx must be executed through a paymaster
+ * @param paymaster.provider The paymaster provider, must implement the PaymasterInterface
+ * @param paymaster.params The paymaster parameters
  * @param quote The selected quote. See `getQuotes`
  * @param executeApprove False if the taker already executed `approve`
- * @param gasless False if the user wants to execute the transaction himself
- * @param gasTokenAddress The gas token address that will be used to pay the gas fees (required when gasless is true)
- * @param maxGasTokenAmount The maximum amount of gas token that the user is willing to spend (required when gasless is true)
- * @param executeGaslessTxCallback This function is called after the user signed the typed data and just before calling the API to execute the transaction
- * @param slippage The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
- * This value is ignored if slippage is not applicable to the selected quote
- * @param options Optional options.
- * @returns Promise<InvokeSwapResponse>
+ * @param slippage The maximum acceptable slippage for the trade
+ * @param options Optional avnu options
+ * @returns Promise<InvokeTransactionResponse | PAYMASTER_API.ExecuteResponse>
  */
 const executeSwap = async (
-  account: AccountInterface,
-  quote: Quote,
-  {
-    executeApprove = true,
-    gasless = false,
-    gasTokenAddress,
-    maxGasTokenAmount,
-    slippage = 0.005,
-    executeGaslessTxCallback,
-  }: ExecuteSwapOptions = {},
+  { provider, paymaster, quote, executeApprove = true, slippage }: InvokeSwapParams,
   options?: AvnuOptions,
-): Promise<InvokeSwapResponse> => {
-  const chainId = await account.getChainId();
+): Promise<InvokeTransactionResponse | PAYMASTER_API.ExecuteResponse> => {
+  const chainId = await provider.getChainId();
   if (chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
   }
-
-  if (gasless) {
-    if (!gasTokenAddress || !maxGasTokenAmount) {
-      throw Error(`Should provide gasTokenAddress and maxGasTokenAmount when gasless is true`);
-    }
-    const typedData = await fetchBuildSwapTypedData(
-      quote.quoteId,
-      gasTokenAddress,
-      maxGasTokenAmount,
-      executeApprove,
-      account.address,
-      slippage,
-      options,
-    );
-    const signature = await account.signMessage(typedData);
-    if (executeGaslessTxCallback) {
-      executeGaslessTxCallback();
-    }
-    return fetchExecuteSwapTransaction(quote.quoteId, signature, options).then((value) => ({
-      transactionHash: value.transactionHash,
-      gasTokenAddress: value.gasTokenAddress,
-      gasTokenAmount: BigInt(value.gasTokenAmount!),
-    }));
-  } else {
-    return fetchBuildExecuteTransaction(quote.quoteId, account.address, slippage, executeApprove, options)
-      .then(({ calls }) => account.execute(calls))
-      .then((value) => ({ transactionHash: value.transaction_hash }));
+  const callPromise = quoteToCalls(quote.quoteId, provider.address, slippage, executeApprove, options);
+  if (paymaster && paymaster.active) {
+    const { provider: paymasterProvider, params: paymasterParams } = paymaster;
+    return callPromise
+      .then(
+        ({ calls }) =>
+          paymasterProvider.buildTransaction(
+            { type: 'invoke', invoke: { userAddress: provider.address, calls } },
+            paymasterParams,
+          ) as Promise<PreparedInvokeTransaction>,
+      )
+      .then(async (result) => {
+        const rawSignature = await provider.signMessage(result.typed_data);
+        let signature: string[] = [];
+        if (Array.isArray(rawSignature)) {
+          signature = rawSignature.map((sig) => toBeHex(BigInt(sig)));
+        } else if (rawSignature.r && rawSignature.s) {
+          signature = [toBeHex(BigInt(rawSignature.r)), toBeHex(BigInt(rawSignature.s))];
+        }
+        return {
+          typedData: result.typed_data,
+          signature,
+        };
+      })
+      .then(({ typedData, signature }) =>
+        paymasterProvider.executeTransaction(
+          { type: 'invoke', invoke: { userAddress: provider.address, typedData, signature } },
+          paymasterParams,
+        ),
+      );
   }
+  return callPromise
+    .then(({ calls }) => provider.execute(calls))
+    .then((value) => ({ transactionHash: value.transaction_hash }));
 };
 
 /**
@@ -258,13 +255,13 @@ const calculateMaxSpendAmount = (amount: bigint, slippage: number): bigint =>
   amount + (amount * BigInt(slippage)) / BigInt(10000);
 
 export {
-  calculateMinReceivedAmount,
   calculateMaxSpendAmount,
+  calculateMinReceivedAmount,
   executeSwap,
-  fetchBuildExecuteTransaction,
   fetchBuildSwapTypedData,
   fetchExecuteSwapTransaction,
   fetchPrices,
   fetchQuotes,
   fetchSources,
+  quoteToCalls,
 };
