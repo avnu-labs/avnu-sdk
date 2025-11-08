@@ -1,3 +1,4 @@
+import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import type { Duration } from 'moment';
 import { AccountInterface, Call, ExecutionParameters, PaymasterInterface } from 'starknet';
 
@@ -136,6 +137,18 @@ export interface ExecuteSwapOptions {
   executeGaslessTxCallback?: () => unknown;
 }
 
+export interface PreparedPaymasterTransaction {
+  typedData: OutsideExecutionTypedData;
+  signature: string[];
+}
+export interface PaymasterTransactionParams {
+  provider: AccountInterface;
+  paymaster: {
+    provider: PaymasterInterface;
+    params: ExecutionParameters;
+  };
+  calls: Call[];
+}
 export interface InvokeSwapParams {
   provider: AccountInterface;
   paymaster?: {

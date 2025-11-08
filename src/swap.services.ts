@@ -1,4 +1,3 @@
-import { PAYMASTER_API } from '@starknet-io/starknet-types-08';
 import { toBeHex } from 'ethers';
 import qs from 'qs';
 import { PreparedInvokeTransaction, Signature, TypedData } from 'starknet';
@@ -6,6 +5,8 @@ import {
   AvnuOptions,
   InvokeSwapParams,
   InvokeTransactionResponse,
+  PaymasterTransactionParams,
+  PreparedPaymasterTransaction,
   Price,
   PriceRequest,
   Quote,
@@ -117,16 +118,14 @@ const fetchExecuteSwapTransaction = (
  * @returns The calldata
  */
 const quoteToCalls = (
-  quoteId: string,
-  takerAddress?: string,
-  slippage?: number,
-  includeApprove?: boolean,
+  {quoteId,
+    takerAddress,
+    slippage,
+    includeApprove,
+  }: {quoteId: string, takerAddress?: string, slippage?: number, includeApprove?: boolean},
   options?: AvnuOptions,
-): Promise<SwapCalls> =>
-  fetch(
-    `${getBaseUrl(options)}/swap/v2/build`,
-    postRequest({ quoteId, takerAddress, slippage, includeApprove }, options),
-  ).then((response) => parseResponse<SwapCalls>(response, options?.avnuPublicKey));
+) => (
+  fetch(`${getBaseUrl(options)}/swap/v2/build`, postRequest({ quoteId, takerAddress, slippage, includeApprove }, options)).then((response) => parseResponse<SwapCalls>(response, options?.avnuPublicKey)))
 
 /**
  * Build typed-data. Once signed by the user, the signature can be sent to the API to be executed by AVNU
@@ -176,6 +175,44 @@ const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
     parseResponse<Source[]>(response, options?.avnuPublicKey),
   );
 
+const preparePaymasterTransaction = async ({
+  provider,
+  paymaster,
+  calls,
+}: PaymasterTransactionParams): Promise<PreparedPaymasterTransaction> => {
+  if (!paymaster.provider || !paymaster.params) {
+    throw new Error('Paymaster provider and params are required');
+  }
+  return (
+    paymaster.provider.buildTransaction(
+      { type: 'invoke', invoke: { userAddress: provider.address, calls } },
+      paymaster.params,
+    ) as Promise<PreparedInvokeTransaction>
+  ).then(async (result) => {
+    const rawSignature = await provider.signMessage(result.typed_data);
+    let signature: string[] = [];
+    if (Array.isArray(rawSignature)) {
+      signature = rawSignature.map((sig) => toBeHex(BigInt(sig)));
+    } else if (rawSignature.r && rawSignature.s) {
+      signature = [toBeHex(BigInt(rawSignature.r)), toBeHex(BigInt(rawSignature.s))];
+    }
+    return {
+      typedData: result.typed_data,
+      signature,
+    };
+  });
+};
+
+const prepareSwapForPaymaster = async (
+  { provider, paymaster, quote, executeApprove = true, slippage }: InvokeSwapParams,
+  options?: AvnuOptions,
+): Promise<PreparedPaymasterTransaction> => {
+  if (!paymaster || !paymaster.active) {
+    throw new Error('Paymaster is required');
+  }
+  const callPromise = quoteToCalls({ quoteId: quote.quoteId, takerAddress: provider.address, slippage, includeApprove: executeApprove }, options);
+  return callPromise.then(({ calls }) => preparePaymasterTransaction({ provider, paymaster, calls }));
+};
 /**
  * Execute the exchange
  *
@@ -193,43 +230,22 @@ const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
 const executeSwap = async (
   { provider, paymaster, quote, executeApprove = true, slippage }: InvokeSwapParams,
   options?: AvnuOptions,
-): Promise<InvokeTransactionResponse | PAYMASTER_API.ExecuteResponse> => {
+): Promise<InvokeTransactionResponse> => {
   const chainId = await provider.getChainId();
   if (chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
   }
-  const callPromise = quoteToCalls(quote.quoteId, provider.address, slippage, executeApprove, options);
   if (paymaster && paymaster.active) {
-    const { provider: paymasterProvider, params: paymasterParams } = paymaster;
-    return callPromise
-      .then(
-        ({ calls }) =>
-          paymasterProvider.buildTransaction(
-            { type: 'invoke', invoke: { userAddress: provider.address, calls } },
-            paymasterParams,
-          ) as Promise<PreparedInvokeTransaction>,
-      )
-      .then(async (result) => {
-        const rawSignature = await provider.signMessage(result.typed_data);
-        let signature: string[] = [];
-        if (Array.isArray(rawSignature)) {
-          signature = rawSignature.map((sig) => toBeHex(BigInt(sig)));
-        } else if (rawSignature.r && rawSignature.s) {
-          signature = [toBeHex(BigInt(rawSignature.r)), toBeHex(BigInt(rawSignature.s))];
-        }
-        return {
-          typedData: result.typed_data,
-          signature,
-        };
-      })
+    return prepareSwapForPaymaster({ provider, paymaster, quote, executeApprove, slippage }, options)
       .then(({ typedData, signature }) =>
-        paymasterProvider.executeTransaction(
+        paymaster.provider.executeTransaction(
           { type: 'invoke', invoke: { userAddress: provider.address, typedData, signature } },
-          paymasterParams,
+          paymaster.params,
         ),
-      );
+      )
+      .then((value) => ({ transactionHash: value.transaction_hash }));
   }
-  return callPromise
+  return quoteToCalls({ quoteId: quote.quoteId, takerAddress: provider.address, slippage, includeApprove: executeApprove }, options)
     .then(({ calls }) => provider.execute(calls))
     .then((value) => ({ transactionHash: value.transaction_hash }));
 };
@@ -263,5 +279,6 @@ export {
   fetchPrices,
   fetchQuotes,
   fetchSources,
+  prepareSwapForPaymaster,
   quoteToCalls,
 };
