@@ -9,20 +9,21 @@ import {
   PriceRequest,
   Quote,
   QuoteRequest,
+  QuoteToCallsParams,
   Source,
   SwapCalls,
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, postRequest } from './utils';
 
 /**
- * Fetches the prices of DEX applications.
+ * Get the prices of DEX applications.
  * It allows to find the prices of AMM without any path optimization. It allows to measure the performance of the results from the getQuotes endpoints. The prices are sorted (best first).
  *
- * @returns The best quotes
  * @param request The request params for the avnu API `/swap/v2/prices` endpoint.
- * @param options Optional options.
+ * @param options Optional SDK configuration
+ * @returns The best prices sorted by best first
  */
-const fetchPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Price[]> => {
+const getPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Price[]> => {
   const queryParams = qs.stringify({ ...request, sellAmount: toBeHex(request.sellAmount) }, { arrayFormat: 'repeat' });
   return fetch(`${getBaseUrl(options)}/swap/v2/prices?${queryParams}`, getRequest(options))
     .then((response) => parseResponse<Price[]>(response, options?.avnuPublicKey))
@@ -37,14 +38,14 @@ const fetchPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Pric
 };
 
 /**
- * Fetches the best quotes.
+ * Get the best quotes.
  * It allows to find the best quotes from on-chain and off-chain liquidity. The best quotes will be returned and are sorted (best first).
  *
  * @param request The request params for the avnu API `/swap/v2/quotes` endpoint.
- * @param options Optional options.
- * @returns The best quotes
+ * @param options Optional SDK configuration
+ * @returns The best quotes sorted by best first
  */
-const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
+const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]> => {
   if (!request.sellAmount && !request.buyAmount) throw new Error('Sell amount or buy amount is required');
   const queryParams = qs.stringify(
     {
@@ -84,76 +85,84 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
  * Build calls for executing the trade through AVNU router
  * It allows trader to build the calls needed for executing the trade on AVNU router
  *
- * @param quoteId The id of the selected quote
- * @param takerAddress Required when taker address was not provided during the quote request
- * @param slippage The maximum acceptable slippage of the buyAmount amount.
- * @param includeApprove If true, the response will contain the approve call. True by default.
- * @param options Optional avnu options.
+ * @param params The parameters to build the swap calls
+ * @param params.quoteId The id of the selected quote
+ * @param params.takerAddress Required when taker address was not provided during the quote request
+ * @param params.slippage The maximum acceptable slippage of the buyAmount amount
+ * @param params.includeApprove If true, the response will contain the approve call. True by default
+ * @param options Optional SDK configuration
  * @returns The SwapCalls containing the calls to execute the trade and the chainId
  */
-const quoteToCalls = (
-  {
-    quoteId,
-    takerAddress,
-    slippage,
-    includeApprove,
-  }: { quoteId: string; takerAddress?: string; slippage?: number; includeApprove?: boolean },
-  options?: AvnuOptions,
-) =>
-  fetch(
+const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promise<SwapCalls> => {
+  const { quoteId, takerAddress, slippage, includeApprove } = params;
+  return fetch(
     `${getBaseUrl(options)}/swap/v2/build`,
     postRequest({ quoteId, takerAddress, slippage, includeApprove }, options),
   ).then((response) => parseResponse<SwapCalls>(response, options?.avnuPublicKey));
+};
 
 /**
- * Fetches the supported sources
+ * Get the supported sources
  *
- * @param options Optional options.
- * @returns The sources
+ * @param options Optional SDK configuration
+ * @returns The available liquidity sources
  */
-const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
+const getSources = (options?: AvnuOptions): Promise<Source[]> =>
   fetch(`${getBaseUrl(options)}/swap/v2/sources`, getRequest(options)).then((response) =>
     parseResponse<Source[]>(response, options?.avnuPublicKey),
   );
 
 /**
- * Execute the exchange
+ * Execute the swap transaction
  *
- * @param provider The account which will execute/sign the transaction, must implement the AccountInterface
- * @param paymaster The paymaster information, if needed
- * @param paymaster.active True if the the tx must be executed through a paymaster
- * @param paymaster.provider The paymaster provider, must implement the PaymasterInterface
- * @param paymaster.params The paymaster parameters
- * @param quote The selected quote. See `getQuotes`
- * @param executeApprove False if the taker already executed `approve`
- * @param slippage The maximum acceptable slippage for the trade
- * @param options Optional avnu options
- * @returns Promise<InvokeTransactionResponse | PAYMASTER_API.ExecuteResponse>
+ * @param params The swap execution parameters
+ * @param params.provider The account which will execute/sign the transaction, must implement the AccountInterface
+ * @param params.paymaster The paymaster information, if needed
+ * @param params.paymaster.active True if the tx must be executed through a paymaster
+ * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
+ * @param params.paymaster.params The paymaster parameters
+ * @param params.quote The selected quote. See `getQuotes`
+ * @param params.executeApprove False if the taker already executed `approve`. Defaults to true
+ * @param params.slippage The maximum acceptable slippage for the trade
+ * @param options Optional SDK configuration
+ * @returns The transaction hash
  */
-const executeSwap = async (
-  { provider, paymaster, quote, executeApprove = true, slippage }: InvokeSwapParams,
-  options?: AvnuOptions,
-): Promise<InvokeTransactionResponse> => {
+const executeSwap = async (params: InvokeSwapParams, options?: AvnuOptions): Promise<InvokeTransactionResponse> => {
+  const { provider, paymaster, quote, executeApprove = true, slippage } = params;
+
   const chainId = await provider.getChainId();
   if (chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
   }
 
-  const execution = quoteToCalls(
+  const { calls } = await quoteToCalls(
     { quoteId: quote.quoteId, takerAddress: provider.address, slippage, includeApprove: executeApprove },
     options,
   );
 
   if (paymaster && paymaster.active) {
-    return execution.then(async ({ calls }) => {
-      const prepared = await buildPaymasterTransaction({ provider, paymaster, calls });
-      const signed = await signPaymasterTransaction(provider, prepared.typed_data);
-      return executePaymasterTransaction(provider, paymaster.provider, paymaster.params, signed);
+    const prepared = await buildPaymasterTransaction({
+      provider,
+      paymaster: {
+        provider: paymaster.provider,
+        params: paymaster.params,
+      },
+      calls,
+    });
+    const signed = await signPaymasterTransaction({
+      provider,
+      typedData: prepared.typed_data,
+    });
+    return executePaymasterTransaction({
+      provider,
+      paymaster: paymaster.provider,
+      executionParams: paymaster.params,
+      signedTransaction: signed,
     });
   }
-  return execution
-    .then(({ calls }) => provider.execute(calls))
-    .then((value) => ({ transactionHash: value.transaction_hash }));
+
+  const result = await provider.execute(calls);
+  return { transactionHash: result.transaction_hash };
 };
 
 /**
@@ -180,8 +189,8 @@ export {
   calculateMaxSpendAmount,
   calculateMinReceivedAmount,
   executeSwap,
-  fetchPrices,
-  fetchQuotes,
-  fetchSources,
+  getPrices,
+  getQuotes,
+  getSources,
   quoteToCalls,
 };

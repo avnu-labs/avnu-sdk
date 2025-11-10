@@ -128,20 +128,19 @@ export interface AvnuOptions {
   avnuPublicKey?: string;
 }
 
-export interface ExecuteSwapOptions {
-  executeApprove?: boolean;
-  gasless?: boolean;
-  gasTokenAddress?: string;
-  maxGasTokenAmount?: bigint;
-  slippage?: number;
-  executeGaslessTxCallback?: () => unknown;
-}
-
-export interface PreparedPaymasterTransaction {
+export interface SignedPaymasterTransaction {
   typedData: OutsideExecutionTypedData;
   signature: string[];
 }
-export interface PaymasterTransactionParams {
+
+export interface QuoteToCallsParams {
+  quoteId: string;
+  takerAddress?: string;
+  slippage?: number;
+  includeApprove?: boolean;
+}
+
+export interface BuildPaymasterTransactionParams {
   provider: AccountInterface;
   paymaster: {
     provider: PaymasterInterface;
@@ -149,6 +148,19 @@ export interface PaymasterTransactionParams {
   };
   calls: Call[];
 }
+
+export interface SignTransactionParams {
+  provider: AccountInterface;
+  typedData: OutsideExecutionTypedData;
+}
+
+export interface ExecutePaymasterTransactionParams {
+  provider: AccountInterface;
+  paymaster: PaymasterInterface;
+  executionParams: ExecutionParameters;
+  signedTransaction: SignedPaymasterTransaction;
+}
+
 export interface InvokeSwapParams {
   provider: AccountInterface;
   paymaster?: {

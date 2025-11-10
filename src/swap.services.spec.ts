@@ -6,9 +6,9 @@ import { aPrice, aPriceRequest, aQuote, aQuoteRequest, aSource, aSwapCalls } fro
 import {
   calculateMaxSpendAmount,
   calculateMinReceivedAmount,
-  fetchPrices,
-  fetchQuotes,
-  fetchSources,
+  getPrices,
+  getQuotes,
+  getSources,
   quoteToCalls,
 } from './swap.services';
 
@@ -17,7 +17,7 @@ describe('Swap services', () => {
     fetchMock.restore();
   });
 
-  describe('fetchPrices', () => {
+  describe('getPrices', () => {
     it('should return a list of prices', async () => {
       // Given
       const request = aPriceRequest();
@@ -33,7 +33,7 @@ describe('Swap services', () => {
       fetchMock.get(`${BASE_URL}/swap/v2/prices?${qs.stringify(queryParams)}`, response);
 
       // When
-      const result = await fetchPrices(request);
+      const result = await getPrices(request);
 
       // Then
       const expected = [{ ...aPrice() }];
@@ -56,7 +56,7 @@ describe('Swap services', () => {
       fetchMock.get(`${baseUrl}/swap/v2/prices?${qs.stringify(queryParams)}`, response);
 
       // When
-      const result = await fetchPrices(request, { baseUrl });
+      const result = await getPrices(request, { baseUrl });
 
       // Then
       const expected = [{ ...aPrice() }];
@@ -71,7 +71,7 @@ describe('Swap services', () => {
 
       // When
       try {
-        await fetchPrices(request);
+        await getPrices(request);
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
@@ -80,7 +80,7 @@ describe('Swap services', () => {
     });
   });
 
-  describe('fetchQuotes', () => {
+  describe('getQuotes', () => {
     it('should return a list of quotes', async () => {
       // Given
       const request = aQuoteRequest();
@@ -101,7 +101,7 @@ describe('Swap services', () => {
       fetchMock.get(`${BASE_URL}/swap/v2/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
-      const result = await fetchQuotes(request);
+      const result = await getQuotes(request);
 
       // Then
       const expected = [{ ...aQuote() }];
@@ -129,7 +129,7 @@ describe('Swap services', () => {
       fetchMock.get(`${baseUrl}/swap/v2/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
-      const result = await fetchQuotes(request, { baseUrl });
+      const result = await getQuotes(request, { baseUrl });
 
       // Then
       const expected = [{ ...aQuote() }];
@@ -144,7 +144,7 @@ describe('Swap services', () => {
 
       // When
       try {
-        await fetchQuotes(request);
+        await getQuotes(request);
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
@@ -189,14 +189,14 @@ describe('Swap services', () => {
     });
   });
 
-  describe('fetchSources', () => {
+  describe('getSources', () => {
     it('should return a list of sources', async () => {
       // Given
       const response = [aSource()];
       fetchMock.get(`${BASE_URL}/swap/v2/sources`, response);
 
       // When
-      const result = await fetchSources();
+      const result = await getSources();
 
       // Then
       expect(result).toStrictEqual(response);
@@ -208,7 +208,7 @@ describe('Swap services', () => {
 
       // When
       try {
-        await fetchSources();
+        await getSources();
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
