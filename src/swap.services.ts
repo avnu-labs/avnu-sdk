@@ -1,13 +1,10 @@
-import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import { toBeHex } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, PreparedInvokeTransaction } from 'starknet';
+import { buildPaymasterTransaction, executePaymasterTransaction, signPaymasterTransaction } from './paymaster.services';
 import {
   AvnuOptions,
   InvokeSwapParams,
   InvokeTransactionResponse,
-  PaymasterTransactionParams,
-  PreparedPaymasterTransaction,
   Price,
   PriceRequest,
   Quote,
@@ -120,48 +117,6 @@ const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
   );
 
 /**
- * Sign the paymaster transaction
- *
- * @param provider The account which will sign the transaction, must implement the AccountInterface
- * @param typedData The typed data to sign
- * @returns The prepared paymaster transaction
- */
-const signPaymasterTransaction = async (
-  provider: AccountInterface,
-  typedData: OutsideExecutionTypedData,
-): Promise<PreparedPaymasterTransaction> => {
-  const rawSignature = await provider.signMessage(typedData);
-  let signature: string[] = [];
-  if (Array.isArray(rawSignature)) {
-    signature = rawSignature.map((sig) => toBeHex(BigInt(sig)));
-  } else if (rawSignature.r && rawSignature.s) {
-    signature = [toBeHex(BigInt(rawSignature.r)), toBeHex(BigInt(rawSignature.s))];
-  }
-  return {
-    typedData,
-    signature,
-  };
-};
-
-const preparePaymasterTransaction = async ({
-  provider,
-  paymaster,
-  calls,
-}: PaymasterTransactionParams): Promise<PreparedPaymasterTransaction> => {
-  if (!paymaster.provider || !paymaster.params) {
-    throw new Error('Paymaster provider and params are required');
-  }
-  return (
-    paymaster.provider.buildTransaction(
-      { type: 'invoke', invoke: { userAddress: provider.address, calls } },
-      paymaster.params,
-    ) as Promise<PreparedInvokeTransaction>
-  ).then(async (result) => {
-    return signPaymasterTransaction(provider, result.typed_data);
-  });
-};
-
-/**
  * Execute the exchange
  *
  * @param provider The account which will execute/sign the transaction, must implement the AccountInterface
@@ -191,15 +146,9 @@ const executeSwap = async (
 
   if (paymaster && paymaster.active) {
     return execution.then(async ({ calls }) => {
-      const prepared = await preparePaymasterTransaction({ provider, paymaster, calls });
-      const result = await paymaster.provider.executeTransaction(
-        {
-          type: 'invoke',
-          invoke: { userAddress: provider.address, typedData: prepared.typedData, signature: prepared.signature },
-        },
-        paymaster.params,
-      );
-      return { transactionHash: result.transaction_hash };
+      const prepared = await buildPaymasterTransaction({ provider, paymaster, calls });
+      const signed = await signPaymasterTransaction(provider, prepared.typed_data);
+      return executePaymasterTransaction(provider, paymaster.provider, paymaster.params, signed);
     });
   }
   return execution
@@ -235,5 +184,4 @@ export {
   fetchQuotes,
   fetchSources,
   quoteToCalls,
-  signPaymasterTransaction,
 };
