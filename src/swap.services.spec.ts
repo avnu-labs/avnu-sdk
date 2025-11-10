@@ -2,19 +2,10 @@ import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
 import { BASE_URL } from './constants';
-import {
-  anInvokeTransactionResponse,
-  aPrice,
-  aPriceRequest,
-  aQuote,
-  aQuoteRequest,
-  aSource,
-  aSwapCalls,
-} from './fixtures';
+import { aPrice, aPriceRequest, aQuote, aQuoteRequest, aSource, aSwapCalls } from './fixtures';
 import {
   calculateMaxSpendAmount,
   calculateMinReceivedAmount,
-  fetchExecuteSwapTransaction,
   fetchPrices,
   fetchQuotes,
   fetchSources,
@@ -162,43 +153,7 @@ describe('Swap services', () => {
     });
   });
 
-  describe('fetchExecuteSwapTransaction', () => {
-    it('should return an InvokeSwapResponse', async () => {
-      // Given
-      const response = anInvokeTransactionResponse();
-      fetchMock.post(`${BASE_URL}/swap/v2/execute`, response);
-
-      // When
-      const result = await fetchExecuteSwapTransaction('quoteId', []);
-
-      // Then
-      expect(result).toStrictEqual(response);
-    });
-
-    it('should use baseUrl from AvnuOption when defined', async () => {
-      // Given
-      const baseUrl = 'https://example.com';
-      const response = anInvokeTransactionResponse();
-      fetchMock.post(`${baseUrl}/swap/v2/execute`, response);
-
-      // When
-      const result = await fetchExecuteSwapTransaction('quoteId', [], { baseUrl });
-
-      // Then
-      expect(result).toStrictEqual(response);
-    });
-
-    it('should use throw Error with status code and text when status is higher than 400', () => {
-      // Given
-      fetchMock.post(`${BASE_URL}/swap/v2/execute`, 401);
-
-      // When & Then
-      expect.assertions(1);
-      expect(fetchExecuteSwapTransaction('quoteId', [])).rejects.toEqual(Error('401 Unauthorized'));
-    });
-  });
-
-  describe('fetchBuildExecuteTransaction', () => {
+  describe('quoteToCalls', () => {
     it('should return a SwapCalls', async () => {
       // Given
       const response = aSwapCalls();

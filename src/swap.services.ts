@@ -1,7 +1,7 @@
 import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import { toBeHex } from 'ethers';
 import qs from 'qs';
-import { AccountInterface, PreparedInvokeTransaction, Signature, TypedData } from 'starknet';
+import { AccountInterface, PreparedInvokeTransaction } from 'starknet';
 import {
   AvnuOptions,
   InvokeSwapParams,
@@ -126,7 +126,10 @@ const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
  * @param typedData The typed data to sign
  * @returns The prepared paymaster transaction
  */
-const signPaymasterTransaction = async (provider: AccountInterface, typedData: OutsideExecutionTypedData): Promise<PreparedPaymasterTransaction> => {
+const signPaymasterTransaction = async (
+  provider: AccountInterface,
+  typedData: OutsideExecutionTypedData,
+): Promise<PreparedPaymasterTransaction> => {
   const rawSignature = await provider.signMessage(typedData);
   let signature: string[] = [];
   if (Array.isArray(rawSignature)) {
@@ -158,19 +161,6 @@ const preparePaymasterTransaction = async ({
   });
 };
 
-const prepareSwapForPaymaster = async (
-  { provider, paymaster, quote, executeApprove = true, slippage }: InvokeSwapParams,
-  options?: AvnuOptions,
-): Promise<PreparedPaymasterTransaction> => {
-  if (!paymaster || !paymaster.active) {
-    throw new Error('Paymaster is required');
-  }
-  const callPromise = quoteToCalls(
-    { quoteId: quote.quoteId, takerAddress: provider.address, slippage, includeApprove: executeApprove },
-    options,
-  );
-  return callPromise.then(({ calls }) => preparePaymasterTransaction({ provider, paymaster, calls }));
-};
 /**
  * Execute the exchange
  *
@@ -193,20 +183,26 @@ const executeSwap = async (
   if (chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
   }
-  if (paymaster && paymaster.active) {
-    return prepareSwapForPaymaster({ provider, paymaster, quote, executeApprove, slippage }, options)
-      .then(({ typedData, signature }) =>
-        paymaster.provider.executeTransaction(
-          { type: 'invoke', invoke: { userAddress: provider.address, typedData, signature } },
-          paymaster.params,
-        ),
-      )
-      .then((value) => ({ transactionHash: value.transaction_hash }));
-  }
-  return quoteToCalls(
+
+  const execution = quoteToCalls(
     { quoteId: quote.quoteId, takerAddress: provider.address, slippage, includeApprove: executeApprove },
     options,
-  )
+  );
+
+  if (paymaster && paymaster.active) {
+    return execution.then(async ({ calls }) => {
+      const prepared = await preparePaymasterTransaction({ provider, paymaster, calls });
+      const result = await paymaster.provider.executeTransaction(
+        {
+          type: 'invoke',
+          invoke: { userAddress: provider.address, typedData: prepared.typedData, signature: prepared.signature },
+        },
+        paymaster.params,
+      );
+      return { transactionHash: result.transaction_hash };
+    });
+  }
+  return execution
     .then(({ calls }) => provider.execute(calls))
     .then((value) => ({ transactionHash: value.transaction_hash }));
 };
@@ -238,7 +234,6 @@ export {
   fetchPrices,
   fetchQuotes,
   fetchSources,
-  prepareSwapForPaymaster,
   quoteToCalls,
   signPaymasterTransaction,
 };
