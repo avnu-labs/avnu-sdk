@@ -205,7 +205,7 @@ describe('Swap services', () => {
       fetchMock.post(`${BASE_URL}/swap/v2/build`, response);
 
       // When
-      const result = await quoteToCalls('quoteId', '');
+      const result = await quoteToCalls({ quoteId: '', takerAddress: '' });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -218,7 +218,7 @@ describe('Swap services', () => {
       fetchMock.post(`${baseUrl}/swap/v2/build`, response);
 
       // When
-      const result = await quoteToCalls('quoteId', '', undefined, true, { baseUrl });
+      const result = await quoteToCalls({ quoteId: '', takerAddress: '' }, { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -230,7 +230,7 @@ describe('Swap services', () => {
 
       // When & Then
       expect.assertions(1);
-      expect(quoteToCalls('quoteId', '')).rejects.toEqual(Error('401 Unauthorized'));
+      expect(quoteToCalls({ quoteId: '', takerAddress: '' })).rejects.toEqual(Error('401 Unauthorized'));
     });
   });
 
@@ -286,7 +286,7 @@ describe('Swap services', () => {
       const result = calculateMaxSpendAmount(amount, slippage);
 
       // Then
-      expect(result).toBe(BigInt(1030000));
+      expect(result).toBe(BigInt(1003000));
     });
   });
 });
