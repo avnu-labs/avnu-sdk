@@ -160,7 +160,7 @@ describe('Swap services', () => {
       fetchMock.post(`${BASE_URL}/swap/v2/build`, response);
 
       // When
-      const result = await quoteToCalls({ quoteId: '', takerAddress: '' });
+      const result = await quoteToCalls({ quoteId: '', takerAddress: '', slippage: 0.01 });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -173,7 +173,7 @@ describe('Swap services', () => {
       fetchMock.post(`${baseUrl}/swap/v2/build`, response);
 
       // When
-      const result = await quoteToCalls({ quoteId: '', takerAddress: '' }, { baseUrl });
+      const result = await quoteToCalls({ quoteId: '', takerAddress: '', slippage: 0.01 }, { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -185,7 +185,9 @@ describe('Swap services', () => {
 
       // When & Then
       expect.assertions(1);
-      expect(quoteToCalls({ quoteId: '', takerAddress: '' })).rejects.toEqual(Error('401 Unauthorized'));
+      expect(quoteToCalls({ quoteId: '', takerAddress: '', slippage: 0.01 })).rejects.toEqual(
+        Error('401 Unauthorized'),
+      );
     });
   });
 

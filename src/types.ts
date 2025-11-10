@@ -135,9 +135,9 @@ export interface SignedPaymasterTransaction {
 
 export interface QuoteToCallsParams {
   quoteId: string;
+  slippage: number;
   takerAddress?: string;
-  slippage?: number;
-  includeApprove?: boolean;
+  executeApprove?: boolean;
 }
 
 export interface BuildPaymasterTransactionParams {

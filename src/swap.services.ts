@@ -88,16 +88,16 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
  * @param params The parameters to build the swap calls
  * @param params.quoteId The id of the selected quote
  * @param params.takerAddress Required when taker address was not provided during the quote request
- * @param params.slippage The maximum acceptable slippage of the buyAmount amount
- * @param params.includeApprove If true, the response will contain the approve call. True by default
+ * @param params.slippage The maximum acceptable slippage of the buyAmount amount (required)
+ * @param params.executeApprove If true, the response will contain the approve call. True by default
  * @param options Optional SDK configuration
  * @returns The SwapCalls containing the calls to execute the trade and the chainId
  */
 const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promise<SwapCalls> => {
-  const { quoteId, takerAddress, slippage, includeApprove } = params;
+  const { quoteId, takerAddress, slippage, executeApprove } = params;
   return fetch(
     `${getBaseUrl(options)}/swap/v2/build`,
-    postRequest({ quoteId, takerAddress, slippage, includeApprove }, options),
+    postRequest({ quoteId, takerAddress, slippage, includeApprove: executeApprove }, options),
   ).then((response) => parseResponse<SwapCalls>(response, options?.avnuPublicKey));
 };
 
@@ -136,7 +136,7 @@ const executeSwap = async (params: InvokeSwapParams, options?: AvnuOptions): Pro
   }
 
   const { calls } = await quoteToCalls(
-    { quoteId: quote.quoteId, takerAddress: provider.address, slippage, includeApprove: executeApprove },
+    { quoteId: quote.quoteId, takerAddress: provider.address, slippage, executeApprove },
     options,
   );
 
