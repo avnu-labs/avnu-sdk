@@ -84,39 +84,15 @@ const fetchQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quot
 };
 
 /**
- * Executing the exchange through AVNU router
- *
- * @param quoteId The id of the selected quote
- * @param signature The typed data's signature
- * @param options Optional options.
- * @returns The transaction hash
- */
-const fetchExecuteSwapTransaction = (
-  quoteId: string,
-  signature: Signature,
-  options?: AvnuOptions,
-): Promise<InvokeTransactionResponse> => {
-  if (Array.isArray(signature)) {
-    signature = signature.map((sig) => toBeHex(BigInt(sig)));
-  } else if (signature.r && signature.s) {
-    signature = [toBeHex(BigInt(signature.r)), toBeHex(BigInt(signature.s))];
-  }
-  return fetch(`${getBaseUrl(options)}/swap/v2/execute`, postRequest({ quoteId, signature }, options)).then(
-    (response) => parseResponse<InvokeTransactionResponse>(response, options?.avnuPublicKey),
-  );
-};
-
-/**
- * Build data for executing the exchange through AVNU router
- * It allows trader to build the data needed for executing the exchange on AVNU router
+ * Build calls for executing the trade through AVNU router
+ * It allows trader to build the calls needed for executing the trade on AVNU router
  *
  * @param quoteId The id of the selected quote
  * @param takerAddress Required when taker address was not provided during the quote request
- * @param slippage The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
- * This value is ignored if slippage is not applicable to the selected quote
+ * @param slippage The maximum acceptable slippage of the buyAmount amount.
  * @param includeApprove If true, the response will contain the approve call. True by default.
- * @param options Optional options.
- * @returns The calldata
+ * @param options Optional avnu options.
+ * @returns The SwapCalls containing the calls to execute the trade and the chainId
  */
 const quoteToCalls = (
   {
@@ -133,43 +109,6 @@ const quoteToCalls = (
   ).then((response) => parseResponse<SwapCalls>(response, options?.avnuPublicKey));
 
 /**
- * Build typed-data. Once signed by the user, the signature can be sent to the API to be executed by AVNU
- *
- * @param quoteId The id of the selected quote
- * @param gasTokenAddress The gas token address that will be used to pay the gas fees
- * @param maxGasTokenAmount The maximum amount of gas token the user accepts to spend
- * @param includeApprove If true, the typed data will contains the approve call
- * @param takerAddress Required when taker address was not provided during the quote request
- * @param slippage The maximum acceptable slippage of the buyAmount amount. Default value is 5%. 0.05 is 5%.
- * This value is ignored if slippage is not applicable to the selected quote
- * @param options Optional options.
- * @returns The calldata
- */
-const fetchBuildSwapTypedData = (
-  quoteId: string,
-  gasTokenAddress: string,
-  maxGasTokenAmount: bigint,
-  includeApprove: boolean = true,
-  takerAddress?: string,
-  slippage?: number,
-  options?: AvnuOptions,
-): Promise<TypedData> =>
-  fetch(
-    `${getBaseUrl(options)}/swap/v2/build-typed-data`,
-    postRequest(
-      {
-        quoteId,
-        takerAddress,
-        slippage,
-        includeApprove,
-        gasTokenAddress,
-        maxGasTokenAmount: toBeHex(maxGasTokenAmount),
-      },
-      options,
-    ),
-  ).then((response) => parseResponse<TypedData>(response, options?.avnuPublicKey));
-
-/**
  * Fetches the supported sources
  *
  * @param options Optional options.
@@ -180,13 +119,14 @@ const fetchSources = (options?: AvnuOptions): Promise<Source[]> =>
     parseResponse<Source[]>(response, options?.avnuPublicKey),
   );
 
-const signPaymasterTransaction = async ({
-  provider,
-  typedData,
-}: {
-  provider: AccountInterface;
-  typedData: OutsideExecutionTypedData;
-}): Promise<PreparedPaymasterTransaction> => {
+/**
+ * Sign the paymaster transaction
+ *
+ * @param provider The account which will sign the transaction, must implement the AccountInterface
+ * @param typedData The typed data to sign
+ * @returns The prepared paymaster transaction
+ */
+const signPaymasterTransaction = async (provider: AccountInterface, typedData: OutsideExecutionTypedData): Promise<PreparedPaymasterTransaction> => {
   const rawSignature = await provider.signMessage(typedData);
   let signature: string[] = [];
   if (Array.isArray(rawSignature)) {
@@ -214,7 +154,7 @@ const preparePaymasterTransaction = async ({
       paymaster.params,
     ) as Promise<PreparedInvokeTransaction>
   ).then(async (result) => {
-    return signPaymasterTransaction({ provider, typedData: result.typed_data });
+    return signPaymasterTransaction(provider, result.typed_data);
   });
 };
 
@@ -295,11 +235,10 @@ export {
   calculateMaxSpendAmount,
   calculateMinReceivedAmount,
   executeSwap,
-  fetchBuildSwapTypedData,
-  fetchExecuteSwapTransaction,
   fetchPrices,
   fetchQuotes,
   fetchSources,
   prepareSwapForPaymaster,
   quoteToCalls,
+  signPaymasterTransaction,
 };
