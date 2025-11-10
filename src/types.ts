@@ -141,7 +141,7 @@ export interface QuoteToCallsParams {
 }
 
 export interface BuildPaymasterTransactionParams {
-  provider: AccountInterface;
+  takerAddress: string;
   paymaster: {
     provider: PaymasterInterface;
     params: ExecutionParameters;
@@ -155,9 +155,11 @@ export interface SignTransactionParams {
 }
 
 export interface ExecutePaymasterTransactionParams {
-  provider: AccountInterface;
-  paymaster: PaymasterInterface;
-  executionParams: ExecutionParameters;
+  takerAddress: string;
+  paymaster: {
+    provider: PaymasterInterface;
+    params: ExecutionParameters;
+  };
   signedTransaction: SignedPaymasterTransaction;
 }
 

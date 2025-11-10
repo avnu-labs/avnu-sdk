@@ -12,7 +12,7 @@ import {
  * Build a paymaster transaction
  *
  * @param params The paymaster transaction parameters
- * @param params.provider The account which will execute the transaction, must implement the AccountInterface
+ * @param params.takerAddress The address of the taker who will execute the transaction
  * @param params.paymaster The paymaster information
  * @param params.calls The calls to execute
  * @returns The prepared paymaster transaction containing the typed data to sign
@@ -20,9 +20,9 @@ import {
 const buildPaymasterTransaction = async (
   params: BuildPaymasterTransactionParams,
 ): Promise<PreparedInvokeTransaction> => {
-  const { provider, paymaster, calls } = params;
+  const { takerAddress, paymaster, calls } = params;
   return paymaster.provider.buildTransaction(
-    { type: 'invoke', invoke: { userAddress: provider.address, calls } },
+    { type: 'invoke', invoke: { userAddress: takerAddress, calls } },
     paymaster.params,
   ) as Promise<PreparedInvokeTransaction>;
 };
@@ -54,7 +54,7 @@ const signPaymasterTransaction = async (params: SignTransactionParams): Promise<
  * Execute a paymaster transaction
  *
  * @param params The execution parameters
- * @param params.provider The account which will sign the transaction, must implement the AccountInterface
+ * @param params.takerAddress The address of the taker who will execute the transaction
  * @param params.paymaster The paymaster interface
  * @param params.executionParams The execution parameters
  * @param params.signedTransaction The signed transaction with typed data and signature
@@ -63,13 +63,14 @@ const signPaymasterTransaction = async (params: SignTransactionParams): Promise<
 const executePaymasterTransaction = async (
   params: ExecutePaymasterTransactionParams,
 ): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, executionParams, signedTransaction } = params;
+  const { takerAddress, paymaster, signedTransaction } = params;
+  const { provider, params: executionParams } = paymaster;
   const { typedData, signature } = signedTransaction;
-  return paymaster
+  return provider
     .executeTransaction(
       {
         type: 'invoke',
-        invoke: { userAddress: provider.address, typedData, signature },
+        invoke: { userAddress: takerAddress, typedData, signature },
       },
       executionParams,
     )

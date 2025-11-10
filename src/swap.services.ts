@@ -142,11 +142,8 @@ const executeSwap = async (params: InvokeSwapParams, options?: AvnuOptions): Pro
 
   if (paymaster && paymaster.active) {
     const prepared = await buildPaymasterTransaction({
-      provider,
-      paymaster: {
-        provider: paymaster.provider,
-        params: paymaster.params,
-      },
+      takerAddress: provider.address,
+      paymaster,
       calls,
     });
     const signed = await signPaymasterTransaction({
@@ -154,9 +151,8 @@ const executeSwap = async (params: InvokeSwapParams, options?: AvnuOptions): Pro
       typedData: prepared.typed_data,
     });
     return executePaymasterTransaction({
-      provider,
-      paymaster: paymaster.provider,
-      executionParams: paymaster.params,
+      takerAddress: provider.address,
+      paymaster,
       signedTransaction: signed,
     });
   }
