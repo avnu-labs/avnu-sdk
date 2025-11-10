@@ -4,6 +4,25 @@ import { AccountInterface, ExecutionParameters, PaymasterInterface, PreparedInvo
 import { InvokeTransactionResponse, PaymasterTransactionParams, PreparedPaymasterTransaction } from './types';
 
 /**
+ * Build a paymaster transaction
+ *
+ * @param provider The account which will execute the transaction, must implement the AccountInterface
+ * @param paymaster The paymaster information
+ * @param calls The calls to execute
+ * @returns The prepared paymaster transaction containing the typed data to sign
+ */
+const buildPaymasterTransaction = async ({
+    provider,
+    paymaster,
+    calls,
+  }: PaymasterTransactionParams): Promise<PreparedInvokeTransaction> => {
+    return paymaster.provider.buildTransaction(
+      { type: 'invoke', invoke: { userAddress: provider.address, calls } },
+      paymaster.params,
+    ) as Promise<PreparedInvokeTransaction>;
+  };
+
+/**
  * Sign the paymaster transaction
  *
  * @param provider The account which will sign the transaction, must implement the AccountInterface
@@ -25,25 +44,6 @@ const signPaymasterTransaction = async (
     typedData,
     signature,
   };
-};
-
-/**
- * Build a paymaster transaction
- *
- * @param provider The account which will execute the transaction, must implement the AccountInterface
- * @param paymaster The paymaster information
- * @param calls The calls to execute
- * @returns The prepared paymaster transaction containing the typed data to sign
- */
-const buildPaymasterTransaction = async ({
-  provider,
-  paymaster,
-  calls,
-}: PaymasterTransactionParams): Promise<PreparedInvokeTransaction> => {
-  return paymaster.provider.buildTransaction(
-    { type: 'invoke', invoke: { userAddress: provider.address, calls } },
-    paymaster.params,
-  ) as Promise<PreparedInvokeTransaction>;
 };
 
 /**
@@ -73,4 +73,4 @@ const executePaymasterTransaction = async (
     .then((result) => ({ transactionHash: result.transaction_hash }));
 };
 
-export { buildPaymasterTransaction, executePaymasterTransaction, signPaymasterTransaction };
+export { buildPaymasterTransaction, signPaymasterTransaction, executePaymasterTransaction };
