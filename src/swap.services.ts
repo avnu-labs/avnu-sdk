@@ -5,8 +5,6 @@ import {
   AvnuOptions,
   InvokeSwapParams,
   InvokeTransactionResponse,
-  Price,
-  PriceRequest,
   Quote,
   QuoteRequest,
   QuoteToCallsParams,
@@ -16,26 +14,15 @@ import {
 import { getBaseUrl, getRequest, parseResponse, postRequest } from './utils';
 
 /**
- * Get the prices of DEX applications.
- * It allows to find the prices of AMM without any path optimization. It allows to measure the performance of the results from the getQuotes endpoints. The prices are sorted (best first).
+ * Get the supported sources
  *
- * @param request The request params for the avnu API `/swap/v2/prices` endpoint.
  * @param options Optional SDK configuration
- * @returns The best prices sorted by best first
+ * @returns The available liquidity sources
  */
-const getPrices = (request: PriceRequest, options?: AvnuOptions): Promise<Price[]> => {
-  const queryParams = qs.stringify({ ...request, sellAmount: toBeHex(request.sellAmount) }, { arrayFormat: 'repeat' });
-  return fetch(`${getBaseUrl(options)}/swap/v2/prices?${queryParams}`, getRequest(options))
-    .then((response) => parseResponse<Price[]>(response, options?.avnuPublicKey))
-    .then((prices) =>
-      prices.map((price) => ({
-        ...price,
-        sellAmount: BigInt(price.sellAmount),
-        buyAmount: BigInt(price.buyAmount),
-        gasFees: BigInt(price.gasFees),
-      })),
-    );
-};
+const getSources = (options?: AvnuOptions): Promise<Source[]> =>
+  fetch(`${getBaseUrl(options)}/swap/v2/sources`, getRequest(options)).then((response) =>
+    parseResponse<Source[]>(response, options?.avnuPublicKey),
+  );
 
 /**
  * Get the best quotes.
@@ -100,17 +87,6 @@ const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promis
     postRequest({ quoteId, takerAddress, slippage, includeApprove: executeApprove }, options),
   ).then((response) => parseResponse<SwapCalls>(response, options?.avnuPublicKey));
 };
-
-/**
- * Get the supported sources
- *
- * @param options Optional SDK configuration
- * @returns The available liquidity sources
- */
-const getSources = (options?: AvnuOptions): Promise<Source[]> =>
-  fetch(`${getBaseUrl(options)}/swap/v2/sources`, getRequest(options)).then((response) =>
-    parseResponse<Source[]>(response, options?.avnuPublicKey),
-  );
 
 /**
  * Execute the swap transaction
@@ -181,12 +157,4 @@ const calculateMinReceivedAmount = (amount: bigint, slippage: number): bigint =>
 const calculateMaxSpendAmount = (amount: bigint, slippage: number): bigint =>
   amount + (amount * BigInt(slippage)) / BigInt(10000);
 
-export {
-  calculateMaxSpendAmount,
-  calculateMinReceivedAmount,
-  executeSwap,
-  getPrices,
-  getQuotes,
-  getSources,
-  quoteToCalls,
-};
+export { calculateMaxSpendAmount, calculateMinReceivedAmount, executeSwap, getQuotes, getSources, quoteToCalls };

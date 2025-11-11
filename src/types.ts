@@ -34,11 +34,21 @@ export interface Token {
 
 export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
 
-export interface PriceRequest {
-  sellTokenAddress: string;
-  buyTokenAddress: string;
-  sellAmount: bigint;
+/* PRICE PART */
+export interface MarketPrice {
+  usd: number;
 }
+
+export interface TokenPrice {
+  address: string;
+  decimals: number;
+  globalMarket: MarketPrice | null;
+  starknetMarket: MarketPrice | null;
+}
+
+export type TokenPriceResponse = TokenPrice[];
+
+/* SWAP PART */
 
 export interface QuoteRequest {
   sellTokenAddress: string;
@@ -61,21 +71,6 @@ export interface Route {
   buyTokenAddress: string;
   routeInfo?: Map<string, string>;
   routes: Route[];
-}
-
-export interface Price {
-  sellTokenAddress: string;
-  sellAmount: bigint;
-  sellAmountInUsd: number;
-  buyTokenAddress: string;
-  buyAmount: bigint;
-  buyAmountInUsd: number;
-  blockNumber?: number;
-  chainId: string;
-  sourceName: string;
-  priceRatioUsd: number;
-  gasFees: bigint;
-  gasFeesInUsd: number;
 }
 
 export interface Quote {
@@ -124,6 +119,7 @@ export interface RequestError {
 
 export interface AvnuOptions {
   baseUrl?: string;
+  impulseBaseUrl?: string;
   abortSignal?: AbortSignal;
   avnuPublicKey?: string;
 }
