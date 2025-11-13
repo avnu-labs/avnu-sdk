@@ -21,6 +21,26 @@ export interface Page<T> {
   number: number;
 }
 
+/* GLOBAL PART */
+
+interface InvokeParams {
+  provider: AccountInterface;
+  paymaster?: InvokePaymasterParams;
+}
+
+/* PAYMASTER PART */
+
+export interface PaymasterParams {
+  provider: PaymasterInterface;
+  params: ExecutionParameters;
+}
+
+export interface InvokePaymasterParams extends PaymasterParams {
+  active: boolean;
+}
+
+/* TOKEN PART */
+
 export interface Token {
   address: string;
   name: string;
@@ -147,19 +167,6 @@ export interface StakingWithdrawalActionMetadataDto {
   amountUsd?: number;
 }
 
-export interface StakeToCallsParams {
-  poolAddress: string;
-  userAddress: string;
-  amount: bigint;
-}
-
-export interface InvokeStakeParams {
-  provider: AccountInterface;
-  paymaster?: InvokePaymasterParams;
-  poolAddress: string;
-  amount: bigint;
-}
-
 /* PRICE PART */
 export interface MarketPrice {
   usd: number;
@@ -174,18 +181,30 @@ export interface TokenPrice {
 
 export type TokenPriceResponse = TokenPrice[];
 
-/* PAYMASTER PART */
-
-export interface PaymasterParams {
-  provider: PaymasterInterface;
-  params: ExecutionParameters;
-}
-
-export interface InvokePaymasterParams extends PaymasterParams {
-  active: boolean;
-}
-
 /* STAKING PART */
+interface StakingActionToCallsParams {
+  poolAddress: string;
+  userAddress: string;
+}
+
+export interface StakeToCallsParams extends StakingActionToCallsParams {
+  amount: bigint;
+}
+
+export interface ClaimRewardsToCallsParams extends StakingActionToCallsParams {
+  restake: boolean;
+}
+
+export interface InvokeStakeParams extends InvokeParams {
+  poolAddress: string;
+  amount: bigint;
+}
+
+export interface InvokeClaimRewardsParams extends InvokeParams {
+  poolAddress: string;
+  restake: boolean;
+}
+
 export interface StakingInfo {
   selfStakedAmount: bigint;
   selfStakedAmountInUsd: number | undefined;
@@ -334,9 +353,7 @@ export interface ExecutePaymasterTransactionParams {
   signedTransaction: SignedPaymasterTransaction;
 }
 
-export interface InvokeSwapParams {
-  provider: AccountInterface;
-  paymaster?: InvokePaymasterParams;
+export interface InvokeSwapParams extends InvokeParams {
   quote: Quote;
   slippage: number;
   executeApprove?: boolean;
