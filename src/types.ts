@@ -34,6 +34,132 @@ export interface Token {
 
 export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
 
+/* ACTION PART */
+export interface Action {
+  blockNumber: bigint;
+  date: Date;
+  transactionHash: string;
+  gasFee: GasFeeInfo;
+  type: ActionType;
+  metadata: ActionMetadataDto;
+}
+
+export type ActionType =
+  | 'Swap'
+  | 'OpenDcaOrder'
+  | 'CancelDcaOrder'
+  | 'DcaTrade'
+  | 'StakingStake'
+  | 'StakingInitiateWithdrawal'
+  | 'StakingCancelWithdrawal'
+  | 'StakingWithdraw'
+  | 'StakingClaimRewards';
+
+export interface GasFeeInfo {
+  gasFeeAmount: number;
+  gasFeeAmountUsd?: number;
+  gasFeeTokenAddress: string;
+}
+
+export type ActionMetadataDto =
+  | SwapMetadataDto
+  | OpenDcaOrderMetadataDto
+  | CancelDcaOrderActionMetadataDto
+  | DcaTradeActionMetadataDto
+  | StakingInitiateWithdrawalActionMetadataDto
+  | StakingCancelWithdrawalActionMetadataDto
+  | StakingStakeActionMetadataDto
+  | StakingClaimRewardsActionMetadataDto
+  | StakingWithdrawalActionMetadataDto;
+
+export interface SwapMetadataDto {
+  sellTokenAddress: string;
+  sellAmount: number;
+  sellAmountUsd?: number;
+  buyTokenAddress: string;
+  buyAmount: number;
+  buyAmountUsd?: number;
+}
+
+export interface OpenDcaOrderMetadataDto {
+  orderClassHash: string;
+  orderAddress: string;
+  sellTokenAddress: string;
+  sellAmount: number;
+  sellAmountUsd?: number;
+  sellAmountPerCycle: number;
+  buyTokenAddress: string;
+  cycleFrequency: bigint;
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface CancelDcaOrderActionMetadataDto {
+  orderAddress: string;
+}
+
+export interface DcaTradeActionMetadataDto {
+  sellTokenAddress: string;
+  sellAmount: number;
+  sellAmountUsd?: number;
+  buyTokenAddress: string;
+  buyAmount: number;
+  buyAmountUsd?: number;
+}
+
+export interface StakingInitiateWithdrawalActionMetadataDto {
+  delegationPoolAddress: string;
+  exitTimestamp: Date;
+  amount: number;
+  amountUsd?: number;
+  oldDelegatedStake: number;
+  oldDelegatedStakeUsd?: number;
+  newDelegatedStake: number;
+  newDelegatedStakeUsd?: number;
+}
+
+export interface StakingCancelWithdrawalActionMetadataDto {
+  delegationPoolAddress: string;
+  oldDelegatedStake: number;
+  oldDelegatedStakeUsd?: number;
+  newDelegatedStake: number;
+  newDelegatedStakeUsd?: number;
+}
+
+export interface StakingStakeActionMetadataDto {
+  delegationPoolAddress: string;
+  oldDelegatedStake: number;
+  oldDelegatedStakeUsd?: number;
+  newDelegatedStake: number;
+  newDelegatedStakeUsd?: number;
+}
+
+export interface StakingClaimRewardsActionMetadataDto {
+  delegationPoolAddress: string;
+  rewardAddress: string;
+  amount: number;
+  amountUsd?: number;
+}
+
+export interface StakingWithdrawalActionMetadataDto {
+  delegationPoolAddress: string;
+  amount: number;
+  amountUsd?: number;
+}
+
+export interface StakeToCallsParams {
+  poolAddress: string;
+  userAddress: string;
+  amount: bigint;
+}
+
+export interface InvokeStakeParams {
+  provider: AccountInterface;
+  paymaster?: InvokePaymasterParams;
+  poolAddress: string;
+  amount: bigint;
+}
+
 /* PRICE PART */
 export interface MarketPrice {
   usd: number;
@@ -48,6 +174,61 @@ export interface TokenPrice {
 
 export type TokenPriceResponse = TokenPrice[];
 
+/* PAYMASTER PART */
+
+export interface PaymasterParams {
+  provider: PaymasterInterface;
+  params: ExecutionParameters;
+}
+
+export interface InvokePaymasterParams extends PaymasterParams {
+  active: boolean;
+}
+
+/* STAKING PART */
+export interface StakingInfo {
+  selfStakedAmount: bigint;
+  selfStakedAmountInUsd: number | undefined;
+  operationalAddress: string;
+  rewardAddress: string;
+  stakerAddress: string;
+  commission: number;
+  delegationPools: DelegationPool[];
+}
+
+export interface DelegationPool {
+  poolAddress: string;
+  tokenAddress: string;
+  stakedAmount: bigint;
+  stakedAmountInUsd: number | undefined;
+  apr: number;
+}
+
+export interface PoolMemberInfo {
+  tokenAddress: string;
+  tokenPriceInUsd: number;
+  poolAddress: string;
+  userAddress: string;
+  amount: bigint;
+  amountInUsd: number | undefined;
+  unclaimedRewards: bigint;
+  unclaimedRewardsInUsd: number | undefined;
+  unpoolAmount: bigint;
+  unpoolAmountInUsd: number | undefined;
+  unpoolTime: Date | undefined;
+  totalClaimedRewards: bigint;
+  totalClaimedRewardsHistoricalUsd: number;
+  totalClaimedRewardsUsd: number;
+  userActions: Action[];
+  totalUserActionsCount: number;
+  expectedYearlyStrkRewards: bigint;
+  aprs: Apr[];
+}
+
+export interface Apr {
+  date: Date;
+  apr: number;
+}
 /* SWAP PART */
 
 export interface QuoteRequest {
@@ -138,10 +319,7 @@ export interface QuoteToCallsParams {
 
 export interface BuildPaymasterTransactionParams {
   takerAddress: string;
-  paymaster: {
-    provider: PaymasterInterface;
-    params: ExecutionParameters;
-  };
+  paymaster: PaymasterParams;
   calls: Call[];
 }
 
@@ -152,20 +330,13 @@ export interface SignTransactionParams {
 
 export interface ExecutePaymasterTransactionParams {
   takerAddress: string;
-  paymaster: {
-    provider: PaymasterInterface;
-    params: ExecutionParameters;
-  };
+  paymaster: PaymasterParams;
   signedTransaction: SignedPaymasterTransaction;
 }
 
 export interface InvokeSwapParams {
   provider: AccountInterface;
-  paymaster?: {
-    active: boolean;
-    provider: PaymasterInterface;
-    params: ExecutionParameters;
-  };
+  paymaster?: InvokePaymasterParams;
   quote: Quote;
   slippage: number;
   executeApprove?: boolean;

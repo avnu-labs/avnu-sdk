@@ -1,6 +1,6 @@
 import { toBeHex } from 'ethers';
 import qs from 'qs';
-import { buildPaymasterTransaction, executePaymasterTransaction, signPaymasterTransaction } from './paymaster.services';
+import { executeAllPaymasterFlow } from './paymaster.services';
 import {
   AvnuOptions,
   InvokeSwapParams,
@@ -117,20 +117,7 @@ const executeSwap = async (params: InvokeSwapParams, options?: AvnuOptions): Pro
   );
 
   if (paymaster && paymaster.active) {
-    const prepared = await buildPaymasterTransaction({
-      takerAddress: provider.address,
-      paymaster,
-      calls,
-    });
-    const signed = await signPaymasterTransaction({
-      provider,
-      typedData: prepared.typed_data,
-    });
-    return executePaymasterTransaction({
-      takerAddress: provider.address,
-      paymaster,
-      signedTransaction: signed,
-    });
+    return executeAllPaymasterFlow({ paymaster, provider, calls });
   }
 
   const result = await provider.execute(calls);

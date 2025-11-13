@@ -1,8 +1,9 @@
 import { toBeHex } from 'ethers';
-import { PreparedInvokeTransaction } from 'starknet';
+import { AccountInterface, Call, PreparedInvokeTransaction } from 'starknet';
 import {
   BuildPaymasterTransactionParams,
   ExecutePaymasterTransactionParams,
+  InvokePaymasterParams,
   InvokeTransactionResponse,
   SignedPaymasterTransaction,
   SignTransactionParams,
@@ -10,10 +11,12 @@ import {
 
 /**
  * Build a paymaster transaction
+ * !! Be careful if you run this on a client it will leak your PAYMASTER_API_KEY if you have one!!
+ * !! Use it in a server-side environment instead !!
  *
  * @param params The paymaster transaction parameters
  * @param params.takerAddress The address of the taker who will execute the transaction
- * @param params.paymaster The paymaster information
+ * @param params.paymaster The paymaster params
  * @param params.calls The calls to execute
  * @returns The prepared paymaster transaction containing the typed data to sign
  */
@@ -52,11 +55,12 @@ const signPaymasterTransaction = async (params: SignTransactionParams): Promise<
 
 /**
  * Execute a paymaster transaction
+ * !! Be careful if you run this on a client it will leak your PAYMASTER_API_KEY if you have one!!
+ * !! Use it in a server-side environment instead !!
  *
  * @param params The execution parameters
  * @param params.takerAddress The address of the taker who will execute the transaction
- * @param params.paymaster The paymaster interface
- * @param params.executionParams The execution parameters
+ * @param params.paymaster The paymaster params
  * @param params.signedTransaction The signed transaction with typed data and signature
  * @returns The transaction hash
  */
@@ -77,4 +81,40 @@ const executePaymasterTransaction = async (
     .then((result) => ({ transactionHash: result.transaction_hash }));
 };
 
-export { buildPaymasterTransaction, executePaymasterTransaction, signPaymasterTransaction };
+/**
+ * Execute the complete paymaster flow
+ * !! Be careful if you run this on a client it will leak your PAYMASTER_API_KEY if you have one!!
+ * !! Use it in a server-side environment instead !!
+ *
+ * @param paymaster.provider The paymaster provider, must implement the PaymasterInterface
+ * @param paymaster.params The paymaster parameters
+ * @param provider The account which will execute the transaction, must implement the AccountInterface
+ * @param calls The calls to execute
+ * @returns The transaction hash
+ */
+const executeAllPaymasterFlow = async ({
+  paymaster,
+  provider,
+  calls,
+}: {
+  paymaster: InvokePaymasterParams;
+  provider: AccountInterface;
+  calls: Call[];
+}): Promise<InvokeTransactionResponse> => {
+  const prepared = await buildPaymasterTransaction({
+    takerAddress: provider.address,
+    paymaster,
+    calls,
+  });
+  const signed = await signPaymasterTransaction({
+    provider,
+    typedData: prepared.typed_data,
+  });
+  return executePaymasterTransaction({
+    takerAddress: provider.address,
+    paymaster,
+    signedTransaction: signed,
+  });
+};
+
+export { buildPaymasterTransaction, executeAllPaymasterFlow, executePaymasterTransaction, signPaymasterTransaction };

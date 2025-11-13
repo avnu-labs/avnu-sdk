@@ -1,6 +1,5 @@
 import fetchMock from 'fetch-mock';
-import qs from 'qs';
-import { BASE_URL, IMPULSE_BASE_URL } from './constants';
+import { IMPULSE_BASE_URL } from './constants';
 import { aPrice, aPriceRequest } from './fixtures';
 import { getPrices } from './price.services';
 import { TokenPriceResponse } from './types';
