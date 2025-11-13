@@ -5,11 +5,14 @@ import {
   AvnuOptions,
   ClaimRewardsToCallsParams,
   InvokeClaimRewardsParams,
+  InvokeInitiateUnstakeParams,
   InvokeStakeParams,
   InvokeTransactionResponse,
+  InvokeUnstakeParams,
   PoolMemberInfo,
   StakeToCallsParams,
   StakingInfo,
+  UnstakeToCallsParams,
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, postRequest } from './utils';
 
@@ -55,6 +58,12 @@ const initiateUnstakeToCalls = async (params: StakeToCallsParams, options?: Avnu
   return actionToCalls('initiate-withdraw', poolAddress, userAddress, body, options);
 };
 
+const unstakeToCalls = async (params: UnstakeToCallsParams, options?: AvnuOptions): Promise<Call[]> => {
+  const { poolAddress, userAddress } = params;
+  const body = { userAddress };
+  return actionToCalls('claim-withdraw', poolAddress, userAddress, body, options);
+};
+
 const claimRewardsToCalls = async (params: ClaimRewardsToCallsParams, options?: AvnuOptions): Promise<Call[]> => {
   const { poolAddress, userAddress, restake } = params;
   const body = { userAddress, restake };
@@ -71,11 +80,23 @@ const executeStake = async (params: InvokeStakeParams, options?: AvnuOptions): P
 };
 
 const executeInitiateUnstake = async (
-  params: InvokeStakeParams,
+  params: InvokeInitiateUnstakeParams,
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
   const { provider, paymaster, poolAddress, amount } = params;
   const calls = await initiateUnstakeToCalls({ poolAddress, userAddress: provider.address, amount }, options);
+  if (paymaster && paymaster.active) {
+    return executeAllPaymasterFlow({ paymaster, provider, calls });
+  }
+  return provider.execute(calls).then((result) => ({ transactionHash: result.transaction_hash }));
+};
+
+const executeUnstake = async (
+  params: InvokeUnstakeParams,
+  options?: AvnuOptions,
+): Promise<InvokeTransactionResponse> => {
+  const { provider, paymaster, poolAddress } = params;
+  const calls = await unstakeToCalls({ poolAddress, userAddress: provider.address }, options);
   if (paymaster && paymaster.active) {
     return executeAllPaymasterFlow({ paymaster, provider, calls });
   }
@@ -99,8 +120,10 @@ export {
   executeClaimRewards,
   executeInitiateUnstake,
   executeStake,
+  executeUnstake,
   getPoolMemberInfo,
   getStakingInfo,
   initiateUnstakeToCalls,
   stakeToCalls,
+  unstakeToCalls,
 };

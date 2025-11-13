@@ -191,6 +191,8 @@ export interface StakeToCallsParams extends StakingActionToCallsParams {
   amount: bigint;
 }
 
+export interface UnstakeToCallsParams extends StakingActionToCallsParams {}
+
 export interface ClaimRewardsToCallsParams extends StakingActionToCallsParams {
   restake: boolean;
 }
@@ -198,6 +200,15 @@ export interface ClaimRewardsToCallsParams extends StakingActionToCallsParams {
 export interface InvokeStakeParams extends InvokeParams {
   poolAddress: string;
   amount: bigint;
+}
+
+export interface InvokeInitiateUnstakeParams extends InvokeParams {
+  poolAddress: string;
+  amount: bigint;
+}
+
+export interface InvokeUnstakeParams extends InvokeParams {
+  poolAddress: string;
 }
 
 export interface InvokeClaimRewardsParams extends InvokeParams {
