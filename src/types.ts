@@ -54,6 +54,105 @@ export interface Token {
 
 export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
 
+/* MARKET PART */
+
+export enum FeedDateRange {
+  ONE_HOUR = '1H',
+  ONE_DAY = '1D',
+  ONE_WEEK = '1W',
+  ONE_MONTH = '1M',
+  ONE_YEAR = '1Y',
+}
+
+export enum PriceFeedType {
+  LINE = 'LINE',
+  CANDLE = 'CANDLE',
+}
+
+export enum VolumeFeedType {
+  LINE = 'LINE',
+  BAR = 'BAR',
+}
+
+export enum FeedResolution {
+  ONE_MIN = '1',
+  FIVE_MIN = '5',
+  FIFTEEN_MIN = '15',
+  HOURLY = '1H',
+  FOUR_HOUR = '4H',
+  DAILY = '1D',
+  WEEKLY = '1W',
+  MONTHLY = '1M',
+  YEARLY = '1Y',
+}
+
+export interface SimpleFeedProps {
+  dateRange: FeedDateRange;
+}
+
+export interface FeedProps extends SimpleFeedProps {
+  resolution: FeedResolution;
+}
+
+export interface PriceFeedProps extends FeedProps {
+  type: PriceFeedType;
+}
+
+export interface PriceData {
+  value: number;
+  valueUsd?: number;
+}
+
+export interface SimplePriceData extends PriceData {
+  date: string;
+}
+
+export interface SimpleVolumeData {
+  date: string;
+  value: number;
+}
+
+export interface ByExchangeVolumeData extends SimpleVolumeData {
+  exchange: string;
+}
+
+export interface ByExchangeTVLData extends SimplePriceData {
+  exchange: string;
+}
+
+export interface CandlePriceData {
+  date: string;
+  close: number;
+  high: number;
+  low: number;
+  open: number;
+  volume: number;
+}
+
+export interface TokenMarketData extends Token {
+  coingeckoId?: string;
+  website?: string;
+  linePriceFeedInUsd?: SimplePriceData[];
+  verified: boolean;
+  market: {
+    currentPrice: number;
+    fullyDilutedValuation: number;
+    totalSupply: number;
+    priceChange1h: number;
+    priceChangePercentage1h?: number;
+    priceChange24h: number;
+    priceChangePercentage24h?: number;
+    priceChange7d: number;
+    priceChangePercentage7d?: number;
+    marketCap: number;
+    marketCapChange24h: number;
+    marketCapChangePercentage24h: number;
+    starknetVolume24h: number;
+    starknetTradingVolume24h: number;
+    starknetTvl: number;
+  };
+}
+
 /* ACTION PART */
 export interface Action {
   blockNumber: bigint;

@@ -1,6 +1,7 @@
 export * from './constants';
 export * from './dca.services';
 export * from './fixtures';
+export * from './market.services';
 export * from './paymaster.services';
 export * from './price.services';
 export * from './staking.services';
