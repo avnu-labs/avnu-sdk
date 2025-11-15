@@ -25,4 +25,20 @@ const fetchTokens = async (request?: GetTokensRequest, options?: AvnuOptions): P
   );
 };
 
-export { fetchTokens };
+const fetchTokenByAddress = async (tokenAddress: string, options?: AvnuOptions): Promise<Token> => {
+  return fetch(`${getBaseUrl(options)}/v1/starknet/tokens/${tokenAddress}`, getRequest(options)).then((response) =>
+    parseResponse<Token>(response, options?.avnuPublicKey),
+  );
+};
+
+const fetchVerifiedTokenBySymbol = async (symbol: string, options?: AvnuOptions): Promise<Token | undefined> => {
+  return fetchTokens({ page: 0, size: 1, tags: ['Verified', 'Unruggable'], search: symbol }, options).then((page) => {
+    const token = page.content[0];
+    if (token && token.symbol.toLowerCase() === symbol.toLowerCase()) {
+      return token;
+    }
+    throw undefined;
+  });
+};
+
+export { fetchTokenByAddress, fetchTokens, fetchVerifiedTokenBySymbol };

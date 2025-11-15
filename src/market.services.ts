@@ -26,7 +26,7 @@ const getTokenMarketData = (tokenAddress: string, options?: AvnuOptions): Promis
     parseResponse<TokenMarketData>(response, options?.avnuPublicKey),
   );
 
-export const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
+const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
   const now = dayjs();
   let start;
   switch (dateRange) {

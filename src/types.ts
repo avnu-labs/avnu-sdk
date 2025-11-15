@@ -13,6 +13,11 @@ export interface GetTokensRequest extends Pageable {
   tags?: TokenTag[];
 }
 
+export interface GetTokenRequest {
+  search?: string;
+  tags?: TokenTag[];
+}
+
 export interface Page<T> {
   content: T[];
   totalPages: number;
