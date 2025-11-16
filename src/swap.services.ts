@@ -1,6 +1,8 @@
 import { toBeHex } from 'ethers';
 import qs from 'qs';
+import { z } from 'zod';
 import { executeAllPaymasterFlow } from './paymaster.services';
+import { QuoteSchema } from './schemas';
 import {
   AvnuOptions,
   InvokeSwapParams,
@@ -11,7 +13,7 @@ import {
   Source,
   SwapCalls,
 } from './types';
-import { getBaseUrl, getRequest, parseResponse, postRequest } from './utils';
+import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
 
 /**
  * Get the supported sources
@@ -43,29 +45,9 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
     },
     { arrayFormat: 'repeat' },
   );
-  return fetch(`${getBaseUrl(options)}/swap/v2/quotes?${queryParams}`, getRequest(options))
-    .then((response) => parseResponse<Quote[]>(response, options?.avnuPublicKey))
-    .then((quotes) =>
-      quotes.map((quote) => ({
-        ...quote,
-        sellAmount: BigInt(quote.sellAmount),
-        buyAmount: BigInt(quote.buyAmount),
-        buyAmountWithoutFees: BigInt(quote.buyAmountWithoutFees),
-        gasFees: BigInt(quote.gasFees),
-        avnuFees: BigInt(quote.avnuFees),
-        integratorFees: BigInt(quote.integratorFees),
-        avnuFeesBps: BigInt(quote.avnuFeesBps),
-        integratorFeesBps: BigInt(quote.integratorFeesBps),
-        gasless: quote.gasless && {
-          active: quote.gasless.active,
-          gasTokenPrices: quote.gasless.gasTokenPrices.map((gasTokenPrice) => ({
-            tokenAddress: gasTokenPrice.tokenAddress,
-            gasFeesInUsd: gasTokenPrice.gasFeesInUsd,
-            gasFeesInGasToken: BigInt(gasTokenPrice.gasFeesInGasToken),
-          })),
-        },
-      })),
-    );
+  return fetch(`${getBaseUrl(options)}/swap/v2/quotes?${queryParams}`, getRequest(options)).then((response) =>
+    parseResponseWithSchema(response, z.array(QuoteSchema), options?.avnuPublicKey),
+  );
 };
 
 /**

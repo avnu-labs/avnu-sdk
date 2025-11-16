@@ -32,15 +32,7 @@ describe('DCA services', () => {
       const result = (await fetchGetOrders(request)).content;
 
       // Then
-      const expected = [
-        {
-          ...order,
-          timestamp: order.timestamp?.toISOString(),
-          closeDate: order.closeDate?.toISOString(),
-          startDate: order.startDate?.toISOString(),
-          endDate: order.endDate?.toISOString(),
-        },
-      ];
+      const expected = [order];
 
       expect(result).toStrictEqual(expected);
     });

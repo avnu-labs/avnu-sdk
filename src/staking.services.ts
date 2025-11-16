@@ -1,6 +1,7 @@
 import { toBeHex } from 'ethers';
 import { Call } from 'starknet';
 import { executeAllPaymasterFlow } from './paymaster.services';
+import { PoolMemberInfoSchema, StakingInfoSchema } from './schemas';
 import {
   AvnuOptions,
   ClaimRewardsToCallsParams,
@@ -14,11 +15,11 @@ import {
   StakingInfo,
   UnstakeToCallsParams,
 } from './types';
-import { getBaseUrl, getRequest, parseResponse, postRequest } from './utils';
+import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
 
 const getStakingInfo = async (options?: AvnuOptions): Promise<StakingInfo> => {
   return fetch(`${getBaseUrl(options)}/staking/v2/info`, getRequest(options)).then((response) =>
-    parseResponse<StakingInfo>(response, options?.avnuPublicKey),
+    parseResponseWithSchema(response, StakingInfoSchema, options?.avnuPublicKey),
   );
 };
 
@@ -30,7 +31,7 @@ const getPoolMemberInfo = async (
   return fetch(
     `${getBaseUrl(options)}/staking/v2/pools/${tokenAddress}/members/${userAddress}`,
     getRequest(options),
-  ).then((response) => parseResponse<PoolMemberInfo>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, PoolMemberInfoSchema, options?.avnuPublicKey));
 };
 
 const actionToCalls = async (

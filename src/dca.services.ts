@@ -1,6 +1,7 @@
 import { toBeHex } from 'ethers';
 import qs from 'qs';
 import { AccountInterface, Call, Signature, TypedData } from 'starknet';
+import { EstimatedGasFeesSchema, OrderReceiptSchema, PageSchema } from './schemas';
 import {
   AvnuOptions,
   CreateOrderDto,
@@ -11,7 +12,7 @@ import {
   Page,
   PaymasterOptions,
 } from './types';
-import { getBaseUrl, getRequest, parseResponse, postRequest } from './utils';
+import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
 
 const fetchBuildCalls = async (url: string, body: unknown, options?: AvnuOptions): Promise<Call[]> => {
   return fetch(`${getBaseUrl(options)}/dca/v1/${url}`, postRequest(body, options)).then((response) =>
@@ -20,19 +21,9 @@ const fetchBuildCalls = async (url: string, body: unknown, options?: AvnuOptions
 };
 
 const fetchEstimateFee = async (url: string, body: unknown, options?: AvnuOptions): Promise<EstimatedGasFees> => {
-  return fetch(`${getBaseUrl(options)}/dca/v1/${url}`, postRequest(body, options))
-    .then((response) => parseResponse<EstimatedGasFees>(response, options?.avnuPublicKey))
-    .then((response) => ({
-      ...response,
-      overallFee: BigInt(response.overallFee),
-      paymaster: {
-        ...response.paymaster,
-        gasTokenPrices: response.paymaster.gasTokenPrices.map((price) => ({
-          ...price,
-          gasFeesInGasToken: BigInt(price.gasFeesInGasToken),
-        })),
-      },
-    }));
+  return fetch(`${getBaseUrl(options)}/dca/v1/${url}`, postRequest(body, options)).then((response) =>
+    parseResponseWithSchema(response, EstimatedGasFeesSchema, options?.avnuPublicKey),
+  );
 };
 
 const fetchBuildTypedData = async (
@@ -165,24 +156,9 @@ const fetchGetOrders = async (
 ): Promise<Page<OrderReceipt>> => {
   const params = qs.stringify({ traderAddress, status, page, size, sort }, { arrayFormat: 'repeat' });
 
-  return fetch(`${getBaseUrl(options)}/dca/v1/orders?${params}`, getRequest(options))
-    .then((response) => parseResponse<Page<OrderReceipt>>(response, options?.avnuPublicKey))
-    .then((result) => ({
-      ...result,
-      content: result.content.map((order) => ({
-        ...order,
-        sellAmount: BigInt(order.sellAmount),
-        sellAmountPerCycle: BigInt(order.sellAmountPerCycle),
-        amountSold: BigInt(order.amountSold),
-        amountBought: BigInt(order.amountBought),
-        averageAmountBought: BigInt(order.averageAmountBought),
-        trades: order.trades.map((trade) => ({
-          ...trade,
-          sellAmount: BigInt(trade.sellAmount),
-          buyAmount: trade.buyAmount && BigInt(trade.buyAmount),
-        })),
-      })),
-    }));
+  return fetch(`${getBaseUrl(options)}/dca/v1/orders?${params}`, getRequest(options)).then((response) =>
+    parseResponseWithSchema(response, PageSchema(OrderReceiptSchema), options?.avnuPublicKey),
+  );
 };
 
 const executeCreateOrder = async (

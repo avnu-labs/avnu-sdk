@@ -83,6 +83,7 @@
     "typescript": "5.7.2"
   },
   "dependencies": {
-    "dayjs": "^1.11.19"
+    "dayjs": "^1.11.19",
+    "zod": "^4.1.12"
   }
 }

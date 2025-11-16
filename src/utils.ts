@@ -1,4 +1,5 @@
 import { ec, hash } from 'starknet';
+import { z } from 'zod';
 import { BASE_URL, IMPULSE_BASE_URL, SEPOLIA_BASE_URL, SEPOLIA_IMPULSE_BASE_URL } from './constants';
 import { AvnuOptions, ContractError, RequestError } from './types';
 
@@ -58,4 +59,28 @@ export const parseResponse = <T>(response: Response, avnuPublicKey?: string): Pr
       .then(() => response.json());
   }
   return response.json();
+};
+
+/**
+ * Parse API response with Zod schema validation and transformation
+ * @param response The fetch Response object
+ * @param schema Zod schema for validation and transformation
+ * @param avnuPublicKey Optional public key for signature verification
+ * @returns Parsed and validated data
+ */
+export const parseResponseWithSchema = <T extends z.ZodTypeAny>(
+  response: Response,
+  schema: T,
+  avnuPublicKey?: string,
+): Promise<z.infer<T>> => {
+  return parseResponse<unknown>(response, avnuPublicKey).then((data) => {
+    try {
+      return schema.parse(data);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(`Invalid API response: ${error.message}`);
+      }
+      throw error;
+    }
+  });
 };
