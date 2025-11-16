@@ -134,24 +134,30 @@ export interface CandlePriceData {
   volume: number;
 }
 
-export interface TokenMarketData extends Token {
+export interface TokenMarketData {
+  position: number;
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoUri: string;
+  verified: boolean;
+  linePriceFeedInUsd: SimplePriceData[];
   coingeckoId?: string;
   website?: string;
-  linePriceFeedInUsd?: SimplePriceData[];
-  verified: boolean;
   market: {
     currentPrice: number;
-    fullyDilutedValuation: number;
-    totalSupply: number;
+    fullyDilutedValuation?: number | null;
+    totalSupply?: number | null;
     priceChange1h: number;
-    priceChangePercentage1h?: number;
+    priceChangePercentage1h?: number | null;
     priceChange24h: number;
-    priceChangePercentage24h?: number;
+    priceChangePercentage24h?: number | null;
     priceChange7d: number;
-    priceChangePercentage7d?: number;
+    priceChangePercentage7d?: number | null;
     marketCap: number;
-    marketCapChange24h: number;
-    marketCapChangePercentage24h: number;
+    marketCapChange24h?: number | null;
+    marketCapChangePercentage24h?: number | null;
     starknetVolume24h: number;
     starknetTradingVolume24h: number;
     starknetTvl: number;

@@ -1,5 +1,14 @@
 import dayjs from 'dayjs';
 import qs from 'qs';
+import { z } from 'zod';
+import {
+  ByExchangeTVLDataSchema,
+  ByExchangeVolumeDataSchema,
+  CandlePriceDataSchema,
+  SimplePriceDataSchema,
+  SimpleVolumeDataSchema,
+  TokenMarketDataSchema,
+} from './schemas';
 import {
   AvnuOptions,
   ByExchangeTVLData,
@@ -14,16 +23,16 @@ import {
   SimpleVolumeData,
   TokenMarketData,
 } from './types';
-import { getImpulseBaseUrl, getRequest, parseResponse } from './utils';
+import { getImpulseBaseUrl, getRequest, parseResponseWithSchema } from './utils';
 
 const getMarketData = (options?: AvnuOptions): Promise<TokenMarketData[]> =>
   fetch(`${getImpulseBaseUrl(options)}/v1/tokens`, getRequest(options)).then((response) =>
-    parseResponse<TokenMarketData[]>(response, options?.avnuPublicKey),
+    parseResponseWithSchema(response, z.array(TokenMarketDataSchema), options?.avnuPublicKey),
   );
 
 const getTokenMarketData = (tokenAddress: string, options?: AvnuOptions): Promise<TokenMarketData> =>
   fetch(`${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}`, getRequest(options)).then((response) =>
-    parseResponse<TokenMarketData>(response, options?.avnuPublicKey),
+    parseResponseWithSchema(response, TokenMarketDataSchema, options?.avnuPublicKey),
   );
 
 const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
@@ -76,10 +85,12 @@ const getPriceFeed = (
 ): Promise<SimplePriceData[] | CandlePriceData[]> => {
   const type = feedProps.type === PriceFeedType.CANDLE ? 'candle' : 'line';
   const queryParams = getFeedQueryParams(feedProps, quoteTokenAddress);
+  const schema =
+    feedProps.type === PriceFeedType.CANDLE ? z.array(CandlePriceDataSchema) : z.array(SimplePriceDataSchema);
   return fetch(
     `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/prices/${type}?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponse<SimplePriceData[] | CandlePriceData[]>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, schema, options?.avnuPublicKey));
 };
 
 const getVolumeByExchange = (
@@ -91,7 +102,7 @@ const getVolumeByExchange = (
   return fetch(
     `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/exchange-volumes?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponse<ByExchangeVolumeData[]>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
 };
 
 const getExchangeVolumeFeed = (
@@ -103,7 +114,7 @@ const getExchangeVolumeFeed = (
   return fetch(
     `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/exchange-volumes/line?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponse<ByExchangeVolumeData[]>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
 };
 
 const getTVLByExchange = (
@@ -115,7 +126,7 @@ const getTVLByExchange = (
   return fetch(
     `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/exchange-tvl?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponse<ByExchangeTVLData[]>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
 };
 
 const getExchangeTVLFeed = (
@@ -127,7 +138,7 @@ const getExchangeTVLFeed = (
   return fetch(
     `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/exchange-tvl/line?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponse<ByExchangeTVLData[]>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
 };
 
 const getTransferVolumeFeed = (
@@ -139,7 +150,7 @@ const getTransferVolumeFeed = (
   return fetch(
     `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/volumes/line?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponse<SimpleVolumeData[]>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(SimpleVolumeDataSchema), options?.avnuPublicKey));
 };
 
 export {

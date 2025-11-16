@@ -1,11 +1,17 @@
 import { z } from 'zod';
 import {
+  type ByExchangeTVLData,
+  type ByExchangeVolumeData,
+  type CandlePriceData,
   type EstimatedGasFees,
   type OrderReceipt,
   OrderStatus,
   type PoolMemberInfo,
   type Quote,
+  type SimplePriceData,
+  type SimpleVolumeData,
   type StakingInfo,
+  type TokenMarketData,
   TradeStatus,
 } from './types';
 
@@ -351,6 +357,73 @@ export const StakingInfoSchema = z.object({
   commission: z.number(),
   delegationPools: z.array(DelegationPoolSchema),
 }) satisfies z.ZodType<StakingInfo>;
+
+/**
+ * Market Schemas
+ */
+
+export const SimplePriceDataSchema = z.object({
+  date: z.string(),
+  value: z.number(),
+  valueUsd: z.number().optional(),
+}) satisfies z.ZodType<SimplePriceData>;
+
+export const SimpleVolumeDataSchema = z.object({
+  date: z.string(),
+  value: z.number(),
+}) satisfies z.ZodType<SimpleVolumeData>;
+
+export const ByExchangeVolumeDataSchema = z.object({
+  date: z.string(),
+  value: z.number(),
+  exchange: z.string(),
+}) satisfies z.ZodType<ByExchangeVolumeData>;
+
+export const ByExchangeTVLDataSchema = z.object({
+  date: z.string(),
+  value: z.number(),
+  valueUsd: z.number().optional(),
+  exchange: z.string(),
+}) satisfies z.ZodType<ByExchangeTVLData>;
+
+export const CandlePriceDataSchema = z.object({
+  date: z.string(),
+  close: z.number(),
+  high: z.number(),
+  low: z.number(),
+  open: z.number(),
+  volume: z.number(),
+}) satisfies z.ZodType<CandlePriceData>;
+
+export const TokenMarketDataSchema = z.object({
+  position: z.number(),
+  address: z.string(),
+  name: z.string(),
+  symbol: z.string(),
+  decimals: z.number(),
+  logoUri: z.string(),
+  verified: z.boolean(),
+  linePriceFeedInUsd: z.array(SimplePriceDataSchema),
+  coingeckoId: z.string().optional(),
+  website: z.string().optional(),
+  market: z.object({
+    currentPrice: z.number(),
+    marketCap: z.number(),
+    fullyDilutedValuation: z.number().optional().nullable(),
+    starknetTvl: z.number(),
+    priceChange1h: z.number(),
+    priceChangePercentage1h: z.number().optional().nullable(),
+    priceChange24h: z.number(),
+    priceChangePercentage24h: z.number().optional().nullable(),
+    priceChange7d: z.number(),
+    priceChangePercentage7d: z.number().optional().nullable(),
+    marketCapChange24h: z.number().optional().nullable(),
+    marketCapChangePercentage24h: z.number().optional().nullable(),
+    starknetVolume24h: z.number(),
+    starknetTradingVolume24h: z.number(),
+    totalSupply: z.number().optional().nullable(),
+  }),
+}) satisfies z.ZodType<TokenMarketData>;
 
 /**
  * Pagination Schema

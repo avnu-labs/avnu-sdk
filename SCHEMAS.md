@@ -80,6 +80,17 @@ Transforms hex timestamps (fields ending with `*Time`) to `Date`:
 // Schema transforms to: Date object (from Unix timestamp)
 ```
 
+### Important Note: Market Data Dates
+
+**Market data schemas do NOT transform dates** - they keep them as strings:
+```typescript
+// In SimplePriceData, CandlePriceData, etc.
+// API returns: "2025-11-13"
+// Schema keeps as: string (NOT transformed to Date)
+```
+
+This is intentional because market data uses date strings for chart rendering, not Date objects.
+
 ## Migration from Zod v3 to v4
 
 ### Deprecated: `z.nativeEnum()`
@@ -99,11 +110,22 @@ export const OrderStatusSchema = z.enum(OrderStatus);
 
 The following main schemas have type validation enforced:
 
+### Swap & DCA
 - `QuoteSchema` → `Quote`
 - `OrderReceiptSchema` → `OrderReceipt`
 - `EstimatedGasFeesSchema` → `EstimatedGasFees`
+
+### Staking
 - `PoolMemberInfoSchema` → `PoolMemberInfo`
 - `StakingInfoSchema` → `StakingInfo`
+
+### Market Data
+- `TokenMarketDataSchema` → `TokenMarketData`
+- `SimplePriceDataSchema` → `SimplePriceData`
+- `CandlePriceDataSchema` → `CandlePriceData`
+- `SimpleVolumeDataSchema` → `SimpleVolumeData`
+- `ByExchangeVolumeDataSchema` → `ByExchangeVolumeData`
+- `ByExchangeTVLDataSchema` → `ByExchangeTVLData`
 
 ## Best Practices
 
