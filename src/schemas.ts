@@ -1,5 +1,30 @@
 import { z } from 'zod';
-import { OrderStatus, TradeStatus } from './types';
+import {
+  type EstimatedGasFees,
+  type OrderReceipt,
+  OrderStatus,
+  type PoolMemberInfo,
+  type Quote,
+  type StakingInfo,
+  TradeStatus,
+} from './types';
+
+/**
+ * Type-safe schema validation helper
+ *
+ * This ensures that a Zod schema's inferred type exactly matches the expected TypeScript type.
+ * If the schema is missing fields or has incorrect types, TypeScript will show an error.
+ *
+ * Usage:
+ * ```typescript
+ * const _MySchema = z.object({ ... });
+ * export const MySchema = _MySchema satisfies z.ZodType<MyType>;
+ * ```
+ *
+ * Note: This creates a bidirectional check:
+ * - If you forget a field in the schema → TypeScript error
+ * - If you add a field in the type but not the schema → TypeScript error
+ */
 
 /**
  * Custom Zod transformers for AVNU API responses
@@ -29,7 +54,7 @@ export const hexTimestampToDate = z.union([z.string(), z.number(), z.null(), z.u
  * DCA (Dollar Cost Averaging) Schemas
  */
 
-export const TradeStatusSchema = z.nativeEnum(TradeStatus);
+export const TradeStatusSchema = z.enum(TradeStatus);
 
 export const TradeSchema = z.object({
   sellAmount: hexToBigInt,
@@ -43,7 +68,7 @@ export const TradeSchema = z.object({
   errorReason: z.string().optional(),
 });
 
-export const OrderStatusSchema = z.nativeEnum(OrderStatus);
+export const OrderStatusSchema = z.enum(OrderStatus);
 
 export const PricingStrategySchema = z.union([
   z.object({
@@ -79,7 +104,7 @@ export const OrderReceiptSchema = z.object({
   cancelledTradesCount: z.number(),
   pendingTradesCount: z.number(),
   trades: z.array(TradeSchema),
-});
+}) satisfies z.ZodType<OrderReceipt>;
 
 export const EstimateFeeGasTokenPriceSchema = z.object({
   tokenAddress: z.string(),
@@ -96,7 +121,7 @@ export const EstimatedGasFeesSchema = z.object({
   overallFee: hexToBigInt,
   overallFeeInUsd: z.number(),
   paymaster: EstimatedGasFeesPaymasterSchema,
-});
+}) satisfies z.ZodType<EstimatedGasFees>;
 
 /**
  * Swap Schemas
@@ -163,7 +188,7 @@ export const QuoteSchema = z.object({
   liquiditySource: z.enum(['DEX_AGGREGATOR', 'MARKET_MAKER', 'SOLVER', 'ORDERBOOK']),
   gasless: GaslessSchema,
   exactTokenTo: z.boolean().optional(),
-});
+}) satisfies z.ZodType<Quote>;
 
 /**
  * Staking Schemas
@@ -307,7 +332,7 @@ export const PoolMemberInfoSchema = z.object({
   totalUserActionsCount: z.number(),
   expectedYearlyStrkRewards: hexToBigInt,
   aprs: z.array(AprSchema),
-});
+}) satisfies z.ZodType<PoolMemberInfo>;
 
 export const DelegationPoolSchema = z.object({
   poolAddress: z.string(),
@@ -325,7 +350,7 @@ export const StakingInfoSchema = z.object({
   stakerAddress: z.string(),
   commission: z.number(),
   delegationPools: z.array(DelegationPoolSchema),
-});
+}) satisfies z.ZodType<StakingInfo>;
 
 /**
  * Pagination Schema
