@@ -163,7 +163,7 @@ export interface Action {
   blockNumber: bigint;
   date: Date;
   transactionHash: string;
-  gasFee: GasFeeInfo;
+  gasFee: GasFeeInfo | null;
   type: ActionType;
   metadata: ActionMetadataDto;
 }
@@ -198,10 +198,10 @@ export type ActionMetadataDto =
 
 export interface SwapMetadataDto {
   sellTokenAddress: string;
-  sellAmount: number;
+  sellAmount: bigint;
   sellAmountUsd?: number;
   buyTokenAddress: string;
-  buyAmount: number;
+  buyAmount: bigint;
   buyAmountUsd?: number;
 }
 
@@ -209,9 +209,9 @@ export interface OpenDcaOrderMetadataDto {
   orderClassHash: string;
   orderAddress: string;
   sellTokenAddress: string;
-  sellAmount: number;
+  sellAmount: bigint;
   sellAmountUsd?: number;
-  sellAmountPerCycle: number;
+  sellAmountPerCycle: bigint;
   buyTokenAddress: string;
   cycleFrequency: bigint;
   startDate: Date;
@@ -224,50 +224,50 @@ export interface CancelDcaOrderActionMetadataDto {
 
 export interface DcaTradeActionMetadataDto {
   sellTokenAddress: string;
-  sellAmount: number;
+  sellAmount: bigint;
   sellAmountUsd?: number;
   buyTokenAddress: string;
-  buyAmount: number;
+  buyAmount: bigint;
   buyAmountUsd?: number;
 }
 
 export interface StakingInitiateWithdrawalActionMetadataDto {
   delegationPoolAddress: string;
   exitTimestamp: Date;
-  amount: number;
+  amount: bigint;
   amountUsd?: number;
-  oldDelegatedStake: number;
+  oldDelegatedStake: bigint;
   oldDelegatedStakeUsd?: number;
-  newDelegatedStake: number;
+  newDelegatedStake: bigint;
   newDelegatedStakeUsd?: number;
 }
 
 export interface StakingCancelWithdrawalActionMetadataDto {
   delegationPoolAddress: string;
-  oldDelegatedStake: number;
+  oldDelegatedStake: bigint;
   oldDelegatedStakeUsd?: number;
-  newDelegatedStake: number;
+  newDelegatedStake: bigint;
   newDelegatedStakeUsd?: number;
 }
 
 export interface StakingStakeActionMetadataDto {
   delegationPoolAddress: string;
-  oldDelegatedStake: number;
+  oldDelegatedStake: bigint;
   oldDelegatedStakeUsd?: number;
-  newDelegatedStake: number;
+  newDelegatedStake: bigint;
   newDelegatedStakeUsd?: number;
 }
 
 export interface StakingClaimRewardsActionMetadataDto {
   delegationPoolAddress: string;
   rewardAddress: string;
-  amount: number;
+  amount: bigint;
   amountUsd?: number;
 }
 
 export interface StakingWithdrawalActionMetadataDto {
   delegationPoolAddress: string;
-  amount: number;
+  amount: bigint;
   amountUsd?: number;
 }
 

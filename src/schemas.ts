@@ -177,10 +177,10 @@ export const GasFeeInfoSchema = z.object({
 
 export const SwapMetadataSchema = z.object({
   sellTokenAddress: z.string(),
-  sellAmount: z.number(),
+  sellAmount: hexToBigInt,
   sellAmountUsd: z.number().optional(),
   buyTokenAddress: z.string(),
-  buyAmount: z.number(),
+  buyAmount: hexToBigInt,
   buyAmountUsd: z.number().optional(),
 });
 
@@ -188,9 +188,9 @@ export const OpenDcaOrderMetadataSchema = z.object({
   orderClassHash: z.string(),
   orderAddress: z.string(),
   sellTokenAddress: z.string(),
-  sellAmount: z.number(),
+  sellAmount: hexToBigInt,
   sellAmountUsd: z.number().optional(),
-  sellAmountPerCycle: z.number(),
+  sellAmountPerCycle: hexToBigInt,
   buyTokenAddress: z.string(),
   cycleFrequency: hexToBigInt,
   startDate: isoStringToDate,
@@ -203,50 +203,50 @@ export const CancelDcaOrderActionMetadataSchema = z.object({
 
 export const DcaTradeActionMetadataSchema = z.object({
   sellTokenAddress: z.string(),
-  sellAmount: z.number(),
+  sellAmount: hexToBigInt,
   sellAmountUsd: z.number().optional(),
   buyTokenAddress: z.string(),
-  buyAmount: z.number(),
+  buyAmount: hexToBigInt,
   buyAmountUsd: z.number().optional(),
 });
 
 export const StakingInitiateWithdrawalActionMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
   exitTimestamp: isoStringToDate,
-  amount: z.number(),
+  amount: hexToBigInt,
   amountUsd: z.number().optional(),
-  oldDelegatedStake: z.number(),
+  oldDelegatedStake: hexToBigInt,
   oldDelegatedStakeUsd: z.number().optional(),
-  newDelegatedStake: z.number(),
+  newDelegatedStake: hexToBigInt,
   newDelegatedStakeUsd: z.number().optional(),
 });
 
 export const StakingCancelWithdrawalActionMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
-  oldDelegatedStake: z.number(),
+  oldDelegatedStake: hexToBigInt,
   oldDelegatedStakeUsd: z.number().optional(),
-  newDelegatedStake: z.number(),
+  newDelegatedStake: hexToBigInt,
   newDelegatedStakeUsd: z.number().optional(),
 });
 
 export const StakingStakeActionMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
-  oldDelegatedStake: z.number(),
+  oldDelegatedStake: hexToBigInt,
   oldDelegatedStakeUsd: z.number().optional(),
-  newDelegatedStake: z.number(),
+  newDelegatedStake: hexToBigInt,
   newDelegatedStakeUsd: z.number().optional(),
 });
 
 export const StakingClaimRewardsActionMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
   rewardAddress: z.string(),
-  amount: z.number(),
+  amount: hexToBigInt,
   amountUsd: z.number().optional(),
 });
 
 export const StakingWithdrawalActionMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
-  amount: z.number(),
+  amount: hexToBigInt,
   amountUsd: z.number().optional(),
 });
 
@@ -278,7 +278,7 @@ export const ActionSchema = z.object({
   blockNumber: hexToBigInt,
   date: isoStringToDate,
   transactionHash: z.string(),
-  gasFee: GasFeeInfoSchema,
+  gasFee: GasFeeInfoSchema.nullable(),
   type: ActionTypeSchema,
   metadata: ActionMetadataSchema,
 });
