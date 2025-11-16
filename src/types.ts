@@ -57,6 +57,13 @@ export interface Token {
   tags: TokenTag[];
 }
 
+export interface TokenBalance {
+  userAddress: string;
+  tokenAddress: string;
+  balance: bigint;
+  balanceInUsd: number;
+}
+
 export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
 
 /* MARKET PART */

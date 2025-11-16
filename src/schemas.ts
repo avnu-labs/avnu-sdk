@@ -11,6 +11,8 @@ import {
   type SimplePriceData,
   type SimpleVolumeData,
   type StakingInfo,
+  type Token,
+  TokenBalance,
   type TokenMarketData,
   TradeStatus,
 } from './types';
@@ -55,6 +57,28 @@ export const hexTimestampToDate = z.union([z.string(), z.number(), z.null(), z.u
   // Already a number (Unix timestamp in seconds)
   return new Date(val * 1000);
 });
+
+/**
+ * Token Schema
+ */
+
+export const TokenSchema = z.object({
+  address: z.string(),
+  name: z.string(),
+  symbol: z.string(),
+  decimals: z.number(),
+  logoUri: z.string(),
+  lastDailyVolumeUsd: z.number(),
+  extensions: z.record(z.string(), z.string()),
+  tags: z.array(z.enum(['Unknown', 'Verified', 'Community', 'Unruggable', 'AVNU'])),
+}) satisfies z.ZodType<Token>;
+
+export const TokenBalanceSchema = z.object({
+  userAddress: z.string(),
+  tokenAddress: z.string(),
+  balance: hexToBigInt,
+  balanceInUsd: z.number(),
+}) satisfies z.ZodType<TokenBalance>;
 
 /**
  * DCA (Dollar Cost Averaging) Schemas

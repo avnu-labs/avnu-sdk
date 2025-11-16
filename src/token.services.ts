@@ -1,6 +1,8 @@
 import qs from 'qs';
-import { AvnuOptions, GetTokensRequest, Page, Token } from './types';
-import { getBaseUrl, getRequest, parseResponse } from './utils';
+import z from 'zod';
+import { PageSchema, TokenBalanceSchema, TokenSchema } from './schemas';
+import { AvnuOptions, GetTokensRequest, Page, Token, TokenBalance } from './types';
+import { getBaseUrl, getRequest, parseResponseWithSchema } from './utils';
 
 /**
  * Fetches exchangeable tokens from the API.
@@ -15,19 +17,19 @@ const fetchTokens = async (request?: GetTokensRequest, options?: AvnuOptions): P
     {
       page: request?.page,
       size: request?.size,
-      search: request?.size,
+      search: request?.search,
       tag: request?.tags,
     },
     { arrayFormat: 'repeat' },
   );
   return fetch(`${getBaseUrl(options)}/v1/starknet/tokens?${queryParams}`, getRequest(options)).then((response) =>
-    parseResponse<Page<Token>>(response, options?.avnuPublicKey),
+    parseResponseWithSchema(response, PageSchema(TokenSchema), options?.avnuPublicKey),
   );
 };
 
 const fetchTokenByAddress = async (tokenAddress: string, options?: AvnuOptions): Promise<Token> => {
   return fetch(`${getBaseUrl(options)}/v1/starknet/tokens/${tokenAddress}`, getRequest(options)).then((response) =>
-    parseResponse<Token>(response, options?.avnuPublicKey),
+    parseResponseWithSchema(response, TokenSchema, options?.avnuPublicKey),
   );
 };
 
@@ -41,4 +43,18 @@ const fetchVerifiedTokenBySymbol = async (symbol: string, options?: AvnuOptions)
   });
 };
 
-export { fetchTokenByAddress, fetchTokens, fetchVerifiedTokenBySymbol };
+const fetchTokensBalances = async (
+  userAddress: string,
+  tokens: Token[],
+  options?: AvnuOptions,
+): Promise<TokenBalance[]> => {
+  const queryParams = qs.stringify(
+    { userAddress, tokenAddress: tokens.map((token) => token.address) },
+    { arrayFormat: 'repeat' },
+  );
+  return fetch(`${getBaseUrl(options)}/v1/starknet/balances?${queryParams}`, getRequest(options)).then((response) =>
+    parseResponseWithSchema(response, z.array(TokenBalanceSchema), options?.avnuPublicKey),
+  );
+};
+
+export { fetchTokenByAddress, fetchTokens, fetchTokensBalances, fetchVerifiedTokenBySymbol };
