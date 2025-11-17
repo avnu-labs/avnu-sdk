@@ -603,7 +603,7 @@ export interface PaymasterOptions {
   executeGaslessTxCallback?: () => unknown;
 }
 
-export interface CreateOrderDto {
+export interface CreateDcaOrder {
   sellTokenAddress: string | undefined;
   buyTokenAddress: string | undefined;
   sellAmount: string;
@@ -611,4 +611,12 @@ export interface CreateOrderDto {
   frequency: Duration;
   pricingStrategy: PricingStrategy | Record<string, never>;
   traderAddress: string;
+}
+
+export interface InvokeCreateDcaParams extends InvokeParams {
+  order: CreateDcaOrder;
+}
+
+export interface InvokeCancelDcaParams extends InvokeParams {
+  orderAddress: string;
 }
