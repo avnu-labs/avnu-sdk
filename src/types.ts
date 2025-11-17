@@ -477,7 +477,7 @@ export interface GetDcaOrdersParams extends Pageable {
   status?: DcaOrderStatus;
 }
 
-interface PricingStrategy {
+export interface PricingStrategy {
   tokenToMinAmount: string | undefined;
   tokenToMaxAmount: string | undefined;
 }
