@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import qs from 'qs';
 import { z } from 'zod';
+import { FeedDateRange, PriceFeedType } from './enums';
 import {
   ByExchangeTVLDataSchema,
   ByExchangeVolumeDataSchema,
@@ -14,10 +15,8 @@ import {
   ByExchangeTVLData,
   ByExchangeVolumeData,
   CandlePriceData,
-  FeedDateRange,
   FeedProps,
   PriceFeedProps,
-  PriceFeedType,
   SimpleFeedProps,
   SimplePriceData,
   SimpleVolumeData,

@@ -5,11 +5,11 @@ import { DcaOrderSchema, PageSchema } from './schemas';
 import {
   AvnuOptions,
   CreateDcaOrder,
+  DcaOrder,
   GetOrdersParams,
   InvokeCancelDcaParams,
   InvokeCreateDcaParams,
   InvokeTransactionResponse,
-  DcaOrder,
   Page,
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';

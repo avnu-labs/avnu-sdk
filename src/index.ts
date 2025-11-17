@@ -8,3 +8,4 @@ export * from './staking.services';
 export * from './swap.services';
 export * from './token.services';
 export * from './types';
+export * from './enums';

@@ -1,23 +1,20 @@
 import { z } from 'zod';
+import { DcaOrderStatus, DcaTradeStatus, SourceType } from './enums';
 import {
   type ByExchangeTVLData,
   type ByExchangeVolumeData,
   type CandlePriceData,
-  type EstimatedGasFees,
   type DcaOrder,
-  DcaOrderStatus,
   type PoolMemberInfo,
   type Quote,
   Route,
   type SimplePriceData,
   type SimpleVolumeData,
   Source,
-  SourceType,
   type StakingInfo,
   type Token,
   TokenBalance,
   type TokenMarketData,
-  DcaTradeStatus,
 } from './types';
 
 /**

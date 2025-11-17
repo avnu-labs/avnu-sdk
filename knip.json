@@ -1,6 +1,13 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "ignoreExportsUsedInFile": true,
+  "ignore": [
+    "src/enums.ts"
+  ],
+  "ignoreDependencies": [
+    "@starknet-io/starknet-types-09",
+    "typedoc"
+  ],
   "tags": [
     "-lintignore"
   ]

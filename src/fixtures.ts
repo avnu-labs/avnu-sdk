@@ -1,16 +1,15 @@
 import { parseUnits, toBeHex } from 'ethers';
 import moment from 'moment';
 import { constants } from 'starknet';
+import { DcaOrderStatus, SourceType } from './enums';
 import {
   CreateDcaOrder,
-  InvokeTransactionResponse,
   DcaOrder,
-  DcaOrderStatus,
+  InvokeTransactionResponse,
   Page,
   Quote,
   QuoteRequest,
   Source,
-  SourceType,
   SwapCalls,
   Token,
   TokenPrice,

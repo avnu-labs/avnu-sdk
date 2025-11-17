@@ -1,5 +1,7 @@
+import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import type { Duration } from 'moment';
 import { AccountInterface, Call, ExecutionParameters, PaymasterInterface } from 'starknet';
+import { DcaOrderStatus, DcaTradeStatus, FeedDateRange, FeedResolution, PriceFeedType, SourceType } from './enums';
 
 export interface Pageable {
   page?: number;
@@ -66,36 +68,6 @@ export interface TokenBalance {
 export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
 
 /* MARKET PART */
-
-export enum FeedDateRange {
-  ONE_HOUR = '1H',
-  ONE_DAY = '1D',
-  ONE_WEEK = '1W',
-  ONE_MONTH = '1M',
-  ONE_YEAR = '1Y',
-}
-
-export enum PriceFeedType {
-  LINE = 'LINE',
-  CANDLE = 'CANDLE',
-}
-
-export enum VolumeFeedType {
-  LINE = 'LINE',
-  BAR = 'BAR',
-}
-
-export enum FeedResolution {
-  ONE_MIN = '1',
-  FIVE_MIN = '5',
-  FIFTEEN_MIN = '15',
-  HOURLY = '1H',
-  FOUR_HOUR = '4H',
-  DAILY = '1D',
-  WEEKLY = '1W',
-  MONTHLY = '1M',
-  YEARLY = '1Y',
-}
 
 export interface SimpleFeedProps {
   dateRange: FeedDateRange;
@@ -487,13 +459,6 @@ export interface SwapCalls {
   calls: Call[];
 }
 
-export enum SourceType {
-  DEX = 'DEX',
-  MARKET_MAKER = 'MARKET_MAKER',
-  TOKEN_WRAPPER = 'TOKEN_WRAPPER',
-  ORDERBOOK = 'ORDERBOOK',
-}
-
 export interface Source {
   name: string;
   type: SourceType;
@@ -525,12 +490,6 @@ interface PricingStrategy {
   tokenToMaxAmount: string | undefined;
 }
 
-export enum DcaTradeStatus {
-  CANCELLED = 'CANCELLED',
-  PENDING = 'PENDING',
-  SUCCEEDED = 'SUCCEEDED',
-}
-
 interface DcaTrade {
   sellAmount: bigint;
   sellAmountInUsd: number;
@@ -541,12 +500,6 @@ interface DcaTrade {
   status: DcaTradeStatus;
   txHash?: string;
   errorReason?: string;
-}
-
-export enum DcaOrderStatus {
-  INDEXING = 'INDEXING',
-  ACTIVE = 'ACTIVE',
-  CLOSED = 'CLOSED',
 }
 
 export interface DcaOrder {
