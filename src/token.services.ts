@@ -43,6 +43,7 @@ const fetchVerifiedTokenBySymbol = async (symbol: string, options?: AvnuOptions)
   });
 };
 
+// Cacher
 const fetchTokensBalances = async (
   userAddress: string,
   tokens: Token[],
@@ -56,5 +57,7 @@ const fetchTokensBalances = async (
     parseResponseWithSchema(response, z.array(TokenBalanceSchema), options?.avnuPublicKey),
   );
 };
+
+// Cacher -> get transaction recepit
 
 export { fetchTokenByAddress, fetchTokens, fetchTokensBalances, fetchVerifiedTokenBySymbol };
