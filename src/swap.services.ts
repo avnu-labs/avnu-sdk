@@ -2,7 +2,7 @@ import { toBeHex } from 'ethers';
 import qs from 'qs';
 import { z } from 'zod';
 import { executeAllPaymasterFlow } from './paymaster.services';
-import { QuoteSchema } from './schemas';
+import { QuoteSchema, SourceSchema } from './schemas';
 import {
   AvnuOptions,
   InvokeSwapParams,
@@ -23,7 +23,7 @@ import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postReq
  */
 const getSources = (options?: AvnuOptions): Promise<Source[]> =>
   fetch(`${getBaseUrl(options)}/swap/v2/sources`, getRequest(options)).then((response) =>
-    parseResponse<Source[]>(response, options?.avnuPublicKey),
+    parseResponseWithSchema(response, z.array(SourceSchema), options?.avnuPublicKey),
   );
 
 /**

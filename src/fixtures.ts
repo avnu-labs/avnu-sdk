@@ -58,6 +58,7 @@ export const aQuote = (): Quote => ({
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
       routes: [],
+      alternativeSwapCount: 0,
     },
   ],
   gasFees: BigInt('0x0'),
@@ -68,12 +69,7 @@ export const aQuote = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
-  priceRatioUsd: 0,
-  liquiditySource: 'DEX_AGGREGATOR',
-  gasless: {
-    active: false,
-    gasTokenPrices: [],
-  },
+  priceImpactInUsd: 0,
 });
 
 export const aQuoteWithManySubRoutes = (): Quote => ({
@@ -89,8 +85,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   blockNumber: 1,
   chainId: constants.StarknetChainId.SN_SEPOLIA,
   expiry: 100000000000,
-  priceRatioUsd: 0,
-  liquiditySource: 'DEX_AGGREGATOR',
+  priceImpactInUsd: 0,
   routes: [
     {
       name: 'AMM1',
@@ -98,6 +93,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
       percent: 1,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
+      alternativeSwapCount: 0,
       routes: [
         {
           name: 'AMM2',
@@ -105,6 +101,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
           percent: 1,
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
+          alternativeSwapCount: 0,
           routes: [
             {
               name: 'AMM1',
@@ -113,6 +110,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
               sellTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
               buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
               routes: [],
+              alternativeSwapCount: 0,
             },
           ],
         },
@@ -127,10 +125,6 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
-  gasless: {
-    active: false,
-    gasTokenPrices: [],
-  },
 });
 
 export const aQuoteWithManyComplexRoutes = (): Quote => ({
@@ -154,8 +148,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
-  priceRatioUsd: 0,
-  liquiditySource: 'DEX_AGGREGATOR',
+  priceImpactInUsd: 0,
   routes: [
     {
       name: 'AMM1',
@@ -163,6 +156,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
       percent: 0.5,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
+      alternativeSwapCount: 0,
       routes: [
         {
           name: 'AMM2',
@@ -170,6 +164,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
           percent: 0.5,
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
+          alternativeSwapCount: 0,
           routes: [
             {
               name: 'AMM1',
@@ -178,6 +173,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
               sellTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
               buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
               routes: [],
+              alternativeSwapCount: 0,
             },
           ],
         },
@@ -188,6 +184,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
           routes: [],
+          alternativeSwapCount: 0,
         },
       ],
     },
@@ -198,6 +195,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
       routes: [],
+      alternativeSwapCount: 0,
     },
     {
       name: 'AMM1',
@@ -205,6 +203,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
       percent: 0.3,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
+      alternativeSwapCount: 0,
       routes: [
         {
           name: 'AMM2',
@@ -213,6 +212,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
           routes: [],
+          alternativeSwapCount: 0,
         },
         {
           name: 'AMM1',
@@ -221,14 +221,11 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
           routes: [],
+          alternativeSwapCount: 0,
         },
       ],
     },
   ],
-  gasless: {
-    active: false,
-    gasTokenPrices: [],
-  },
 });
 
 export const anInvokeTransactionResponse = (): InvokeTransactionResponse => ({
@@ -280,8 +277,6 @@ export const aPage = <T>(content: T[], size = 10, number = 0, totalPages = 1, to
 
 export const aSource = (): Source => ({
   name: 'AMM1',
-  address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-  icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
   type: SourceType.DEX,
 });
 

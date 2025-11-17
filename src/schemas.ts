@@ -8,8 +8,11 @@ import {
   OrderStatus,
   type PoolMemberInfo,
   type Quote,
+  Route,
   type SimplePriceData,
   type SimpleVolumeData,
+  Source,
+  SourceType,
   type StakingInfo,
   type Token,
   TokenBalance,
@@ -79,6 +82,15 @@ export const TokenBalanceSchema = z.object({
   balance: hexToBigInt,
   balanceInUsd: z.number(),
 }) satisfies z.ZodType<TokenBalance>;
+
+/** Source Schemas */
+
+export const SourceTypeSchema = z.enum(SourceType);
+
+export const SourceSchema = z.object({
+  name: z.string(),
+  type: SourceTypeSchema,
+}) satisfies z.ZodType<Source>;
 
 /**
  * DCA (Dollar Cost Averaging) Schemas
@@ -157,17 +169,7 @@ export const EstimatedGasFeesSchema = z.object({
  * Swap Schemas
  */
 
-type RouteType = {
-  name: string;
-  address: string;
-  percent: number;
-  sellTokenAddress: string;
-  buyTokenAddress: string;
-  routeInfo?: Map<string, string>;
-  routes: RouteType[];
-};
-
-export const RouteSchema: z.ZodType<RouteType> = z.lazy(() =>
+export const RouteSchema: z.ZodType<Route> = z.lazy(() =>
   z.object({
     name: z.string(),
     address: z.string(),
@@ -176,6 +178,7 @@ export const RouteSchema: z.ZodType<RouteType> = z.lazy(() =>
     buyTokenAddress: z.string(),
     routeInfo: z.map(z.string(), z.string()).optional(),
     routes: z.array(RouteSchema),
+    alternativeSwapCount: z.number(),
   }),
 );
 
@@ -212,12 +215,12 @@ export const QuoteSchema = z.object({
   integratorFees: hexToBigInt,
   integratorFeesInUsd: z.number(),
   integratorFeesBps: hexToBigInt,
-  priceRatioUsd: z.number(),
+  priceImpactInUsd: z.number(),
   sellTokenPriceInUsd: z.number().optional(),
   buyTokenPriceInUsd: z.number().optional(),
-  liquiditySource: z.enum(['DEX_AGGREGATOR', 'MARKET_MAKER', 'SOLVER', 'ORDERBOOK']),
-  gasless: GaslessSchema,
   exactTokenTo: z.boolean().optional(),
+  estimatedSlippage: z.number().optional(),
+  alternativeSwapCount: z.number(),
 }) satisfies z.ZodType<Quote>;
 
 /**

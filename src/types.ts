@@ -417,7 +417,7 @@ export interface Quote {
   chainId: string;
   expiry?: number;
   routes: Route[];
-  gasFees: bigint;// In FRI
+  gasFees: bigint; // In FRI
   gasFeesInUsd: number;
   avnuFees: bigint;
   avnuFeesInUsd: number;
