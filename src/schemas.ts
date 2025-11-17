@@ -5,6 +5,7 @@ import {
   type ByExchangeVolumeData,
   type CandlePriceData,
   type DcaOrder,
+  DcaTrade,
   type PoolMemberInfo,
   type Quote,
   Route,
@@ -97,7 +98,7 @@ export const DcaTradeStatusSchema = z.enum(DcaTradeStatus);
 
 export const DcaTradeSchema = z.object({
   sellAmount: hexToBigInt,
-  sellAmountInUsd: z.number(),
+  sellAmountInUsd: z.number().optional(),
   buyAmount: hexToBigInt.optional(),
   buyAmountInUsd: z.number().optional(),
   expectedTradeDate: isoStringToDate,
@@ -105,7 +106,7 @@ export const DcaTradeSchema = z.object({
   status: DcaTradeStatusSchema,
   txHash: z.string().optional(),
   errorReason: z.string().optional(),
-});
+}) satisfies z.ZodType<DcaTrade>;
 
 export const DcaOrderStatusSchema = z.enum(DcaOrderStatus);
 

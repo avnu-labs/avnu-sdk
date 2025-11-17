@@ -66,7 +66,7 @@ const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
 const getFeedQueryParams = (feedProps: FeedProps, quoteTokenAddress?: string) => {
   const dates = getDate(feedProps.dateRange, true);
   return qs.stringify(
-    { resolution: feedProps.resolution, startDate: dates?.start, endDate: dates?.end, in: quoteTokenAddress },
+    { resolution: feedProps.resolution, startDate: dates?.start, endDate: dates?.end, quoteTokenAddress },
     { arrayFormat: 'repeat' },
   );
 };

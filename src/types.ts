@@ -22,6 +22,9 @@ export interface Page<T> {
   number: number;
 }
 
+export const getLastPageNumber = <T>(page: Page<T> | undefined): number =>
+  page ? Math.ceil(page.totalElements / page.size) - 1 : 0;
+
 /* GLOBAL PART */
 
 export interface InvokeTransactionResponse {
@@ -45,11 +48,12 @@ export interface RequestError {
   revertError: string | undefined;
 }
 
-export class ContractError {
-  constructor(
-    public message: string,
-    public revertError: string,
-  ) {}
+export class ContractError extends Error {
+  public readonly revertError: string;
+  constructor(message: string, revertError: string) {
+    super(message);
+    this.revertError = revertError;
+  }
 }
 
 /* PAYMASTER PART */
@@ -478,9 +482,9 @@ interface PricingStrategy {
   tokenToMaxAmount: string | undefined;
 }
 
-interface DcaTrade {
+export interface DcaTrade {
   sellAmount: bigint;
-  sellAmountInUsd: number;
+  sellAmountInUsd?: number;
   buyAmount?: bigint;
   buyAmountInUsd?: number;
   expectedTradeDate: Date;
