@@ -432,11 +432,6 @@ export interface Quote {
   estimatedSlippage?: number;
 }
 
-export interface Gasless {
-  active: boolean;
-  gasTokenPrices: { tokenAddress: string; gasFeesInUsd: number; gasFeesInGasToken: bigint }[];
-}
-
 export interface InvokeTransactionResponse {
   transactionHash: string;
 }

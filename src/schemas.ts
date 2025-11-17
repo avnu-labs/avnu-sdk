@@ -182,17 +182,6 @@ export const RouteSchema: z.ZodType<Route> = z.lazy(() =>
   }),
 );
 
-export const GaslessSchema = z.object({
-  active: z.boolean(),
-  gasTokenPrices: z.array(
-    z.object({
-      tokenAddress: z.string(),
-      gasFeesInUsd: z.number(),
-      gasFeesInGasToken: hexToBigInt,
-    }),
-  ),
-});
-
 export const QuoteSchema = z.object({
   quoteId: z.string(),
   sellTokenAddress: z.string(),
