@@ -1,5 +1,6 @@
 export * from './constants';
 export * from './dca.services';
+export * from './enums';
 export * from './fixtures';
 export * from './market.services';
 export * from './paymaster.services';
@@ -8,4 +9,3 @@ export * from './staking.services';
 export * from './swap.services';
 export * from './token.services';
 export * from './types';
-export * from './enums';

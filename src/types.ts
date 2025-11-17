@@ -14,11 +14,6 @@ export interface GetTokensRequest extends Pageable {
   tags?: TokenTag[];
 }
 
-export interface GetTokenRequest {
-  search?: string;
-  tags?: TokenTag[];
-}
-
 export interface Page<T> {
   content: T[];
   totalPages: number;
@@ -29,9 +24,32 @@ export interface Page<T> {
 
 /* GLOBAL PART */
 
+export interface InvokeTransactionResponse {
+  transactionHash: string;
+}
+
 interface InvokeParams {
   provider: AccountInterface;
   paymaster?: InvokePaymasterParams;
+}
+
+export interface AvnuOptions {
+  baseUrl?: string;
+  impulseBaseUrl?: string;
+  abortSignal?: AbortSignal;
+  avnuPublicKey?: string;
+}
+
+export interface RequestError {
+  messages: string[];
+  revertError: string | undefined;
+}
+
+export class ContractError {
+  constructor(
+    public message: string,
+    public revertError: string,
+  ) {}
 }
 
 /* PAYMASTER PART */
@@ -43,6 +61,28 @@ export interface PaymasterParams {
 
 export interface InvokePaymasterParams extends PaymasterParams {
   active: boolean;
+}
+
+export interface BuildPaymasterTransactionParams {
+  takerAddress: string;
+  paymaster: PaymasterParams;
+  calls: Call[];
+}
+
+export interface SignTransactionParams {
+  provider: AccountInterface;
+  typedData: OutsideExecutionTypedData;
+}
+
+export interface ExecutePaymasterTransactionParams {
+  takerAddress: string;
+  paymaster: PaymasterParams;
+  signedTransaction: SignedPaymasterTransaction;
+}
+
+export interface SignedPaymasterTransaction {
+  typedData: OutsideExecutionTypedData;
+  signature: string[];
 }
 
 /* TOKEN PART */
@@ -349,6 +389,17 @@ export interface Apr {
 }
 /* SWAP PART */
 
+export interface InvokeSwapParams extends InvokeParams {
+  quote: Quote;
+  slippage: number;
+  executeApprove?: boolean;
+}
+
+export interface SwapCalls {
+  chainId: string;
+  calls: Call[];
+}
+
 export interface QuoteRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
@@ -403,27 +454,6 @@ export interface Quote {
   estimatedSlippage?: number;
 }
 
-export interface InvokeTransactionResponse {
-  transactionHash: string;
-}
-
-export interface RequestError {
-  messages: string[];
-  revertError: string | undefined;
-}
-
-export interface AvnuOptions {
-  baseUrl?: string;
-  impulseBaseUrl?: string;
-  abortSignal?: AbortSignal;
-  avnuPublicKey?: string;
-}
-
-export interface SignedPaymasterTransaction {
-  typedData: OutsideExecutionTypedData;
-  signature: string[];
-}
-
 export interface QuoteToCallsParams {
   quoteId: string;
   slippage: number;
@@ -431,58 +461,16 @@ export interface QuoteToCallsParams {
   executeApprove?: boolean;
 }
 
-export interface BuildPaymasterTransactionParams {
-  takerAddress: string;
-  paymaster: PaymasterParams;
-  calls: Call[];
-}
-
-export interface SignTransactionParams {
-  provider: AccountInterface;
-  typedData: OutsideExecutionTypedData;
-}
-
-export interface ExecutePaymasterTransactionParams {
-  takerAddress: string;
-  paymaster: PaymasterParams;
-  signedTransaction: SignedPaymasterTransaction;
-}
-
-export interface InvokeSwapParams extends InvokeParams {
-  quote: Quote;
-  slippage: number;
-  executeApprove?: boolean;
-}
-
-export interface SwapCalls {
-  chainId: string;
-  calls: Call[];
-}
-
 export interface Source {
   name: string;
   type: SourceType;
 }
 
-export class ContractError {
-  constructor(
-    public message: string,
-    public revertError: string,
-  ) {}
-}
+/* DCA PART */
 
-export interface GetOrdersParams {
+export interface GetDcaOrdersParams extends Pageable {
   traderAddress: string;
   status?: DcaOrderStatus;
-  page?: number;
-  size?: number;
-  sort?: Sort;
-}
-
-export interface Sort {
-  field: string;
-  label: string;
-  direction: 'ASC' | 'DESC';
 }
 
 interface PricingStrategy {
@@ -528,31 +516,6 @@ export interface DcaOrder {
   cancelledTradesCount: number;
   pendingTradesCount: number;
   trades: DcaTrade[];
-}
-
-export interface EstimatedGasFees {
-  overallFee: bigint;
-  overallFeeInUsd: number;
-  paymaster: EstimatedGasFeesPaymaster;
-}
-
-export interface EstimatedGasFeesPaymaster {
-  active: boolean;
-  gasTokenPrices: EstimateFeeGasTokenPrice[];
-}
-
-export interface EstimateFeeGasTokenPrice {
-  tokenAddress: string;
-  gasFeesInGasToken: bigint;
-  gasFeesInUsd: number;
-}
-
-export interface PaymasterOptions {
-  gasless?: boolean;
-  gasfree?: boolean;
-  gasTokenAddress?: string;
-  maxGasTokenAmount?: bigint;
-  executeGaslessTxCallback?: () => unknown;
 }
 
 export interface CreateDcaOrder {

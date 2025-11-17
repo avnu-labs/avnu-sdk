@@ -6,7 +6,7 @@ import {
   AvnuOptions,
   CreateDcaOrder,
   DcaOrder,
-  GetOrdersParams,
+  GetDcaOrdersParams,
   InvokeCancelDcaParams,
   InvokeCreateDcaParams,
   InvokeTransactionResponse,
@@ -15,7 +15,7 @@ import {
 import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
 
 const getDcaOrders = async (
-  { traderAddress, status, page, size, sort }: GetOrdersParams,
+  { traderAddress, status, page, size, sort }: GetDcaOrdersParams,
   options?: AvnuOptions,
 ): Promise<Page<DcaOrder>> => {
   const params = qs.stringify({ traderAddress, status, page, size, sort }, { arrayFormat: 'repeat' });
