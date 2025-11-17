@@ -389,6 +389,7 @@ export interface QuoteRequest {
   integratorFees?: bigint;
   integratorFeeRecipient?: string;
   integratorName?: string;
+  onlyDirect?: boolean;
 }
 
 export interface Route {
@@ -399,6 +400,7 @@ export interface Route {
   buyTokenAddress: string;
   routeInfo?: Map<string, string>;
   routes: Route[];
+  alternativeSwapCount: number;
 }
 
 export interface Quote {
@@ -415,7 +417,7 @@ export interface Quote {
   chainId: string;
   expiry?: number;
   routes: Route[];
-  gasFees: bigint;
+  gasFees: bigint;// In FRI
   gasFeesInUsd: number;
   avnuFees: bigint;
   avnuFeesInUsd: number;
@@ -423,12 +425,11 @@ export interface Quote {
   integratorFees: bigint;
   integratorFeesInUsd: number;
   integratorFeesBps: bigint;
-  priceRatioUsd: number;
+  priceImpactInUsd: number;
   sellTokenPriceInUsd?: number;
   buyTokenPriceInUsd?: number;
-  liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER' | 'ORDERBOOK';
-  gasless: Gasless;
   exactTokenTo?: boolean;
+  estimatedSlippage?: number;
 }
 
 export interface Gasless {
@@ -495,14 +496,12 @@ export interface SwapCalls {
 export enum SourceType {
   DEX = 'DEX',
   MARKET_MAKER = 'MARKET_MAKER',
-  SOLVER = 'SOLVER',
+  TOKEN_WRAPPER = 'TOKEN_WRAPPER',
   ORDERBOOK = 'ORDERBOOK',
 }
 
 export interface Source {
   name: string;
-  address: string;
-  icon?: string;
   type: SourceType;
 }
 
