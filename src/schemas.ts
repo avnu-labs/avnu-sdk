@@ -4,8 +4,8 @@ import {
   type ByExchangeVolumeData,
   type CandlePriceData,
   type EstimatedGasFees,
-  type OrderReceipt,
-  OrderStatus,
+  type DcaOrder,
+  DcaOrderStatus,
   type PoolMemberInfo,
   type Quote,
   Route,
@@ -17,7 +17,7 @@ import {
   type Token,
   TokenBalance,
   type TokenMarketData,
-  TradeStatus,
+  DcaTradeStatus,
 } from './types';
 
 /**
@@ -96,21 +96,21 @@ export const SourceSchema = z.object({
  * DCA (Dollar Cost Averaging) Schemas
  */
 
-export const TradeStatusSchema = z.enum(TradeStatus);
+export const DcaTradeStatusSchema = z.enum(DcaTradeStatus);
 
-export const TradeSchema = z.object({
+export const DcaTradeSchema = z.object({
   sellAmount: hexToBigInt,
   sellAmountInUsd: z.number(),
   buyAmount: hexToBigInt.optional(),
   buyAmountInUsd: z.number().optional(),
   expectedTradeDate: isoStringToDate,
   actualTradeDate: isoStringToDate.optional(),
-  status: TradeStatusSchema,
+  status: DcaTradeStatusSchema,
   txHash: z.string().optional(),
   errorReason: z.string().optional(),
 });
 
-export const OrderStatusSchema = z.enum(OrderStatus);
+export const DcaOrderStatusSchema = z.enum(DcaOrderStatus);
 
 export const PricingStrategySchema = z.union([
   z.object({
@@ -120,7 +120,7 @@ export const PricingStrategySchema = z.union([
   z.object({}).strict(),
 ]) as z.ZodType<{ tokenToMinAmount: string | undefined; tokenToMaxAmount: string | undefined } | Record<string, never>>;
 
-export const OrderReceiptSchema = z.object({
+export const DcaOrderSchema = z.object({
   id: z.string(),
   blockNumber: z.number(),
   timestamp: isoStringToDate,
@@ -137,7 +137,7 @@ export const OrderReceiptSchema = z.object({
   closeDate: isoStringToDate.optional(),
   frequency: z.string(),
   iterations: z.number(),
-  status: OrderStatusSchema,
+  status: DcaOrderStatusSchema,
   pricingStrategy: PricingStrategySchema,
   amountSold: hexToBigInt,
   amountBought: hexToBigInt,
@@ -145,25 +145,8 @@ export const OrderReceiptSchema = z.object({
   executedTradesCount: z.number(),
   cancelledTradesCount: z.number(),
   pendingTradesCount: z.number(),
-  trades: z.array(TradeSchema),
-}) satisfies z.ZodType<OrderReceipt>;
-
-export const EstimateFeeGasTokenPriceSchema = z.object({
-  tokenAddress: z.string(),
-  gasFeesInGasToken: hexToBigInt,
-  gasFeesInUsd: z.number(),
-});
-
-export const EstimatedGasFeesPaymasterSchema = z.object({
-  active: z.boolean(),
-  gasTokenPrices: z.array(EstimateFeeGasTokenPriceSchema),
-});
-
-export const EstimatedGasFeesSchema = z.object({
-  overallFee: hexToBigInt,
-  overallFeeInUsd: z.number(),
-  paymaster: EstimatedGasFeesPaymasterSchema,
-}) satisfies z.ZodType<EstimatedGasFees>;
+  trades: z.array(DcaTradeSchema),
+}) satisfies z.ZodType<DcaOrder>;
 
 /**
  * Swap Schemas

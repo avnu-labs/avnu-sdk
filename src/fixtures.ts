@@ -4,8 +4,8 @@ import { constants } from 'starknet';
 import {
   CreateDcaOrder,
   InvokeTransactionResponse,
-  OrderReceipt,
-  OrderStatus,
+  DcaOrder,
+  DcaOrderStatus,
   Page,
   Quote,
   QuoteRequest,
@@ -295,7 +295,7 @@ export const aDCACreateOrder = (): CreateDcaOrder => ({
   traderAddress: '0x0',
 });
 
-export const anOrderReceipt = (): OrderReceipt => ({
+export const anOrderReceipt = (): DcaOrder => ({
   id: '1',
   blockNumber: 1,
   timestamp: new Date(),
@@ -312,7 +312,7 @@ export const anOrderReceipt = (): OrderReceipt => ({
   closeDate: new Date(),
   frequency: '1',
   iterations: 1,
-  status: OrderStatus.ACTIVE,
+  status: DcaOrderStatus.ACTIVE,
   pricingStrategy: {
     tokenToMinAmount: '1',
     tokenToMaxAmount: '1',

@@ -1,7 +1,7 @@
 import qs from 'qs';
 import { Call } from 'starknet';
 import { executeAllPaymasterFlow } from './paymaster.services';
-import { OrderReceiptSchema, PageSchema } from './schemas';
+import { DcaOrderSchema, PageSchema } from './schemas';
 import {
   AvnuOptions,
   CreateDcaOrder,
@@ -9,7 +9,7 @@ import {
   InvokeCancelDcaParams,
   InvokeCreateDcaParams,
   InvokeTransactionResponse,
-  OrderReceipt,
+  DcaOrder,
   Page,
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
@@ -17,11 +17,11 @@ import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postReq
 const getDcaOrders = async (
   { traderAddress, status, page, size, sort }: GetOrdersParams,
   options?: AvnuOptions,
-): Promise<Page<OrderReceipt>> => {
+): Promise<Page<DcaOrder>> => {
   const params = qs.stringify({ traderAddress, status, page, size, sort }, { arrayFormat: 'repeat' });
 
   return fetch(`${getBaseUrl(options)}/dca/v1/orders?${params}`, getRequest(options)).then((response) =>
-    parseResponseWithSchema(response, PageSchema(OrderReceiptSchema), options?.avnuPublicKey),
+    parseResponseWithSchema(response, PageSchema(DcaOrderSchema), options?.avnuPublicKey),
   );
 };
 

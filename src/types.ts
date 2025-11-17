@@ -1,4 +1,3 @@
-import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import type { Duration } from 'moment';
 import { AccountInterface, Call, ExecutionParameters, PaymasterInterface } from 'starknet';
 
@@ -509,7 +508,7 @@ export class ContractError {
 
 export interface GetOrdersParams {
   traderAddress: string;
-  status?: OrderStatus;
+  status?: DcaOrderStatus;
   page?: number;
   size?: number;
   sort?: Sort;
@@ -526,31 +525,31 @@ interface PricingStrategy {
   tokenToMaxAmount: string | undefined;
 }
 
-export enum TradeStatus {
+export enum DcaTradeStatus {
   CANCELLED = 'CANCELLED',
   PENDING = 'PENDING',
   SUCCEEDED = 'SUCCEEDED',
 }
 
-interface Trade {
+interface DcaTrade {
   sellAmount: bigint;
   sellAmountInUsd: number;
   buyAmount?: bigint;
   buyAmountInUsd?: number;
   expectedTradeDate: Date;
   actualTradeDate?: Date;
-  status: TradeStatus;
+  status: DcaTradeStatus;
   txHash?: string;
   errorReason?: string;
 }
 
-export enum OrderStatus {
+export enum DcaOrderStatus {
   INDEXING = 'INDEXING',
   ACTIVE = 'ACTIVE',
   CLOSED = 'CLOSED',
 }
 
-export interface OrderReceipt {
+export interface DcaOrder {
   id: string;
   blockNumber: number;
   timestamp: Date;
@@ -567,7 +566,7 @@ export interface OrderReceipt {
   closeDate?: Date;
   frequency: string;
   iterations: number;
-  status: OrderStatus;
+  status: DcaOrderStatus;
   pricingStrategy: PricingStrategy | Record<string, never>;
   amountSold: bigint;
   amountBought: bigint;
@@ -575,7 +574,7 @@ export interface OrderReceipt {
   executedTradesCount: number;
   cancelledTradesCount: number;
   pendingTradesCount: number;
-  trades: Trade[];
+  trades: DcaTrade[];
 }
 
 export interface EstimatedGasFees {
