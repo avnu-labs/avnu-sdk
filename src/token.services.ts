@@ -1,7 +1,6 @@
 import qs from 'qs';
-import z from 'zod';
-import { PageSchema, TokenBalanceSchema, TokenSchema } from './schemas';
-import { AvnuOptions, GetTokensRequest, Page, Token, TokenBalance } from './types';
+import { PageSchema, TokenSchema } from './schemas';
+import { AvnuOptions, GetTokensRequest, Page, Token } from './types';
 import { getBaseUrl, getRequest, parseResponseWithSchema } from './utils';
 
 /**
@@ -58,21 +57,4 @@ const fetchVerifiedTokenBySymbol = async (symbol: string, options?: AvnuOptions)
   });
 };
 
-// Cacher
-const fetchTokensBalances = async (
-  userAddress: string,
-  tokens: Token[],
-  options?: AvnuOptions,
-): Promise<TokenBalance[]> => {
-  const queryParams = qs.stringify(
-    { userAddress, tokenAddress: tokens.map((token) => token.address) },
-    { arrayFormat: 'repeat' },
-  );
-  return fetch(`${getBaseUrl(options)}/v1/starknet/balances?${queryParams}`, getRequest(options)).then((response) =>
-    parseResponseWithSchema(response, z.array(TokenBalanceSchema), options?.avnuPublicKey),
-  );
-};
-
-// Cacher -> get transaction recepit
-
-export { fetchTokenByAddress, fetchTokens, fetchTokensBalances, fetchVerifiedTokenBySymbol };
+export { fetchTokenByAddress, fetchTokens, fetchVerifiedTokenBySymbol };

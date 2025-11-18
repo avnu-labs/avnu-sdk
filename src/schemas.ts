@@ -14,7 +14,6 @@ import {
   Source,
   type StakingInfo,
   type Token,
-  TokenBalance,
   type TokenMarketData,
   TokenPrice,
   type UserStakingInfo,
@@ -75,13 +74,6 @@ export const TokenSchema = z.object({
   extensions: z.record(z.string(), z.string()),
   tags: z.array(z.enum(['Unknown', 'Verified', 'Community', 'Unruggable', 'AVNU'])),
 }) satisfies z.ZodType<Token>;
-
-export const TokenBalanceSchema = z.object({
-  userAddress: z.string(),
-  tokenAddress: z.string(),
-  balance: hexToBigInt,
-  balanceInUsd: z.number(),
-}) satisfies z.ZodType<TokenBalance>;
 
 /** Source Schemas */
 

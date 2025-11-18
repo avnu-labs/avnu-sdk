@@ -43,13 +43,6 @@ export interface Token {
   tags: TokenTag[];
 }
 
-export interface TokenBalance {
-  userAddress: string;
-  tokenAddress: string;
-  balance: bigint;
-  balanceInUsd: number;
-}
-
 export interface GetTokensRequest extends Pageable {
   search?: string;
   tags?: TokenTag[];
