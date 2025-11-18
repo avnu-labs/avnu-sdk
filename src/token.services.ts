@@ -5,12 +5,15 @@ import { AvnuOptions, GetTokensRequest, Page, Token, TokenBalance } from './type
 import { getBaseUrl, getRequest, parseResponseWithSchema } from './utils';
 
 /**
- * Fetches exchangeable tokens from the API.
- * You can filter tokens by tags and search for specific tokens.
+ * Fetches ERC-20 tokens from the API.
+ * You can filter tokens by tags and search for specific tokens by name, symbol or address.
  *
- * @param request The request params for the avnu API `/swap/v1/starknet/tokens` endpoint.
- * @param options Optional options.
- * @returns The best quotes
+ * @param request.page The page number
+ * @param request.size The page size
+ * @param request.search The search token name, symbol or address query
+ * @param request.tags The tags to filter the tokens (see TokenTag enum)
+ * @param options Optional SDK configuration
+ * @returns The page of tokens corresponding to the request params
  */
 const fetchTokens = async (request?: GetTokensRequest, options?: AvnuOptions): Promise<Page<Token>> => {
   const queryParams = qs.stringify(
@@ -27,12 +30,24 @@ const fetchTokens = async (request?: GetTokensRequest, options?: AvnuOptions): P
   );
 };
 
+/**
+ * Fetch a token by address
+ * @param tokenAddress The token address
+ * @param options Optional SDK configuration
+ * @returns The token if found
+ */
 const fetchTokenByAddress = async (tokenAddress: string, options?: AvnuOptions): Promise<Token> => {
   return fetch(`${getBaseUrl(options)}/v1/starknet/tokens/${tokenAddress}`, getRequest(options)).then((response) =>
     parseResponseWithSchema(response, TokenSchema, options?.avnuPublicKey),
   );
 };
 
+/**
+ * Fetch a **verified** or **unruggable** token by symbol
+ * @param symbol The token symbol
+ * @param options Optional SDK configuration
+ * @returns The **verified** or **unruggable** token if found
+ */
 const fetchVerifiedTokenBySymbol = async (symbol: string, options?: AvnuOptions): Promise<Token | undefined> => {
   return fetchTokens({ page: 0, size: 1, tags: ['Verified', 'Unruggable'], search: symbol }, options).then((page) => {
     const token = page.content[0];
