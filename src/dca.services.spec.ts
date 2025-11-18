@@ -2,7 +2,7 @@ import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
 import { BASE_URL } from './constants';
 import { createDcaToCalls, getDcaOrders } from './dca.services';
-import { aDCACreateOrder, anOrderReceipt, aPage } from './fixtures';
+import { aDCACreateOrder, aDCAOrder, aPage } from './fixtures';
 
 describe('DCA services', () => {
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe('DCA services', () => {
 
   describe('Fetching orders', () => {
     it('should return a list of orders', async () => {
-      const order = anOrderReceipt();
+      const order = aDCAOrder();
       // Given
       const response = aPage([
         {

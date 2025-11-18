@@ -6,7 +6,7 @@ import {
   type CandlePriceData,
   type DcaOrder,
   DcaTrade,
-  type PoolMemberInfo,
+  MarketPrice,
   type Quote,
   Route,
   type SimplePriceData,
@@ -16,6 +16,8 @@ import {
   type Token,
   TokenBalance,
   type TokenMarketData,
+  TokenPrice,
+  type UserStakingInfo,
 } from './types';
 
 /**
@@ -316,7 +318,7 @@ export const AprSchema = z.object({
   apr: z.number(),
 });
 
-export const PoolMemberInfoSchema = z.object({
+export const UserStakingInfoSchema = z.object({
   tokenAddress: z.string(),
   tokenPriceInUsd: z.number(),
   poolAddress: z.string(),
@@ -335,7 +337,7 @@ export const PoolMemberInfoSchema = z.object({
   totalUserActionsCount: z.number(),
   expectedYearlyStrkRewards: hexToBigInt,
   aprs: z.array(AprSchema),
-}) satisfies z.ZodType<PoolMemberInfo>;
+}) satisfies z.ZodType<UserStakingInfo>;
 
 export const DelegationPoolSchema = z.object({
   poolAddress: z.string(),
@@ -421,6 +423,17 @@ export const TokenMarketDataSchema = z.object({
     totalSupply: z.number().optional().nullable(),
   }),
 }) satisfies z.ZodType<TokenMarketData>;
+
+export const MarketPriceSchema = z.object({
+  usd: z.number(),
+}) satisfies z.ZodType<MarketPrice>;
+
+export const TokenPriceSchema = z.object({
+  address: z.string(),
+  decimals: z.number(),
+  globalMarket: MarketPriceSchema.nullable(),
+  starknetMarket: MarketPriceSchema.nullable(),
+}) satisfies z.ZodType<TokenPrice>;
 
 /**
  * Pagination Schema

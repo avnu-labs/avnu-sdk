@@ -259,7 +259,7 @@ export interface DelegationPool {
   apr: number;
 }
 
-export interface PoolMemberInfo {
+export interface UserStakingInfo {
   tokenAddress: string;
   tokenPriceInUsd: number;
   poolAddress: string;

@@ -294,7 +294,7 @@ export const aDCACreateOrder = (): CreateDcaOrder => ({
   traderAddress: '0x0',
 });
 
-export const anOrderReceipt = (): DcaOrder => ({
+export const aDCAOrder = (): DcaOrder => ({
   id: '1',
   blockNumber: 1,
   timestamp: new Date(),

@@ -9,6 +9,7 @@ import {
   SimplePriceDataSchema,
   SimpleVolumeDataSchema,
   TokenMarketDataSchema,
+  TokenPriceSchema,
 } from './schemas';
 import {
   AvnuOptions,
@@ -21,8 +22,9 @@ import {
   SimplePriceData,
   SimpleVolumeData,
   TokenMarketData,
+  TokenPriceResponse,
 } from './types';
-import { getImpulseBaseUrl, getRequest, parseResponseWithSchema } from './utils';
+import { getImpulseBaseUrl, getRequest, parseResponseWithSchema, postRequest } from './utils';
 
 const getMarketData = (options?: AvnuOptions): Promise<TokenMarketData[]> =>
   fetch(`${getImpulseBaseUrl(options)}/v1/tokens`, getRequest(options)).then((response) =>
@@ -152,11 +154,21 @@ const getTransferVolumeFeed = (
   ).then((response) => parseResponseWithSchema(response, z.array(SimpleVolumeDataSchema), options?.avnuPublicKey));
 };
 
+const getPrices = (tokenAddresses: string[], options?: AvnuOptions): Promise<TokenPriceResponse> => {
+  const requestBody: { tokens: string[] } = {
+    tokens: tokenAddresses,
+  };
+  return fetch(`${getImpulseBaseUrl(options)}/v3/tokens/prices`, postRequest(requestBody, options)).then((response) =>
+    parseResponseWithSchema(response, z.array(TokenPriceSchema), options?.avnuPublicKey),
+  );
+};
+
 export {
   getExchangeTVLFeed,
   getExchangeVolumeFeed,
   getMarketData,
   getPriceFeed,
+  getPrices,
   getTokenMarketData,
   getTransferVolumeFeed,
   getTVLByExchange,

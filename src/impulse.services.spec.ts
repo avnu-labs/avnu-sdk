@@ -1,10 +1,10 @@
 import fetchMock from 'fetch-mock';
 import { IMPULSE_BASE_URL } from './constants';
 import { aPrice, aPriceRequest } from './fixtures';
-import { getPrices } from './price.services';
+import { getPrices } from './impulse.services';
 import { TokenPriceResponse } from './types';
 
-describe('Price services', () => {
+describe('Impulse services', () => {
   beforeEach(() => {
     fetchMock.restore();
   });
