@@ -25,6 +25,13 @@ export const postRequest = (body: unknown, options?: AvnuOptions): RequestInit =
   ...(body !== undefined && { body: JSON.stringify(body) }),
 });
 
+/**
+ * Parse API response
+ * @param response The fetch Response object
+ * @param avnuPublicKey Optional public key for signature verification
+ * @returns The parsed response if the response is successful
+ * @throws An error if the response is not successful
+ */
 export const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T> => {
   if (response.status === 400) {
     return response.json().then((error: RequestError) => {
