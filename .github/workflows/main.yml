@@ -17,6 +17,8 @@ jobs:
           node-version: 22
       - name: Install
         run: yarn install
+      - name: Knip
+        run: yarn knip
       - name: Lint
         run: yarn lint
       - name: Test
