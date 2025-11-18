@@ -26,16 +26,12 @@ import {
 } from './types';
 import { getImpulseBaseUrl, getRequest, parseResponseWithSchema, postRequest } from './utils';
 
-const getMarketData = (options?: AvnuOptions): Promise<TokenMarketData[]> =>
-  fetch(`${getImpulseBaseUrl(options)}/v1/tokens`, getRequest(options)).then((response) =>
-    parseResponseWithSchema(response, z.array(TokenMarketDataSchema), options?.avnuPublicKey),
-  );
-
-const getTokenMarketData = (tokenAddress: string, options?: AvnuOptions): Promise<TokenMarketData> =>
-  fetch(`${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}`, getRequest(options)).then((response) =>
-    parseResponseWithSchema(response, TokenMarketDataSchema, options?.avnuPublicKey),
-  );
-
+/**
+ * Internal utils to get the start and end dates for a given date range
+ * @param dateRange The date range (ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR)
+ * @param fullDate True if the date should be in full ISO format, false if it should be in YYYY-MM-DD format
+ * @returns The start and end dates
+ */
 const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
   const now = dayjs();
   let start;
@@ -65,6 +61,12 @@ const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
   };
 };
 
+/**
+ * Internal utils to get the query params for a given feed props
+ * @param feedProps The feed props (date range and resolution)
+ * @param quoteTokenAddress The address of the quote token
+ * @returns The query params
+ */
 const getFeedQueryParams = (feedProps: FeedProps, quoteTokenAddress?: string) => {
   const dates = getDate(feedProps.dateRange, true);
   return qs.stringify(
@@ -73,11 +75,47 @@ const getFeedQueryParams = (feedProps: FeedProps, quoteTokenAddress?: string) =>
   );
 };
 
+/**
+ * Internal utils to get the query params for a given simple feed props
+ * @param simpleProps The simple feed props (date range)
+ * @returns The query params
+ */
 const getSimpleQueryParams = (simpleProps: SimpleFeedProps) => {
   const dates = getDate(simpleProps.dateRange, false);
   return qs.stringify({ startDate: dates?.start, endDate: dates?.end }, { arrayFormat: 'repeat' });
 };
 
+/**
+ * Get the most popular tokens on Starknet, including their market data
+ * @param options Optional SDK configuration
+ * @returns The list of tokens with their market data
+ */
+const getMarketData = (options?: AvnuOptions): Promise<TokenMarketData[]> =>
+  fetch(`${getImpulseBaseUrl(options)}/v1/tokens`, getRequest(options)).then((response) =>
+    parseResponseWithSchema(response, z.array(TokenMarketDataSchema), options?.avnuPublicKey),
+  );
+
+/**
+ * Get the market data for a specific token
+ * @param tokenAddress The address of the token
+ * @param options Optional SDK configuration
+ * @returns The market data for the token
+ */
+const getTokenMarketData = (tokenAddress: string, options?: AvnuOptions): Promise<TokenMarketData> =>
+  fetch(`${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}`, getRequest(options)).then((response) =>
+    parseResponseWithSchema(response, TokenMarketDataSchema, options?.avnuPublicKey),
+  );
+
+/**
+ * Get the price feed for a given token
+ * @param tokenAddress The address of the token
+ * @param feedProps.type The type of feed (LINE or CANDLE)
+ * @param feedProps.dateRange The date range (ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR)
+ * @param feedProps.resolution The resolution (1, 5, 15, 1H, 4H, 1D, 1W, 1M, 1Y)
+ * @param quoteTokenAddress The address of the quoted token (optional)
+ * @param options Optional SDK configuration
+ * @returns The price feed data
+ */
 const getPriceFeed = (
   tokenAddress: string,
   feedProps: PriceFeedProps,
@@ -94,6 +132,13 @@ const getPriceFeed = (
   ).then((response) => parseResponseWithSchema(response, schema, options?.avnuPublicKey));
 };
 
+/**
+ * Get the volume by exchange for a given token and a given date range
+ * @param tokenAddress The address of the token
+ * @param simpleProps.dateRange The date range (ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR)
+ * @param options Optional SDK configuration
+ * @returns The volume by exchange data
+ */
 const getVolumeByExchange = (
   tokenAddress: string,
   simpleProps: SimpleFeedProps,
@@ -106,6 +151,15 @@ const getVolumeByExchange = (
   ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
 };
 
+/**
+ * Get the exchange volume feed for a given token
+ * @param tokenAddress The address of the token
+ * @param feedProps.type The type of feed (LINE or CANDLE)
+ * @param feedProps.dateRange The date range (ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR)
+ * @param feedProps.resolution The resolution (1, 5, 15, 1H, 4H, 1D, 1W, 1M, 1Y)
+ * @param options Optional SDK configuration
+ * @returns The exchange volume feed data
+ */
 const getExchangeVolumeFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
@@ -118,6 +172,13 @@ const getExchangeVolumeFeed = (
   ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
 };
 
+/**
+ * Get the TVL by exchange for a given token and a given date range
+ * @param tokenAddress The address of the token
+ * @param simpleProps.dateRange The date range (ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR)
+ * @param options Optional SDK configuration
+ * @returns The TVL by exchange data
+ */
 const getTVLByExchange = (
   tokenAddress: string,
   simpleProps: SimpleFeedProps,
@@ -130,6 +191,15 @@ const getTVLByExchange = (
   ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
 };
 
+/**
+ * Get the exchange TVL feed for a given token
+ * @param tokenAddress The address of the token
+ * @param feedProps.type The type of feed (LINE or CANDLE)
+ * @param feedProps.dateRange The date range (ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR)
+ * @param feedProps.resolution The resolution (1, 5, 15, 1H, 4H, 1D, 1W, 1M, 1Y)
+ * @param options Optional SDK configuration
+ * @returns The exchange TVL feed data
+ */
 const getExchangeTVLFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
@@ -142,6 +212,15 @@ const getExchangeTVLFeed = (
   ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
 };
 
+/**
+ * Get the transfer volume feed for a given token
+ * @param tokenAddress The address of the token
+ * @param feedProps.type The type of feed (LINE or CANDLE)
+ * @param feedProps.dateRange The date range (ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR)
+ * @param feedProps.resolution The resolution (1, 5, 15, 1H, 4H, 1D, 1W, 1M, 1Y)
+ * @param options Optional SDK configuration
+ * @returns The transfer volume feed data
+ */
 const getTransferVolumeFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
@@ -154,6 +233,12 @@ const getTransferVolumeFeed = (
   ).then((response) => parseResponseWithSchema(response, z.array(SimpleVolumeDataSchema), options?.avnuPublicKey));
 };
 
+/**
+ * Get the market prices for a given list of tokens
+ * @param tokenAddresses The list of token addresses
+ * @param options Optional SDK configuration
+ * @returns The market prices for the tokens
+ */
 const getPrices = (tokenAddresses: string[], options?: AvnuOptions): Promise<TokenPriceResponse> => {
   const requestBody: { tokens: string[] } = {
     tokens: tokenAddresses,
