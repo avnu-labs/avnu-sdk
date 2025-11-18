@@ -3,15 +3,18 @@ import type { Duration } from 'moment';
 import { AccountInterface, Call, ExecutionParameters, PaymasterInterface } from 'starknet';
 import { DcaOrderStatus, DcaTradeStatus, FeedDateRange, FeedResolution, PriceFeedType, SourceType } from './enums';
 
+export interface AvnuOptions {
+  baseUrl?: string;
+  impulseBaseUrl?: string;
+  abortSignal?: AbortSignal;
+  avnuPublicKey?: string;
+}
+
+/* Pagination Part */
 export interface Pageable {
   page?: number;
   size?: number;
   sort?: string;
-}
-
-export interface GetTokensRequest extends Pageable {
-  search?: string;
-  tags?: TokenTag[];
 }
 
 export interface Page<T> {
@@ -25,24 +28,58 @@ export interface Page<T> {
 export const getLastPageNumber = <T>(page: Page<T> | undefined): number =>
   page ? Math.ceil(page.totalElements / page.size) - 1 : 0;
 
-/* GLOBAL PART */
+/* Token Part */
+
+export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
+
+export interface Token {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoUri: string;
+  lastDailyVolumeUsd: number;
+  extensions: { [key: string]: string };
+  tags: TokenTag[];
+}
+
+export interface TokenBalance {
+  userAddress: string;
+  tokenAddress: string;
+  balance: bigint;
+  balanceInUsd: number;
+}
+
+export interface GetTokensRequest extends Pageable {
+  search?: string;
+  tags?: TokenTag[];
+}
+
+export interface MarketPrice {
+  usd: number;
+}
+
+export interface TokenPrice {
+  address: string;
+  decimals: number;
+  globalMarket: MarketPrice | null;
+  starknetMarket: MarketPrice | null;
+}
+
+export type TokenPriceResponse = TokenPrice[];
+
+/* Transactions Part */
 
 export interface InvokeTransactionResponse {
   transactionHash: string;
 }
 
-interface InvokeParams {
+export interface InvokeParams {
   provider: AccountInterface;
   paymaster?: InvokePaymasterParams;
 }
 
-export interface AvnuOptions {
-  baseUrl?: string;
-  impulseBaseUrl?: string;
-  abortSignal?: AbortSignal;
-  avnuPublicKey?: string;
-}
-
+/* Error Part */
 export interface RequestError {
   messages: string[];
   revertError: string | undefined;
@@ -56,7 +93,7 @@ export class ContractError extends Error {
   }
 }
 
-/* PAYMASTER PART */
+/* Paymaster Part */
 
 export interface PaymasterParams {
   provider: PaymasterInterface;
@@ -89,309 +126,7 @@ export interface SignedPaymasterTransaction {
   signature: string[];
 }
 
-/* TOKEN PART */
-
-export interface Token {
-  address: string;
-  name: string;
-  symbol: string;
-  decimals: number;
-  logoUri: string;
-  lastDailyVolumeUsd: number;
-  extensions: { [key: string]: string };
-  tags: TokenTag[];
-}
-
-export interface TokenBalance {
-  userAddress: string;
-  tokenAddress: string;
-  balance: bigint;
-  balanceInUsd: number;
-}
-
-export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
-
-/* MARKET PART */
-
-export interface SimpleFeedProps {
-  dateRange: FeedDateRange;
-}
-
-export interface FeedProps extends SimpleFeedProps {
-  resolution: FeedResolution;
-}
-
-export interface PriceFeedProps extends FeedProps {
-  type: PriceFeedType;
-}
-
-export interface PriceData {
-  value: number;
-  valueUsd?: number;
-}
-
-export interface SimplePriceData extends PriceData {
-  date: string;
-}
-
-export interface SimpleVolumeData {
-  date: string;
-  value: number;
-}
-
-export interface ByExchangeVolumeData extends SimpleVolumeData {
-  exchange: string;
-}
-
-export interface ByExchangeTVLData extends SimplePriceData {
-  exchange: string;
-}
-
-export interface CandlePriceData {
-  date: string;
-  close: number;
-  high: number;
-  low: number;
-  open: number;
-  volume: number;
-}
-
-export interface TokenMarketData {
-  position: number;
-  address: string;
-  name: string;
-  symbol: string;
-  decimals: number;
-  logoUri: string;
-  verified: boolean;
-  linePriceFeedInUsd: SimplePriceData[];
-  coingeckoId?: string;
-  website?: string;
-  market: {
-    currentPrice: number;
-    fullyDilutedValuation?: number | null;
-    totalSupply?: number | null;
-    priceChange1h: number;
-    priceChangePercentage1h?: number | null;
-    priceChange24h: number;
-    priceChangePercentage24h?: number | null;
-    priceChange7d: number;
-    priceChangePercentage7d?: number | null;
-    marketCap: number;
-    marketCapChange24h?: number | null;
-    marketCapChangePercentage24h?: number | null;
-    starknetVolume24h: number;
-    starknetTradingVolume24h: number;
-    starknetTvl: number;
-  };
-}
-
-/* ACTION PART */
-export interface Action {
-  blockNumber: bigint;
-  date: Date;
-  transactionHash: string;
-  gasFee: GasFeeInfo | null;
-  type: ActionType;
-  metadata: ActionMetadataDto;
-}
-
-export type ActionType =
-  | 'Swap'
-  | 'OpenDcaOrder'
-  | 'CancelDcaOrder'
-  | 'DcaTrade'
-  | 'StakingStake'
-  | 'StakingInitiateWithdrawal'
-  | 'StakingCancelWithdrawal'
-  | 'StakingWithdraw'
-  | 'StakingClaimRewards';
-
-export interface GasFeeInfo {
-  gasFeeAmount: number;
-  gasFeeAmountUsd?: number;
-  gasFeeTokenAddress: string;
-}
-
-export type ActionMetadataDto =
-  | SwapMetadataDto
-  | OpenDcaOrderMetadataDto
-  | CancelDcaOrderActionMetadataDto
-  | DcaTradeActionMetadataDto
-  | StakingInitiateWithdrawalActionMetadataDto
-  | StakingCancelWithdrawalActionMetadataDto
-  | StakingStakeActionMetadataDto
-  | StakingClaimRewardsActionMetadataDto
-  | StakingWithdrawalActionMetadataDto;
-
-export interface SwapMetadataDto {
-  sellTokenAddress: string;
-  sellAmount: bigint;
-  sellAmountUsd?: number;
-  buyTokenAddress: string;
-  buyAmount: bigint;
-  buyAmountUsd?: number;
-}
-
-export interface OpenDcaOrderMetadataDto {
-  orderClassHash: string;
-  orderAddress: string;
-  sellTokenAddress: string;
-  sellAmount: bigint;
-  sellAmountUsd?: number;
-  sellAmountPerCycle: bigint;
-  buyTokenAddress: string;
-  cycleFrequency: bigint;
-  startDate: Date;
-  endDate: Date;
-}
-
-export interface CancelDcaOrderActionMetadataDto {
-  orderAddress: string;
-}
-
-export interface DcaTradeActionMetadataDto {
-  sellTokenAddress: string;
-  sellAmount: bigint;
-  sellAmountUsd?: number;
-  buyTokenAddress: string;
-  buyAmount: bigint;
-  buyAmountUsd?: number;
-}
-
-export interface StakingInitiateWithdrawalActionMetadataDto {
-  delegationPoolAddress: string;
-  exitTimestamp: Date;
-  amount: bigint;
-  amountUsd?: number;
-  oldDelegatedStake: bigint;
-  oldDelegatedStakeUsd?: number;
-  newDelegatedStake: bigint;
-  newDelegatedStakeUsd?: number;
-}
-
-export interface StakingCancelWithdrawalActionMetadataDto {
-  delegationPoolAddress: string;
-  oldDelegatedStake: bigint;
-  oldDelegatedStakeUsd?: number;
-  newDelegatedStake: bigint;
-  newDelegatedStakeUsd?: number;
-}
-
-export interface StakingStakeActionMetadataDto {
-  delegationPoolAddress: string;
-  oldDelegatedStake: bigint;
-  oldDelegatedStakeUsd?: number;
-  newDelegatedStake: bigint;
-  newDelegatedStakeUsd?: number;
-}
-
-export interface StakingClaimRewardsActionMetadataDto {
-  delegationPoolAddress: string;
-  rewardAddress: string;
-  amount: bigint;
-  amountUsd?: number;
-}
-
-export interface StakingWithdrawalActionMetadataDto {
-  delegationPoolAddress: string;
-  amount: bigint;
-  amountUsd?: number;
-}
-
-/* PRICE PART */
-export interface MarketPrice {
-  usd: number;
-}
-
-export interface TokenPrice {
-  address: string;
-  decimals: number;
-  globalMarket: MarketPrice | null;
-  starknetMarket: MarketPrice | null;
-}
-
-export type TokenPriceResponse = TokenPrice[];
-
-/* STAKING PART */
-interface StakingActionToCallsParams {
-  poolAddress: string;
-  userAddress: string;
-}
-
-export interface StakeToCallsParams extends StakingActionToCallsParams {
-  amount: bigint;
-}
-
-export interface UnstakeToCallsParams extends StakingActionToCallsParams {}
-
-export interface ClaimRewardsToCallsParams extends StakingActionToCallsParams {
-  restake: boolean;
-}
-
-export interface InvokeStakeParams extends InvokeParams {
-  poolAddress: string;
-  amount: bigint;
-}
-
-export interface InvokeInitiateUnstakeParams extends InvokeParams {
-  poolAddress: string;
-  amount: bigint;
-}
-
-export interface InvokeUnstakeParams extends InvokeParams {
-  poolAddress: string;
-}
-
-export interface InvokeClaimRewardsParams extends InvokeParams {
-  poolAddress: string;
-  restake: boolean;
-}
-
-export interface StakingInfo {
-  selfStakedAmount: bigint;
-  selfStakedAmountInUsd: number | undefined;
-  operationalAddress: string;
-  rewardAddress: string;
-  stakerAddress: string;
-  commission: number;
-  delegationPools: DelegationPool[];
-}
-
-export interface DelegationPool {
-  poolAddress: string;
-  tokenAddress: string;
-  stakedAmount: bigint;
-  stakedAmountInUsd: number | undefined;
-  apr: number;
-}
-
-export interface PoolMemberInfo {
-  tokenAddress: string;
-  tokenPriceInUsd: number;
-  poolAddress: string;
-  userAddress: string;
-  amount: bigint;
-  amountInUsd: number | undefined;
-  unclaimedRewards: bigint;
-  unclaimedRewardsInUsd: number | undefined;
-  unpoolAmount: bigint;
-  unpoolAmountInUsd: number | undefined;
-  unpoolTime: Date | undefined;
-  totalClaimedRewards: bigint;
-  totalClaimedRewardsHistoricalUsd: number;
-  totalClaimedRewardsUsd: number;
-  userActions: Action[];
-  totalUserActionsCount: number;
-  expectedYearlyStrkRewards: bigint;
-  aprs: Apr[];
-}
-
-export interface Apr {
-  date: Date;
-  apr: number;
-}
-/* SWAP PART */
+/* Swap Part */
 
 export interface InvokeSwapParams extends InvokeParams {
   quote: Quote;
@@ -470,7 +205,87 @@ export interface Source {
   type: SourceType;
 }
 
-/* DCA PART */
+/* Staking Part */
+
+export interface StakingActionToCallsParams {
+  poolAddress: string;
+  userAddress: string;
+}
+
+export interface StakeToCallsParams extends StakingActionToCallsParams {
+  amount: bigint;
+}
+
+export interface UnstakeToCallsParams extends StakingActionToCallsParams {}
+
+export interface ClaimRewardsToCallsParams extends StakingActionToCallsParams {
+  restake: boolean;
+}
+
+export interface InvokeStakeParams extends InvokeParams {
+  poolAddress: string;
+  amount: bigint;
+}
+
+export interface InvokeInitiateUnstakeParams extends InvokeParams {
+  poolAddress: string;
+  amount: bigint;
+}
+
+export interface InvokeUnstakeParams extends InvokeParams {
+  poolAddress: string;
+}
+
+export interface InvokeClaimRewardsParams extends InvokeParams {
+  poolAddress: string;
+  restake: boolean;
+}
+
+export interface StakingInfo {
+  selfStakedAmount: bigint;
+  selfStakedAmountInUsd: number | undefined;
+  operationalAddress: string;
+  rewardAddress: string;
+  stakerAddress: string;
+  commission: number;
+  delegationPools: DelegationPool[];
+}
+
+export interface DelegationPool {
+  poolAddress: string;
+  tokenAddress: string;
+  stakedAmount: bigint;
+  stakedAmountInUsd: number | undefined;
+  apr: number;
+}
+
+export interface PoolMemberInfo {
+  tokenAddress: string;
+  tokenPriceInUsd: number;
+  poolAddress: string;
+  userAddress: string;
+  amount: bigint;
+  amountInUsd: number | undefined;
+  unclaimedRewards: bigint;
+  unclaimedRewardsInUsd: number | undefined;
+  unpoolAmount: bigint;
+  unpoolAmountInUsd: number | undefined;
+  unpoolTime: Date | undefined;
+  totalClaimedRewards: bigint;
+  totalClaimedRewardsHistoricalUsd: number;
+  totalClaimedRewardsUsd: number;
+  userActions: Action[];
+  totalUserActionsCount: number;
+  expectedYearlyStrkRewards: bigint;
+  aprs: Apr[];
+}
+
+export interface Apr {
+  date: Date;
+  apr: number;
+}
+
+/* DCA Part */
 
 export interface GetDcaOrdersParams extends Pageable {
   traderAddress: string;
@@ -538,4 +353,192 @@ export interface InvokeCreateDcaParams extends InvokeParams {
 
 export interface InvokeCancelDcaParams extends InvokeParams {
   orderAddress: string;
+}
+
+/* User Actions Part */
+export interface Action {
+  blockNumber: bigint;
+  date: Date;
+  transactionHash: string;
+  gasFee: GasFeeInfo | null;
+  type: ActionType;
+  metadata: ActionMetadata;
+}
+
+export type ActionType =
+  | 'Swap'
+  | 'OpenDcaOrder'
+  | 'CancelDcaOrder'
+  | 'DcaTrade'
+  | 'StakingStake'
+  | 'StakingInitiateWithdrawal'
+  | 'StakingCancelWithdrawal'
+  | 'StakingWithdraw'
+  | 'StakingClaimRewards';
+
+export interface GasFeeInfo {
+  gasFeeAmount: number;
+  gasFeeAmountUsd?: number;
+  gasFeeTokenAddress: string;
+}
+
+export type ActionMetadata =
+  | SwapMetadata
+  | DcaOrderMetadata
+  | CancelDcaOrderMetadata
+  | DcaTradeMetadata
+  | StakingInitiateUnstakeMetadata
+  | StakingCancelUnstakeMetadata
+  | StakingStakeMetadata
+  | StakingClaimRewardsMetadata
+  | StakingUnstakeMetadata;
+
+export interface SwapMetadata {
+  sellTokenAddress: string;
+  sellAmount: bigint;
+  sellAmountUsd?: number;
+  buyTokenAddress: string;
+  buyAmount: bigint;
+  buyAmountUsd?: number;
+}
+
+export interface DcaOrderMetadata {
+  orderClassHash: string;
+  orderAddress: string;
+  sellTokenAddress: string;
+  sellAmount: bigint;
+  sellAmountUsd?: number;
+  sellAmountPerCycle: bigint;
+  buyTokenAddress: string;
+  cycleFrequency: bigint;
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface CancelDcaOrderMetadata {
+  orderAddress: string;
+}
+
+export interface DcaTradeMetadata {
+  sellTokenAddress: string;
+  sellAmount: bigint;
+  sellAmountUsd?: number;
+  buyTokenAddress: string;
+  buyAmount: bigint;
+  buyAmountUsd?: number;
+}
+
+export interface StakingInitiateUnstakeMetadata {
+  delegationPoolAddress: string;
+  exitTimestamp: Date;
+  amount: bigint;
+  amountUsd?: number;
+  oldDelegatedStake: bigint;
+  oldDelegatedStakeUsd?: number;
+  newDelegatedStake: bigint;
+  newDelegatedStakeUsd?: number;
+}
+
+export interface StakingCancelUnstakeMetadata {
+  delegationPoolAddress: string;
+  oldDelegatedStake: bigint;
+  oldDelegatedStakeUsd?: number;
+  newDelegatedStake: bigint;
+  newDelegatedStakeUsd?: number;
+}
+
+export interface StakingStakeMetadata {
+  delegationPoolAddress: string;
+  oldDelegatedStake: bigint;
+  oldDelegatedStakeUsd?: number;
+  newDelegatedStake: bigint;
+  newDelegatedStakeUsd?: number;
+}
+
+export interface StakingClaimRewardsMetadata {
+  delegationPoolAddress: string;
+  rewardAddress: string;
+  amount: bigint;
+  amountUsd?: number;
+}
+
+export interface StakingUnstakeMetadata {
+  delegationPoolAddress: string;
+  amount: bigint;
+  amountUsd?: number;
+}
+
+/* Impulse Market Part */
+
+export interface SimpleFeedProps {
+  dateRange: FeedDateRange;
+}
+
+export interface FeedProps extends SimpleFeedProps {
+  resolution: FeedResolution;
+}
+
+export interface PriceFeedProps extends FeedProps {
+  type: PriceFeedType;
+}
+
+export interface PriceData {
+  value: number;
+  valueUsd?: number;
+}
+
+export interface SimplePriceData extends PriceData {
+  date: string;
+}
+
+export interface SimpleVolumeData {
+  date: string;
+  value: number;
+}
+
+export interface ByExchangeVolumeData extends SimpleVolumeData {
+  exchange: string;
+}
+
+export interface ByExchangeTVLData extends SimplePriceData {
+  exchange: string;
+}
+
+export interface CandlePriceData {
+  date: string;
+  close: number;
+  high: number;
+  low: number;
+  open: number;
+  volume: number;
+}
+
+export interface TokenMarketData {
+  position: number;
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoUri: string;
+  verified: boolean;
+  linePriceFeedInUsd: SimplePriceData[];
+  coingeckoId?: string;
+  website?: string;
+  market: {
+    currentPrice: number;
+    fullyDilutedValuation?: number | null;
+    totalSupply?: number | null;
+    priceChange1h: number;
+    priceChangePercentage1h?: number | null;
+    priceChange24h: number;
+    priceChangePercentage24h?: number | null;
+    priceChange7d: number;
+    priceChangePercentage7d?: number | null;
+    marketCap: number;
+    marketCapChange24h?: number | null;
+    marketCapChangePercentage24h?: number | null;
+    starknetVolume24h: number;
+    starknetTradingVolume24h: number;
+    starknetTvl: number;
+  };
 }

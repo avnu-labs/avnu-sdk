@@ -212,7 +212,7 @@ export const SwapMetadataSchema = z.object({
   buyAmountUsd: z.number().optional(),
 });
 
-export const OpenDcaOrderMetadataSchema = z.object({
+export const DcaOrderMetadataSchema = z.object({
   orderClassHash: z.string(),
   orderAddress: z.string(),
   sellTokenAddress: z.string(),
@@ -225,11 +225,11 @@ export const OpenDcaOrderMetadataSchema = z.object({
   endDate: isoStringToDate,
 });
 
-export const CancelDcaOrderActionMetadataSchema = z.object({
+export const CancelDcaOrderMetadataSchema = z.object({
   orderAddress: z.string(),
 });
 
-export const DcaTradeActionMetadataSchema = z.object({
+export const DcaTradeMetadataSchema = z.object({
   sellTokenAddress: z.string(),
   sellAmount: hexToBigInt,
   sellAmountUsd: z.number().optional(),
@@ -238,7 +238,7 @@ export const DcaTradeActionMetadataSchema = z.object({
   buyAmountUsd: z.number().optional(),
 });
 
-export const StakingInitiateWithdrawalActionMetadataSchema = z.object({
+export const StakingInitiateUnstakeMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
   exitTimestamp: isoStringToDate,
   amount: hexToBigInt,
@@ -249,7 +249,7 @@ export const StakingInitiateWithdrawalActionMetadataSchema = z.object({
   newDelegatedStakeUsd: z.number().optional(),
 });
 
-export const StakingCancelWithdrawalActionMetadataSchema = z.object({
+export const StakingCancelUnstakeMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
   oldDelegatedStake: hexToBigInt,
   oldDelegatedStakeUsd: z.number().optional(),
@@ -257,7 +257,7 @@ export const StakingCancelWithdrawalActionMetadataSchema = z.object({
   newDelegatedStakeUsd: z.number().optional(),
 });
 
-export const StakingStakeActionMetadataSchema = z.object({
+export const StakingStakeMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
   oldDelegatedStake: hexToBigInt,
   oldDelegatedStakeUsd: z.number().optional(),
@@ -265,14 +265,14 @@ export const StakingStakeActionMetadataSchema = z.object({
   newDelegatedStakeUsd: z.number().optional(),
 });
 
-export const StakingClaimRewardsActionMetadataSchema = z.object({
+export const StakingClaimRewardsMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
   rewardAddress: z.string(),
   amount: hexToBigInt,
   amountUsd: z.number().optional(),
 });
 
-export const StakingWithdrawalActionMetadataSchema = z.object({
+export const StakingUnstakeMetadataSchema = z.object({
   delegationPoolAddress: z.string(),
   amount: hexToBigInt,
   amountUsd: z.number().optional(),
@@ -280,14 +280,14 @@ export const StakingWithdrawalActionMetadataSchema = z.object({
 
 export const ActionMetadataSchema = z.union([
   SwapMetadataSchema,
-  OpenDcaOrderMetadataSchema,
-  CancelDcaOrderActionMetadataSchema,
-  DcaTradeActionMetadataSchema,
-  StakingInitiateWithdrawalActionMetadataSchema,
-  StakingCancelWithdrawalActionMetadataSchema,
-  StakingStakeActionMetadataSchema,
-  StakingClaimRewardsActionMetadataSchema,
-  StakingWithdrawalActionMetadataSchema,
+  DcaOrderMetadataSchema,
+  CancelDcaOrderMetadataSchema,
+  DcaTradeMetadataSchema,
+  StakingInitiateUnstakeMetadataSchema,
+  StakingCancelUnstakeMetadataSchema,
+  StakingStakeMetadataSchema,
+  StakingClaimRewardsMetadataSchema,
+  StakingUnstakeMetadataSchema,
 ]);
 
 export const ActionTypeSchema = z.enum([
