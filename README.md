@@ -48,18 +48,8 @@ For complete documentation, examples, and API reference, visit:
 
 **[https://doc.avnu.fi/](https://doc.avnu.fi/)**
 
-## Examples
-
-Check out the [`/examples`](/examples) folder for integration examples with:
-- Starknet.js
-- Starknet React
-- get-starknet
-
 ## Requirements
 
 - Node.js >= 22
 - Starknet.js >= 8.9.0
 
-## License
-
-MIT
