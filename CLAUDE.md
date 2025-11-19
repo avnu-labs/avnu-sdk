@@ -540,8 +540,10 @@ interface RequestError {
 ### Peer Dependencies (installed by consumers)
 ```json
 {
-  "starknet": "^7.5.0",
-  "ethers": "^6.14.3"
+  "starknet": "^8.9.0",
+  "ethers": "^6.15.0",
+  "moment": "^2.30.1",
+  "qs": "^6.14.0"
 }
 ```
 
@@ -549,12 +551,9 @@ interface RequestError {
 ```json
 {
   "dayjs": "^1.11.19",  // Date handling (lightweight)
-  "qs": "^6.14.0",      // Query string serialization
   "zod": "^4.1.12"      // Runtime validation
 }
 ```
-
-**Note:** `moment` is used in devDependencies for tests but not required for users (dayjs provided instead).
 
 ## Testing
 

@@ -58,7 +58,7 @@ Check out the [`/examples`](/examples) folder for integration examples with:
 ## Requirements
 
 - Node.js >= 22
-- Starknet.js >= 7.5.0
+- Starknet.js >= 8.9.0
 
 ## License
 
