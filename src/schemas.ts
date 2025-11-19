@@ -184,7 +184,6 @@ export const QuoteSchema = z.object({
   buyTokenPriceInUsd: z.number().optional(),
   exactTokenTo: z.boolean().optional(),
   estimatedSlippage: z.number().optional(),
-  alternativeSwapCount: z.number(),
 }) satisfies z.ZodType<Quote>;
 
 /**
