@@ -5724,10 +5724,10 @@ stack-utils@^2.0.3:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-starknet@8.6.0:
-  version "8.6.0"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-8.6.0.tgz#37bd77db2583c7fb1feb35cdb8cc6059c5396048"
-  integrity sha512-5rDiJPnc3GpH7KA8B/TqCzKgdpZbxaA52clf/OEhDKhMbbJpWeRcDqKKC8u+kFD9Nd/Rt6y2hwmZ32u82Ycurg==
+starknet@8.9.0:
+  version "8.9.0"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-8.9.0.tgz#9dcfb90358e16d4514c3026a968a11905f50ffbc"
+  integrity sha512-uhXSCKW0SMBGckd4yVlscVz4DMkQqZ+/RTpfxZ5J46e6AuCUHOqGKv61tqgUP9GhdvgHV/XyN+kdmlyZn3rXjA==
   dependencies:
     "@noble/curves" "~1.7.0"
     "@noble/hashes" "~1.6.0"
