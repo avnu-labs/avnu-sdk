@@ -1,15 +1,20 @@
+import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import type { Duration } from 'moment';
-import { Call } from 'starknet';
+import { AccountInterface, Call, ExecutionParameters, PaymasterInterface } from 'starknet';
+import { DcaOrderStatus, DcaTradeStatus, FeedDateRange, FeedResolution, PriceFeedType, SourceType } from './enums';
 
+export interface AvnuOptions {
+  baseUrl?: string;
+  impulseBaseUrl?: string;
+  abortSignal?: AbortSignal;
+  avnuPublicKey?: string;
+}
+
+/* Pagination Part */
 export interface Pageable {
   page?: number;
   size?: number;
   sort?: string;
-}
-
-export interface GetTokensRequest extends Pageable {
-  search?: string;
-  tags?: TokenTag[];
 }
 
 export interface Page<T> {
@@ -19,6 +24,13 @@ export interface Page<T> {
   size: number;
   number: number;
 }
+
+export const getLastPageNumber = <T>(page: Page<T> | undefined): number =>
+  page ? Math.ceil(page.totalElements / page.size) - 1 : 0;
+
+/* Token Part */
+
+export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
 
 export interface Token {
   address: string;
@@ -31,12 +43,93 @@ export interface Token {
   tags: TokenTag[];
 }
 
-export type TokenTag = 'Unknown' | 'Verified' | 'Community' | 'Unruggable' | 'AVNU';
+export interface GetTokensRequest extends Pageable {
+  search?: string;
+  tags?: TokenTag[];
+}
 
-export interface PriceRequest {
-  sellTokenAddress: string;
-  buyTokenAddress: string;
-  sellAmount: bigint;
+export interface MarketPrice {
+  usd: number;
+}
+
+export interface TokenPrice {
+  address: string;
+  decimals: number;
+  globalMarket: MarketPrice | null;
+  starknetMarket: MarketPrice | null;
+}
+
+export type TokenPriceResponse = TokenPrice[];
+
+/* Transactions Part */
+
+export interface InvokeTransactionResponse {
+  transactionHash: string;
+}
+
+export interface InvokeParams {
+  provider: AccountInterface;
+  paymaster?: InvokePaymasterParams;
+}
+
+/* Error Part */
+export interface RequestError {
+  messages: string[];
+  revertError: string | undefined;
+}
+
+export class ContractError extends Error {
+  public readonly revertError: string;
+  constructor(message: string, revertError: string) {
+    super(message);
+    this.revertError = revertError;
+  }
+}
+
+/* Paymaster Part */
+
+export interface PaymasterParams {
+  provider: PaymasterInterface;
+  params: ExecutionParameters;
+}
+
+export interface InvokePaymasterParams extends PaymasterParams {
+  active: boolean;
+}
+
+export interface BuildPaymasterTransactionParams {
+  takerAddress: string;
+  paymaster: PaymasterParams;
+  calls: Call[];
+}
+
+export interface SignTransactionParams {
+  provider: AccountInterface;
+  typedData: OutsideExecutionTypedData;
+}
+
+export interface ExecutePaymasterTransactionParams {
+  takerAddress: string;
+  paymaster: PaymasterParams;
+  signedTransaction: SignedPaymasterTransaction;
+}
+
+export interface SignedPaymasterTransaction {
+  typedData: OutsideExecutionTypedData;
+  signature: string[];
+}
+
+/* Swap Part */
+
+export interface InvokeSwapParams extends InvokeParams {
+  quote: Quote;
+  slippage: number;
+  executeApprove?: boolean;
+}
+
+export interface SwapCalls {
+  chainId: string;
+  calls: Call[];
 }
 
 export interface QuoteRequest {
@@ -50,6 +143,7 @@ export interface QuoteRequest {
   integratorFees?: bigint;
   integratorFeeRecipient?: string;
   integratorName?: string;
+  onlyDirect?: boolean;
 }
 
 export interface Route {
@@ -60,21 +154,7 @@ export interface Route {
   buyTokenAddress: string;
   routeInfo?: Map<string, string>;
   routes: Route[];
-}
-
-export interface Price {
-  sellTokenAddress: string;
-  sellAmount: bigint;
-  sellAmountInUsd: number;
-  buyTokenAddress: string;
-  buyAmount: bigint;
-  buyAmountInUsd: number;
-  blockNumber?: number;
-  chainId: string;
-  sourceName: string;
-  priceRatioUsd: number;
-  gasFees: bigint;
-  gasFeesInUsd: number;
+  alternativeSwapCount: number;
 }
 
 export interface Quote {
@@ -91,7 +171,7 @@ export interface Quote {
   chainId: string;
   expiry?: number;
   routes: Route[];
-  gasFees: bigint;
+  gasFees: bigint; // In FRI
   gasFeesInUsd: number;
   avnuFees: bigint;
   avnuFeesInUsd: number;
@@ -99,115 +179,130 @@ export interface Quote {
   integratorFees: bigint;
   integratorFeesInUsd: number;
   integratorFeesBps: bigint;
-  priceRatioUsd: number;
+  priceImpactInUsd: number;
   sellTokenPriceInUsd?: number;
   buyTokenPriceInUsd?: number;
-  liquiditySource: 'DEX_AGGREGATOR' | 'MARKET_MAKER' | 'SOLVER' | 'ORDERBOOK';
-  gasless: Gasless;
   exactTokenTo?: boolean;
+  estimatedSlippage?: number;
 }
 
-export interface Gasless {
-  active: boolean;
-  gasTokenPrices: { tokenAddress: string; gasFeesInUsd: number; gasFeesInGasToken: bigint }[];
-}
-
-export interface InvokeSwapResponse {
-  transactionHash: string;
-  gasTokenAddress?: string;
-  gasTokenAmount?: bigint;
-}
-
-export interface RequestError {
-  messages: string[];
-  revertError: string | undefined;
-}
-
-export interface AvnuOptions {
-  baseUrl?: string;
-  abortSignal?: AbortSignal;
-  avnuPublicKey?: string;
-}
-
-export interface ExecuteSwapOptions {
+export interface QuoteToCallsParams {
+  quoteId: string;
+  slippage: number;
+  takerAddress?: string;
   executeApprove?: boolean;
-  gasless?: boolean;
-  gasTokenAddress?: string;
-  maxGasTokenAmount?: bigint;
-  slippage?: number;
-  executeGaslessTxCallback?: () => unknown;
-}
-
-export interface BuildSwapTransaction {
-  chainId: string;
-  calls: Call[];
-}
-
-export enum SourceType {
-  DEX = 'DEX',
-  MARKET_MAKER = 'MARKET_MAKER',
-  SOLVER = 'SOLVER',
-  ORDERBOOK = 'ORDERBOOK',
 }
 
 export interface Source {
   name: string;
-  address: string;
-  icon?: string;
   type: SourceType;
 }
 
-export class ContractError {
-  constructor(
-    public message: string,
-    public revertError: string,
-  ) {}
+/* Staking Part */
+
+export interface StakingActionToCallsParams {
+  poolAddress: string;
+  userAddress: string;
 }
 
-export interface GetOrdersParams {
+export interface StakeToCallsParams extends StakingActionToCallsParams {
+  amount: bigint;
+}
+
+export interface UnstakeToCallsParams extends StakingActionToCallsParams {}
+
+export interface ClaimRewardsToCallsParams extends StakingActionToCallsParams {
+  restake: boolean;
+}
+
+export interface InvokeStakeParams extends InvokeParams {
+  poolAddress: string;
+  amount: bigint;
+}
+
+export interface InvokeInitiateUnstakeParams extends InvokeParams {
+  poolAddress: string;
+  amount: bigint;
+}
+
+export interface InvokeUnstakeParams extends InvokeParams {
+  poolAddress: string;
+}
+
+export interface InvokeClaimRewardsParams extends InvokeParams {
+  poolAddress: string;
+  restake: boolean;
+}
+
+export interface StakingInfo {
+  selfStakedAmount: bigint;
+  selfStakedAmountInUsd: number | undefined;
+  operationalAddress: string;
+  rewardAddress: string;
+  stakerAddress: string;
+  commission: number;
+  delegationPools: DelegationPool[];
+}
+
+export interface DelegationPool {
+  poolAddress: string;
+  tokenAddress: string;
+  stakedAmount: bigint;
+  stakedAmountInUsd: number | undefined;
+  apr: number;
+}
+
+export interface UserStakingInfo {
+  tokenAddress: string;
+  tokenPriceInUsd: number;
+  poolAddress: string;
+  userAddress: string;
+  amount: bigint;
+  amountInUsd: number | undefined;
+  unclaimedRewards: bigint;
+  unclaimedRewardsInUsd: number | undefined;
+  unpoolAmount: bigint;
+  unpoolAmountInUsd: number | undefined;
+  unpoolTime: Date | undefined;
+  totalClaimedRewards: bigint;
+  totalClaimedRewardsHistoricalUsd: number;
+  totalClaimedRewardsUsd: number;
+  userActions: Action[];
+  totalUserActionsCount: number;
+  expectedYearlyStrkRewards: bigint;
+  aprs: Apr[];
+}
+
+export interface Apr {
+  date: Date;
+  apr: number;
+}
+
+/* DCA Part */
+
+export interface GetDcaOrdersParams extends Pageable {
   traderAddress: string;
-  status?: OrderStatus;
-  page?: number;
-  size?: number;
-  sort?: Sort;
+  status?: DcaOrderStatus;
 }
 
-export interface Sort {
-  field: string;
-  label: string;
-  direction: 'ASC' | 'DESC';
-}
-
-interface PricingStrategy {
+export interface PricingStrategy {
   tokenToMinAmount: string | undefined;
   tokenToMaxAmount: string | undefined;
 }
 
-export enum TradeStatus {
-  CANCELLED = 'CANCELLED',
-  PENDING = 'PENDING',
-  SUCCEEDED = 'SUCCEEDED',
-}
-
-interface Trade {
+export interface DcaTrade {
   sellAmount: bigint;
-  sellAmountInUsd: number;
+  sellAmountInUsd?: number;
   buyAmount?: bigint;
   buyAmountInUsd?: number;
   expectedTradeDate: Date;
   actualTradeDate?: Date;
-  status: TradeStatus;
+  status: DcaTradeStatus;
   txHash?: string;
   errorReason?: string;
 }
 
-export enum OrderStatus {
-  INDEXING = 'INDEXING',
-  ACTIVE = 'ACTIVE',
-  CLOSED = 'CLOSED',
-}
-
-export interface OrderReceipt {
+export interface DcaOrder {
   id: string;
   blockNumber: number;
   timestamp: Date;
@@ -224,7 +319,7 @@ export interface OrderReceipt {
   closeDate?: Date;
   frequency: string;
   iterations: number;
-  status: OrderStatus;
+  status: DcaOrderStatus;
   pricingStrategy: PricingStrategy | Record<string, never>;
   amountSold: bigint;
   amountBought: bigint;
@@ -232,35 +327,10 @@ export interface OrderReceipt {
   executedTradesCount: number;
   cancelledTradesCount: number;
   pendingTradesCount: number;
-  trades: Trade[];
+  trades: DcaTrade[];
 }
 
-export interface EstimatedGasFees {
-  overallFee: bigint;
-  overallFeeInUsd: number;
-  paymaster: EstimatedGasFeesPaymaster;
-}
-
-export interface EstimatedGasFeesPaymaster {
-  active: boolean;
-  gasTokenPrices: EstimateFeeGasTokenPrice[];
-}
-
-export interface EstimateFeeGasTokenPrice {
-  tokenAddress: string;
-  gasFeesInGasToken: bigint;
-  gasFeesInUsd: number;
-}
-
-export interface PaymasterOptions {
-  gasless?: boolean;
-  gasfree?: boolean;
-  gasTokenAddress?: string;
-  maxGasTokenAmount?: bigint;
-  executeGaslessTxCallback?: () => unknown;
-}
-
-export interface CreateOrderDto {
+export interface CreateDcaOrder {
   sellTokenAddress: string | undefined;
   buyTokenAddress: string | undefined;
   sellAmount: string;
@@ -268,4 +338,200 @@ export interface CreateOrderDto {
   frequency: Duration;
   pricingStrategy: PricingStrategy | Record<string, never>;
   traderAddress: string;
+}
+
+export interface InvokeCreateDcaParams extends InvokeParams {
+  order: CreateDcaOrder;
+}
+
+export interface InvokeCancelDcaParams extends InvokeParams {
+  orderAddress: string;
+}
+
+/* User Actions Part */
+export interface Action {
+  blockNumber: bigint;
+  date: Date;
+  transactionHash: string;
+  gasFee: GasFeeInfo | null;
+  type: ActionType;
+  metadata: ActionMetadata;
+}
+
+export type ActionType =
+  | 'Swap'
+  | 'OpenDcaOrder'
+  | 'CancelDcaOrder'
+  | 'DcaTrade'
+  | 'StakingStake'
+  | 'StakingInitiateWithdrawal'
+  | 'StakingCancelWithdrawal'
+  | 'StakingWithdraw'
+  | 'StakingClaimRewards';
+
+export interface GasFeeInfo {
+  gasFeeAmount: number;
+  gasFeeAmountUsd?: number;
+  gasFeeTokenAddress: string;
+}
+
+export type ActionMetadata =
+  | SwapMetadata
+  | DcaOrderMetadata
+  | CancelDcaOrderMetadata
+  | DcaTradeMetadata
+  | StakingInitiateUnstakeMetadata
+  | StakingCancelUnstakeMetadata
+  | StakingStakeMetadata
+  | StakingClaimRewardsMetadata
+  | StakingUnstakeMetadata;
+
+export interface SwapMetadata {
+  sellTokenAddress: string;
+  sellAmount: bigint;
+  sellAmountUsd?: number;
+  buyTokenAddress: string;
+  buyAmount: bigint;
+  buyAmountUsd?: number;
+}
+
+export interface DcaOrderMetadata {
+  orderClassHash: string;
+  orderAddress: string;
+  sellTokenAddress: string;
+  sellAmount: bigint;
+  sellAmountUsd?: number;
+  sellAmountPerCycle: bigint;
+  buyTokenAddress: string;
+  cycleFrequency: bigint;
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface CancelDcaOrderMetadata {
+  orderAddress: string;
+}
+
+export interface DcaTradeMetadata {
+  sellTokenAddress: string;
+  sellAmount: bigint;
+  sellAmountUsd?: number;
+  buyTokenAddress: string;
+  buyAmount: bigint;
+  buyAmountUsd?: number;
+}
+
+export interface StakingInitiateUnstakeMetadata {
+  delegationPoolAddress: string;
+  exitTimestamp: Date;
+  amount: bigint;
+  amountUsd?: number;
+  oldDelegatedStake: bigint;
+  oldDelegatedStakeUsd?: number;
+  newDelegatedStake: bigint;
+  newDelegatedStakeUsd?: number;
+}
+
+export interface StakingCancelUnstakeMetadata {
+  delegationPoolAddress: string;
+  oldDelegatedStake: bigint;
+  oldDelegatedStakeUsd?: number;
+  newDelegatedStake: bigint;
+  newDelegatedStakeUsd?: number;
+}
+
+export interface StakingStakeMetadata {
+  delegationPoolAddress: string;
+  oldDelegatedStake: bigint;
+  oldDelegatedStakeUsd?: number;
+  newDelegatedStake: bigint;
+  newDelegatedStakeUsd?: number;
+}
+
+export interface StakingClaimRewardsMetadata {
+  delegationPoolAddress: string;
+  rewardAddress: string;
+  amount: bigint;
+  amountUsd?: number;
+}
+
+export interface StakingUnstakeMetadata {
+  delegationPoolAddress: string;
+  amount: bigint;
+  amountUsd?: number;
+}
+
+/* Impulse Market Part */
+
+export interface SimpleFeedProps {
+  dateRange: FeedDateRange;
+}
+
+export interface FeedProps extends SimpleFeedProps {
+  resolution: FeedResolution;
+}
+
+export interface PriceFeedProps extends FeedProps {
+  type: PriceFeedType;
+}
+
+export interface PriceData {
+  value: number;
+  valueUsd?: number;
+}
+
+export interface SimplePriceData extends PriceData {
+  date: string;
+}
+
+export interface SimpleVolumeData {
+  date: string;
+  value: number;
+}
+
+export interface ByExchangeVolumeData extends SimpleVolumeData {
+  exchange: string;
+}
+
+export interface ByExchangeTVLData extends SimplePriceData {
+  exchange: string;
+}
+
+export interface CandlePriceData {
+  date: string;
+  close: number;
+  high: number;
+  low: number;
+  open: number;
+  volume: number;
+}
+
+export interface TokenMarketData {
+  position: number;
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoUri: string;
+  verified: boolean;
+  linePriceFeedInUsd: SimplePriceData[];
+  coingeckoId?: string;
+  website?: string;
+  market: {
+    currentPrice: number;
+    fullyDilutedValuation?: number | null;
+    totalSupply?: number | null;
+    priceChange1h: number;
+    priceChangePercentage1h?: number | null;
+    priceChange24h: number;
+    priceChangePercentage24h?: number | null;
+    priceChange7d: number;
+    priceChangePercentage7d?: number | null;
+    marketCap: number;
+    marketCapChange24h?: number | null;
+    marketCapChangePercentage24h?: number | null;
+    starknetVolume24h: number;
+    starknetTradingVolume24h: number;
+    starknetTvl: number;
+  };
 }

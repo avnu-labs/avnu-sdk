@@ -1,28 +1,24 @@
 import { parseUnits, toBeHex } from 'ethers';
 import moment from 'moment';
 import { constants } from 'starknet';
+import { DcaOrderStatus, SourceType } from './enums';
 import {
-  BuildSwapTransaction,
-  CreateOrderDto,
-  InvokeSwapResponse,
-  OrderReceipt,
-  OrderStatus,
+  CreateDcaOrder,
+  DcaOrder,
+  InvokeTransactionResponse,
   Page,
-  Price,
-  PriceRequest,
   Quote,
   QuoteRequest,
   Source,
-  SourceType,
+  SwapCalls,
   Token,
+  TokenPrice,
 } from './types';
 
 /* SWAP PART */
 
-export const aPriceRequest = (): PriceRequest => ({
-  sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-  sellAmount: parseUnits('1', 18),
-  buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
+export const aPriceRequest = (): { tokens: string[] } => ({
+  tokens: ['0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7'],
 });
 
 export const aQuoteRequest = (): QuoteRequest => ({
@@ -33,19 +29,11 @@ export const aQuoteRequest = (): QuoteRequest => ({
   takerAddress: '0x0',
 });
 
-export const aPrice = (): Price => ({
-  sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-  sellAmount: parseUnits('1', 18),
-  sellAmountInUsd: 1700,
-  buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
-  buyAmount: parseUnits('2', 18),
-  buyAmountInUsd: 1700,
-  blockNumber: 1,
-  chainId: constants.StarknetChainId.SN_SEPOLIA,
-  sourceName: 'AMM1',
-  priceRatioUsd: 0,
-  gasFees: BigInt(0),
-  gasFeesInUsd: 0,
+export const aPrice = (): TokenPrice => ({
+  address: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+  decimals: 18,
+  globalMarket: { usd: 1700 },
+  starknetMarket: { usd: 1700 },
 });
 
 export const aQuote = (): Quote => ({
@@ -69,6 +57,7 @@ export const aQuote = (): Quote => ({
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
       routes: [],
+      alternativeSwapCount: 0,
     },
   ],
   gasFees: BigInt('0x0'),
@@ -79,12 +68,7 @@ export const aQuote = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
-  priceRatioUsd: 0,
-  liquiditySource: 'DEX_AGGREGATOR',
-  gasless: {
-    active: false,
-    gasTokenPrices: [],
-  },
+  priceImpactInUsd: 0,
 });
 
 export const aQuoteWithManySubRoutes = (): Quote => ({
@@ -100,8 +84,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   blockNumber: 1,
   chainId: constants.StarknetChainId.SN_SEPOLIA,
   expiry: 100000000000,
-  priceRatioUsd: 0,
-  liquiditySource: 'DEX_AGGREGATOR',
+  priceImpactInUsd: 0,
   routes: [
     {
       name: 'AMM1',
@@ -109,6 +92,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
       percent: 1,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
+      alternativeSwapCount: 0,
       routes: [
         {
           name: 'AMM2',
@@ -116,6 +100,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
           percent: 1,
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
+          alternativeSwapCount: 0,
           routes: [
             {
               name: 'AMM1',
@@ -124,6 +109,7 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
               sellTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
               buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
               routes: [],
+              alternativeSwapCount: 0,
             },
           ],
         },
@@ -138,10 +124,6 @@ export const aQuoteWithManySubRoutes = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
-  gasless: {
-    active: false,
-    gasTokenPrices: [],
-  },
 });
 
 export const aQuoteWithManyComplexRoutes = (): Quote => ({
@@ -165,8 +147,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
   integratorFees: BigInt('0x0'),
   integratorFeesInUsd: 0,
   integratorFeesBps: BigInt('0x0'),
-  priceRatioUsd: 0,
-  liquiditySource: 'DEX_AGGREGATOR',
+  priceImpactInUsd: 0,
   routes: [
     {
       name: 'AMM1',
@@ -174,6 +155,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
       percent: 0.5,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
+      alternativeSwapCount: 0,
       routes: [
         {
           name: 'AMM2',
@@ -181,6 +163,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
           percent: 0.5,
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
+          alternativeSwapCount: 0,
           routes: [
             {
               name: 'AMM1',
@@ -189,6 +172,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
               sellTokenAddress: '0x2e2faab2cad8ecdde5e991798673ddcc08983b872304a66e5f99fbb24e14abc',
               buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
               routes: [],
+              alternativeSwapCount: 0,
             },
           ],
         },
@@ -199,6 +183,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
           routes: [],
+          alternativeSwapCount: 0,
         },
       ],
     },
@@ -209,6 +194,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
       routes: [],
+      alternativeSwapCount: 0,
     },
     {
       name: 'AMM1',
@@ -216,6 +202,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
       percent: 0.3,
       sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
       buyTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
+      alternativeSwapCount: 0,
       routes: [
         {
           name: 'AMM2',
@@ -224,6 +211,7 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
           routes: [],
+          alternativeSwapCount: 0,
         },
         {
           name: 'AMM1',
@@ -232,21 +220,18 @@ export const aQuoteWithManyComplexRoutes = (): Quote => ({
           sellTokenAddress: '0x3e85bfbb8e2a42b7bead9e88e9a1b19dbccf661471061807292120462396ec9',
           buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
           routes: [],
+          alternativeSwapCount: 0,
         },
       ],
     },
   ],
-  gasless: {
-    active: false,
-    gasTokenPrices: [],
-  },
 });
 
-export const anInvokeSwapResponse = (): InvokeSwapResponse => ({
+export const anInvokeTransactionResponse = (): InvokeTransactionResponse => ({
   transactionHash: '0x0',
 });
 
-export const aBuildSwapTransaction = (): BuildSwapTransaction => ({
+export const aSwapCalls = (): SwapCalls => ({
   chainId: constants.StarknetChainId.SN_SEPOLIA,
   calls: [
     {
@@ -291,14 +276,12 @@ export const aPage = <T>(content: T[], size = 10, number = 0, totalPages = 1, to
 
 export const aSource = (): Source => ({
   name: 'AMM1',
-  address: '0x975910cd99bc56bd289eaaa5cee6cd557f0ddafdb2ce6ebea15b158eb2c661',
-  icon: 'https://pbs.twimg.com/profile_images/1567441002063069184/SGtDtW-C_400x400.jpg',
   type: SourceType.DEX,
 });
 
 /* DCA PART */
 
-export const aDCACreateOrder = (): CreateOrderDto => ({
+export const aDCACreateOrder = (): CreateDcaOrder => ({
   sellTokenAddress: '0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
   sellAmount: toBeHex(parseUnits('1', 18)),
   buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
@@ -311,7 +294,7 @@ export const aDCACreateOrder = (): CreateOrderDto => ({
   traderAddress: '0x0',
 });
 
-export const anOrderReceipt = (): OrderReceipt => ({
+export const aDCAOrder = (): DcaOrder => ({
   id: '1',
   blockNumber: 1,
   timestamp: new Date(),
@@ -328,7 +311,7 @@ export const anOrderReceipt = (): OrderReceipt => ({
   closeDate: new Date(),
   frequency: '1',
   iterations: 1,
-  status: OrderStatus.ACTIVE,
+  status: DcaOrderStatus.ACTIVE,
   pricingStrategy: {
     tokenToMinAmount: '1',
     tokenToMaxAmount: '1',

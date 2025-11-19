@@ -2,22 +2,13 @@ import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
 import { BASE_URL } from './constants';
+import { aQuote, aQuoteRequest, aSource, aSwapCalls } from './fixtures';
 import {
-  aBuildSwapTransaction,
-  anInvokeSwapResponse,
-  aPrice,
-  aPriceRequest,
-  aQuote,
-  aQuoteRequest,
-  aSource,
-} from './fixtures';
-import {
-  calculateMinAmount,
-  fetchBuildExecuteTransaction,
-  fetchExecuteSwapTransaction,
-  fetchPrices,
-  fetchQuotes,
-  fetchSources,
+  calculateMaxSpendAmount,
+  calculateMinReceivedAmount,
+  getQuotes,
+  getSources,
+  quoteToCalls,
 } from './swap.services';
 
 describe('Swap services', () => {
@@ -25,70 +16,7 @@ describe('Swap services', () => {
     fetchMock.restore();
   });
 
-  describe('fetchPrices', () => {
-    it('should return a list of prices', async () => {
-      // Given
-      const request = aPriceRequest();
-      const response = [
-        {
-          ...aPrice(),
-          sellAmount: toBeHex(parseUnits('1', 18)),
-          buyAmount: toBeHex(parseUnits('2', 18)),
-          gasFees: '0x0',
-        },
-      ];
-      const queryParams = { ...aPriceRequest(), sellAmount: '0x0de0b6b3a7640000' };
-      fetchMock.get(`${BASE_URL}/swap/v2/prices?${qs.stringify(queryParams)}`, response);
-
-      // When
-      const result = await fetchPrices(request);
-
-      // Then
-      const expected = [{ ...aPrice() }];
-      expect(result).toStrictEqual(expected);
-    });
-
-    it('should use baseUrl from AvnuOption when defined', async () => {
-      // Given
-      const request = aPriceRequest();
-      const baseUrl = 'https://example.com';
-      const response = [
-        {
-          ...aPrice(),
-          sellAmount: toBeHex(parseUnits('1', 18)),
-          buyAmount: toBeHex(parseUnits('2', 18)),
-          gasFees: '0x0',
-        },
-      ];
-      const queryParams = { ...aPriceRequest(), sellAmount: '0x0de0b6b3a7640000' };
-      fetchMock.get(`${baseUrl}/swap/v2/prices?${qs.stringify(queryParams)}`, response);
-
-      // When
-      const result = await fetchPrices(request, { baseUrl });
-
-      // Then
-      const expected = [{ ...aPrice() }];
-      expect(result).toStrictEqual(expected);
-    });
-
-    it('should use throw Error with status code and text when status is higher than 400', async () => {
-      // Given
-      const request = aPriceRequest();
-      const queryParams = { ...aPriceRequest(), sellAmount: '0x0de0b6b3a7640000' };
-      fetchMock.get(`${BASE_URL}/swap/v2/prices?${qs.stringify(queryParams)}`, 401);
-
-      // When
-      try {
-        await fetchPrices(request);
-      } catch (error) {
-        // Then
-        expect(error).toStrictEqual(new Error('401 Unauthorized'));
-      }
-      expect.assertions(1);
-    });
-  });
-
-  describe('fetchQuotes', () => {
+  describe('getQuotes', () => {
     it('should return a list of quotes', async () => {
       // Given
       const request = aQuoteRequest();
@@ -109,7 +37,7 @@ describe('Swap services', () => {
       fetchMock.get(`${BASE_URL}/swap/v2/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
-      const result = await fetchQuotes(request);
+      const result = await getQuotes(request);
 
       // Then
       const expected = [{ ...aQuote() }];
@@ -137,7 +65,7 @@ describe('Swap services', () => {
       fetchMock.get(`${baseUrl}/swap/v2/quotes?${qs.stringify(queryParams)}`, response);
 
       // When
-      const result = await fetchQuotes(request, { baseUrl });
+      const result = await getQuotes(request, { baseUrl });
 
       // Then
       const expected = [{ ...aQuote() }];
@@ -152,7 +80,7 @@ describe('Swap services', () => {
 
       // When
       try {
-        await fetchQuotes(request);
+        await getQuotes(request);
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
@@ -161,50 +89,14 @@ describe('Swap services', () => {
     });
   });
 
-  describe('fetchExecuteSwapTransaction', () => {
-    it('should return an InvokeSwapResponse', async () => {
+  describe('quoteToCalls', () => {
+    it('should return a SwapCalls', async () => {
       // Given
-      const response = anInvokeSwapResponse();
-      fetchMock.post(`${BASE_URL}/swap/v2/execute`, response);
-
-      // When
-      const result = await fetchExecuteSwapTransaction('quoteId', []);
-
-      // Then
-      expect(result).toStrictEqual(response);
-    });
-
-    it('should use baseUrl from AvnuOption when defined', async () => {
-      // Given
-      const baseUrl = 'https://example.com';
-      const response = anInvokeSwapResponse();
-      fetchMock.post(`${baseUrl}/swap/v2/execute`, response);
-
-      // When
-      const result = await fetchExecuteSwapTransaction('quoteId', [], { baseUrl });
-
-      // Then
-      expect(result).toStrictEqual(response);
-    });
-
-    it('should use throw Error with status code and text when status is higher than 400', () => {
-      // Given
-      fetchMock.post(`${BASE_URL}/swap/v2/execute`, 401);
-
-      // When & Then
-      expect.assertions(1);
-      expect(fetchExecuteSwapTransaction('quoteId', [])).rejects.toEqual(Error('401 Unauthorized'));
-    });
-  });
-
-  describe('fetchBuildExecuteTransaction', () => {
-    it('should return a BuildSwapTransaction', async () => {
-      // Given
-      const response = aBuildSwapTransaction();
+      const response = aSwapCalls();
       fetchMock.post(`${BASE_URL}/swap/v2/build`, response);
 
       // When
-      const result = await fetchBuildExecuteTransaction('quoteId', '');
+      const result = await quoteToCalls({ quoteId: '', takerAddress: '', slippage: 0.01 });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -213,11 +105,11 @@ describe('Swap services', () => {
     it('should use baseUrl from AvnuOption when defined', async () => {
       // Given
       const baseUrl = 'https://example.com';
-      const response = aBuildSwapTransaction();
+      const response = aSwapCalls();
       fetchMock.post(`${baseUrl}/swap/v2/build`, response);
 
       // When
-      const result = await fetchBuildExecuteTransaction('quoteId', '', undefined, true, { baseUrl });
+      const result = await quoteToCalls({ quoteId: '', takerAddress: '', slippage: 0.01 }, { baseUrl });
 
       // Then
       expect(result).toStrictEqual(response);
@@ -229,18 +121,20 @@ describe('Swap services', () => {
 
       // When & Then
       expect.assertions(1);
-      expect(fetchBuildExecuteTransaction('quoteId', '')).rejects.toEqual(Error('401 Unauthorized'));
+      expect(quoteToCalls({ quoteId: '', takerAddress: '', slippage: 0.01 })).rejects.toEqual(
+        Error('401 Unauthorized'),
+      );
     });
   });
 
-  describe('fetchSources', () => {
+  describe('getSources', () => {
     it('should return a list of sources', async () => {
       // Given
       const response = [aSource()];
       fetchMock.get(`${BASE_URL}/swap/v2/sources`, response);
 
       // When
-      const result = await fetchSources();
+      const result = await getSources();
 
       // Then
       expect(result).toStrictEqual(response);
@@ -252,7 +146,7 @@ describe('Swap services', () => {
 
       // When
       try {
-        await fetchSources();
+        await getSources();
       } catch (error) {
         // Then
         expect(error).toStrictEqual(new Error('401 Unauthorized'));
@@ -268,10 +162,24 @@ describe('Swap services', () => {
       const slippage = 30;
 
       // When
-      const result = calculateMinAmount(amount, slippage);
+      const result = calculateMinReceivedAmount(amount, slippage);
 
       // Then
       expect(result).toBe(BigInt(997000));
+    });
+  });
+
+  describe('calculateMaxSpendAmount', () => {
+    it('should return max spend amount', () => {
+      // Given
+      const amount = BigInt(1000000);
+      const slippage = 30;
+
+      // When
+      const result = calculateMaxSpendAmount(amount, slippage);
+
+      // Then
+      expect(result).toBe(BigInt(1003000));
     });
   });
 });

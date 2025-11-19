@@ -1,9 +1,13 @@
 import { ec, hash } from 'starknet';
-import { BASE_URL, SEPOLIA_BASE_URL } from './constants';
+import { z } from 'zod';
+import { BASE_URL, IMPULSE_BASE_URL, SEPOLIA_BASE_URL, SEPOLIA_IMPULSE_BASE_URL } from './constants';
 import { AvnuOptions, ContractError, RequestError } from './types';
 
 export const getBaseUrl = (options?: AvnuOptions): string =>
   options?.baseUrl ?? (process.env.NODE_ENV === 'dev' ? SEPOLIA_BASE_URL : BASE_URL);
+
+export const getImpulseBaseUrl = (options?: AvnuOptions): string =>
+  options?.impulseBaseUrl ?? (process.env.NODE_ENV === 'dev' ? SEPOLIA_IMPULSE_BASE_URL : IMPULSE_BASE_URL);
 
 export const getRequest = (options?: AvnuOptions): RequestInit => ({
   signal: options?.abortSignal,
@@ -21,6 +25,13 @@ export const postRequest = (body: unknown, options?: AvnuOptions): RequestInit =
   ...(body !== undefined && { body: JSON.stringify(body) }),
 });
 
+/**
+ * Parse API response
+ * @param response The fetch Response object
+ * @param avnuPublicKey Optional public key for signature verification
+ * @returns The parsed response if the response is successful
+ * @throws An error if the response is not successful
+ */
 export const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T> => {
   if (response.status === 400) {
     return response.json().then((error: RequestError) => {
@@ -55,4 +66,28 @@ export const parseResponse = <T>(response: Response, avnuPublicKey?: string): Pr
       .then(() => response.json());
   }
   return response.json();
+};
+
+/**
+ * Parse API response with Zod schema validation and transformation
+ * @param response The fetch Response object
+ * @param schema Zod schema for validation and transformation
+ * @param avnuPublicKey Optional public key for signature verification
+ * @returns Parsed and validated data
+ */
+export const parseResponseWithSchema = <T extends z.ZodTypeAny>(
+  response: Response,
+  schema: T,
+  avnuPublicKey?: string,
+): Promise<z.infer<T>> => {
+  return parseResponse<unknown>(response, avnuPublicKey).then((data) => {
+    try {
+      return schema.parse(data);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(`Invalid API response: ${error.message}`);
+      }
+      throw error;
+    }
+  });
 };
