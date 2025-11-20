@@ -179,7 +179,7 @@ export const QuoteSchema = z.object({
   integratorFees: hexToBigInt,
   integratorFeesInUsd: z.number(),
   integratorFeesBps: hexToBigInt,
-  priceImpactInUsd: z.number(),
+  priceImpact: z.number(),
   sellTokenPriceInUsd: z.number().optional(),
   buyTokenPriceInUsd: z.number().optional(),
   exactTokenTo: z.boolean().optional(),

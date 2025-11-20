@@ -179,7 +179,7 @@ export interface Quote {
   integratorFees: bigint;
   integratorFeesInUsd: number;
   integratorFeesBps: bigint;
-  priceImpactInUsd: number;
+  priceImpact: number;
   sellTokenPriceInUsd?: number;
   buyTokenPriceInUsd?: number;
   exactTokenTo?: boolean;

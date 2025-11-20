@@ -101,7 +101,7 @@ Calculate min/max amounts with slippage (slippage in bps: 100 = 1%).
 
 **Key types:**
 - `QuoteRequest`: sellTokenAddress, buyTokenAddress, sellAmount, takerAddress, size
-- `Quote`: routes, sellAmount, buyAmount, sellAmountInUsd, buyAmountInUsd, priceRatioUsd, gasFeesInUsd
+- `Quote`: routes, sellAmount, buyAmount, sellAmountInUsd, buyAmountInUsd, priceImpact, gasFeesInUsd
 - `Route`: percent, sellAmount, buyAmount, routes (sub-routes)
 - `SwapCalls`: calls, approvalCalls, contractAddress, calldata
 
