@@ -37,7 +37,7 @@ export interface Token {
   name: string;
   symbol: string;
   decimals: number;
-  logoUri: string;
+  logoUri: string | null;
   lastDailyVolumeUsd: number;
   extensions: { [key: string]: string };
   tags: TokenTag[];
@@ -512,7 +512,7 @@ export interface TokenMarketData {
   name: string;
   symbol: string;
   decimals: number;
-  logoUri: string;
+  logoUri: string | null;
   verified: boolean;
   linePriceFeedInUsd: SimplePriceData[];
   coingeckoId?: string;
