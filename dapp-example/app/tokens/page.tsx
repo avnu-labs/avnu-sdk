@@ -1,18 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { fetchTokens, type Token } from '@avnu/avnu-sdk';
 
 export default function TokensPage() {
   const [search, setSearch] = useState('');
+  const [tokens, setTokens] = useState<Token[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock loading state for demo
-  const isLoading = false;
-  const tokens: { address: string; symbol: string; name: string; logoUri?: string }[] = [];
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setLoading(true);
+      fetchTokens({ search: search || undefined, size: 20 })
+        .then((page) => setTokens(page.content))
+        .finally(() => setLoading(false));
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
 
   return (
     <div className="space-y-6">
@@ -36,24 +44,14 @@ export default function TokensPage() {
           />
 
           <div className="space-y-2">
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 border rounded-md">
-                  <Skeleton className="size-8 rounded-full" />
-                  <div className="space-y-1">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-16" />
-                  </div>
-                </div>
-              ))
+            {loading ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Loading...</p>
             ) : tokens.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Click &quot;Load Tokens&quot; to fetch token list
-              </p>
+              <p className="text-sm text-muted-foreground text-center py-8">No tokens found</p>
             ) : (
               tokens.map((token) => (
                 <div key={token.address} className="flex items-center gap-3 p-3 border rounded-md">
-                  {token.logoUri && (
+                  {token.logoUri ? (
                     <Image
                       src={token.logoUri}
                       alt={token.symbol}
@@ -62,36 +60,24 @@ export default function TokensPage() {
                       className="rounded-full"
                       unoptimized
                     />
+                  ) : (
+                    <div className="size-8 rounded-full bg-muted" />
                   )}
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-medium">{token.symbol}</p>
-                    <p className="text-sm text-muted-foreground">{token.name}</p>
+                    <p className="text-sm text-muted-foreground truncate">{token.name}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    {token.tags.slice(0, 2).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               ))
             )}
           </div>
-
-          <Button className="w-full" disabled>
-            Load Tokens
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">SDK Functions</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground space-y-1">
-          <p>
-            <code>fetchTokens(request)</code> - Get tokens with pagination
-          </p>
-          <p>
-            <code>fetchTokenByAddress(address)</code> - Get specific token
-          </p>
-          <p>
-            <code>fetchVerifiedTokenBySymbol(symbol)</code> - Get verified token
-          </p>
         </CardContent>
       </Card>
     </div>
