@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,10 +29,22 @@ export default function DcaPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
-            <img src={STRK.logoUri} alt={STRK.symbol} className="size-5 rounded-full" />
+            <Image
+              src={STRK.logoUri!}
+              alt={STRK.symbol}
+              width={20}
+              height={20}
+              className="rounded-full"
+            />
             <span className="font-medium">{STRK.symbol}</span>
             <span className="text-muted-foreground">→</span>
-            <img src={ETH.logoUri} alt={ETH.symbol} className="size-5 rounded-full" />
+            <Image
+              src={ETH.logoUri!}
+              alt={ETH.symbol}
+              width={20}
+              height={20}
+              className="rounded-full"
+            />
             <span className="font-medium">{ETH.symbol}</span>
           </div>
 

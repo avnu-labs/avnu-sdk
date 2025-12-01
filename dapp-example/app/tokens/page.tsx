@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -53,7 +54,14 @@ export default function TokensPage() {
               tokens.map((token) => (
                 <div key={token.address} className="flex items-center gap-3 p-3 border rounded-md">
                   {token.logoUri && (
-                    <img src={token.logoUri} alt={token.symbol} className="size-8 rounded-full" />
+                    <Image
+                      src={token.logoUri}
+                      alt={token.symbol}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                      unoptimized
+                    />
                   )}
                   <div>
                     <p className="font-medium">{token.symbol}</p>

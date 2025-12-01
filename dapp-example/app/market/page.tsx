@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { STRK } from '@/lib/tokens';
@@ -15,7 +16,13 @@ export default function MarketPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <img src={STRK.logoUri} alt={STRK.symbol} className="size-6 rounded-full" />
+            <Image
+              src={STRK.logoUri!}
+              alt={STRK.symbol}
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
             {STRK.symbol} Price Chart
           </CardTitle>
           <CardDescription>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +23,13 @@ export default function StakingPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <img src={STRK.logoUri} alt={STRK.symbol} className="size-6 rounded-full" />
+            <Image
+              src={STRK.logoUri!}
+              alt={STRK.symbol}
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
             STRK Staking
           </CardTitle>
           <CardDescription>

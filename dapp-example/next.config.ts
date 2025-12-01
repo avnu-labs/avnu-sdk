@@ -1,7 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [{ hostname: 'assets.coingecko.com' }, { hostname: 'opbnb.bscscan.com' }],
+  },
 };
 
 export default nextConfig;

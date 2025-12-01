@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,13 +31,20 @@ export default function SwapPage() {
             <Label>You sell</Label>
             <div className="flex items-center gap-2">
               <Input
+                className="flex-1"
                 type="number"
                 placeholder="0.0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
-              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md">
-                <img src={STRK.logoUri} alt={STRK.symbol} className="size-5 rounded-full" />
+              <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-md">
+                <Image
+                  src={STRK.logoUri!}
+                  alt={STRK.symbol}
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
                 <span className="font-medium">{STRK.symbol}</span>
               </div>
             </div>
@@ -45,9 +53,15 @@ export default function SwapPage() {
           <div className="space-y-2">
             <Label>You receive</Label>
             <div className="flex items-center gap-2">
-              <Input type="number" placeholder="0.0" disabled />
-              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md">
-                <img src={ETH.logoUri} alt={ETH.symbol} className="size-5 rounded-full" />
+              <Input className="flex-1" type="number" placeholder="0.0" disabled />
+              <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-md">
+                <Image
+                  src={ETH.logoUri!}
+                  alt={ETH.symbol}
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
                 <span className="font-medium">{ETH.symbol}</span>
               </div>
             </div>
