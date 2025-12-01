@@ -6,6 +6,7 @@ import { DcaOrderStatus, SourceType } from './enums';
 import {
   Action,
   Apr,
+  AvnuCalls,
   ByExchangeTVLData,
   ByExchangeVolumeData,
   CandlePriceData,
@@ -21,7 +22,6 @@ import {
   SimpleVolumeData,
   Source,
   StakingInfo,
-  AvnuCalls,
   Token,
   TokenMarketData,
   TokenPrice,
@@ -247,7 +247,7 @@ export const anInvokeTransactionResponse = (): InvokeTransactionResponse => ({
   transactionHash: '0x0',
 });
 
-export const aSwapCalls = (): AvnuCalls => ({
+export const aAvnuCalls = (): AvnuCalls => ({
   chainId: constants.StarknetChainId.SN_SEPOLIA,
   calls: [
     {

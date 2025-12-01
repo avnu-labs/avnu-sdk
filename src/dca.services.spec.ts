@@ -2,7 +2,7 @@ import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
 import { BASE_URL, DCA_API_VERSION } from './constants';
 import { cancelDcaToCalls, createDcaToCalls, executeCancelDca, executeCreateDca, getDcaOrders } from './dca.services';
-import { aCall, aDCACreateOrder, aDCAOrder, aPage } from './fixtures';
+import { aAvnuCalls, aDCACreateOrder, aDCAOrder, aPage } from './fixtures';
 import { createMockAccount, createMockPaymaster, mockExecutionParams } from './test-utils';
 
 describe('DCA services', () => {
@@ -57,7 +57,7 @@ describe('DCA services', () => {
     it('should return an array of calls', async () => {
       // Given
       const order = aDCACreateOrder();
-      const response = [aCall()];
+      const response = aAvnuCalls();
       fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, response);
 
       // When
@@ -85,7 +85,7 @@ describe('DCA services', () => {
     it('should return an array of calls', async () => {
       // Given
       const orderAddress = '0x0order';
-      const response = [aCall()];
+      const response = aAvnuCalls();
       fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, response);
 
       // When
@@ -114,15 +114,15 @@ describe('DCA services', () => {
       // Given
       const mockAccount = createMockAccount('0x0user');
       const order = aDCACreateOrder();
-      const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, calls);
+      const avnuCalls = aAvnuCalls();
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, avnuCalls);
 
       // When
       const result = await executeCreateDca({ provider: mockAccount, order });
 
       // Then
       expect(result).toStrictEqual({ transactionHash: '0xabc' });
-      expect(mockAccount.execute).toHaveBeenCalledWith(calls);
+      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls);
     });
 
     it('should execute with paymaster', async () => {
@@ -130,7 +130,7 @@ describe('DCA services', () => {
       const mockAccount = createMockAccount('0x0user');
       const mockPaymaster = createMockPaymaster();
       const order = aDCACreateOrder();
-      const calls = [aCall()];
+      const calls = aAvnuCalls();
       fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, calls);
 
       // When
@@ -152,15 +152,15 @@ describe('DCA services', () => {
       // Given
       const mockAccount = createMockAccount('0x0user');
       const orderAddress = '0x0order';
-      const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, calls);
+      const avnuCalls = aAvnuCalls();
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, avnuCalls);
 
       // When
       const result = await executeCancelDca({ provider: mockAccount, orderAddress });
 
       // Then
       expect(result).toStrictEqual({ transactionHash: '0xabc' });
-      expect(mockAccount.execute).toHaveBeenCalledWith(calls);
+      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls);
     });
 
     it('should execute with paymaster', async () => {
@@ -168,7 +168,7 @@ describe('DCA services', () => {
       const mockAccount = createMockAccount('0x0user');
       const mockPaymaster = createMockPaymaster();
       const orderAddress = '0x0order';
-      const calls = [aCall()];
+      const calls = aAvnuCalls();
       fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, calls);
 
       // When

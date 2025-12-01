@@ -1,5 +1,4 @@
 import qs from 'qs';
-import { Call } from 'starknet';
 import { DCA_API_VERSION } from './constants';
 import { executeAllPaymasterFlow } from './paymaster.services';
 import { DcaOrderSchema, PageSchema } from './schemas';
@@ -48,7 +47,7 @@ const actionToCalls = async (endpoint: string, body: unknown, options?: AvnuOpti
   return fetch(
     `${getBaseUrl(options)}/dca/${DCA_API_VERSION}/orders${endpoint ? `/${endpoint}` : ''}`,
     postRequest(body, options),
-  ).then((response) => parseResponse<AvnuCalls[]>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponse<AvnuCalls>(response, options?.avnuPublicKey));
 };
 
 /**
@@ -104,7 +103,6 @@ const executeCreateDca = async (
   if (paymaster && paymaster.active) {
     return executeAllPaymasterFlow({ paymaster, provider, calls });
   }
-console.log('calls', calls);
   const result = await provider.execute(calls);
   return { transactionHash: result.transaction_hash };
 };

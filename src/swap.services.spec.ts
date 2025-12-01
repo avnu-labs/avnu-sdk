@@ -2,7 +2,7 @@ import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
 import qs from 'qs';
 import { BASE_URL, SWAP_API_VERSION } from './constants';
-import { aQuote, aQuoteRequest, aSource, aSwapCalls } from './fixtures';
+import { aAvnuCalls, aQuote, aQuoteRequest, aSource } from './fixtures';
 import {
   calculateMaxSpendAmount,
   calculateMinReceivedAmount,
@@ -128,7 +128,7 @@ describe('Swap services', () => {
   describe('quoteToCalls', () => {
     it('should return a SwapCalls', async () => {
       // Given
-      const response = aSwapCalls();
+      const response = aAvnuCalls();
       fetchMock.post(`${BASE_URL}/swap/${SWAP_API_VERSION}/build`, response);
 
       // When
@@ -141,7 +141,7 @@ describe('Swap services', () => {
     it('should use baseUrl from AvnuOption when defined', async () => {
       // Given
       const baseUrl = 'https://example.com';
-      const response = aSwapCalls();
+      const response = aAvnuCalls();
       fetchMock.post(`${baseUrl}/swap/${SWAP_API_VERSION}/build`, response);
 
       // When

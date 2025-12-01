@@ -5,6 +5,7 @@ import { SWAP_API_VERSION } from './constants';
 import { executeAllPaymasterFlow } from './paymaster.services';
 import { QuoteSchema, SourceSchema } from './schemas';
 import {
+  AvnuCalls,
   AvnuOptions,
   InvokeSwapParams,
   InvokeTransactionResponse,
@@ -12,7 +13,6 @@ import {
   QuoteRequest,
   QuoteToCallsParams,
   Source,
-  AvnuCalls,
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
 
