@@ -200,9 +200,9 @@ export const QuoteSchema = z.object({
  */
 
 export const GasFeeInfoSchema = z.object({
-  gasFeeAmount: z.number(),
+  gasFeeAmount: hexToBigInt.optional(),
   gasFeeAmountUsd: z.number().optional(),
-  gasFeeTokenAddress: z.string(),
+  gasFeeTokenAddress: z.string().optional(),
 });
 
 export const SwapMetadataSchema = z.object({
@@ -212,6 +212,7 @@ export const SwapMetadataSchema = z.object({
   buyTokenAddress: z.string(),
   buyAmount: hexToBigInt,
   buyAmountUsd: z.number().optional(),
+  integratorName: z.string().optional(),
 });
 
 export const DcaOrderMetadataSchema = z.object({
@@ -331,7 +332,7 @@ export const UserStakingInfoSchema = z.object({
   unpoolAmountInUsd: z.number().or(z.undefined()),
   unpoolTime: hexTimestampToDate,
   totalClaimedRewards: hexToBigInt,
-  totalClaimedRewardsHistoricalUsd: z.number(),
+  totalClaimedRewardsHistoricalUsd: z.number().optional(),
   totalClaimedRewardsUsd: z.number(),
   userActions: z.array(ActionSchema),
   totalUserActionsCount: z.number(),

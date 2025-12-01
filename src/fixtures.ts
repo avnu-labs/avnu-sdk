@@ -378,7 +378,7 @@ export const anAction = (): Action => ({
   date: new Date('2024-01-01'),
   transactionHash: '0x0txhash',
   gasFee: {
-    gasFeeAmount: 0.001,
+    gasFeeAmount: BigInt('1000000000000000'),
     gasFeeAmountUsd: 0.01,
     gasFeeTokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
   },

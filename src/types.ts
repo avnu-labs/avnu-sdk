@@ -267,7 +267,7 @@ export interface UserStakingInfo {
   unpoolAmountInUsd: number | undefined;
   unpoolTime: Date | undefined;
   totalClaimedRewards: bigint;
-  totalClaimedRewardsHistoricalUsd: number;
+  totalClaimedRewardsHistoricalUsd?: number;
   totalClaimedRewardsUsd: number;
   userActions: Action[];
   totalUserActionsCount: number;
@@ -372,9 +372,9 @@ export type ActionType =
   | 'StakingClaimRewards';
 
 export interface GasFeeInfo {
-  gasFeeAmount: number;
+  gasFeeAmount?: bigint;
   gasFeeAmountUsd?: number;
-  gasFeeTokenAddress: string;
+  gasFeeTokenAddress?: string;
 }
 
 export type ActionMetadata =
@@ -395,6 +395,7 @@ export interface SwapMetadata {
   buyTokenAddress: string;
   buyAmount: bigint;
   buyAmountUsd?: number;
+  integratorName?: string;
 }
 
 export interface DcaOrderMetadata {
