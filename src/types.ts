@@ -152,7 +152,7 @@ export interface Route {
   percent: number;
   sellTokenAddress: string;
   buyTokenAddress: string;
-  routeInfo?: Map<string, string>;
+  routeInfo?: Record<string, string>;
   routes: Route[];
   alternativeSwapCount: number;
 }

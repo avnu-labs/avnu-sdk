@@ -157,7 +157,7 @@ export const RouteSchema: z.ZodType<Route> = z.lazy(() =>
     percent: z.number(),
     sellTokenAddress: z.string(),
     buyTokenAddress: z.string(),
-    routeInfo: z.map(z.string(), z.string()).optional(),
+    routeInfo: z.record(z.string(), z.string()).optional(),
     routes: z.array(RouteSchema),
     alternativeSwapCount: z.number(),
   }),
