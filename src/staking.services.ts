@@ -4,6 +4,7 @@ import { STAKING_API_VERSION } from './constants';
 import { executeAllPaymasterFlow } from './paymaster.services';
 import { StakingInfoSchema, UserStakingInfoSchema } from './schemas';
 import {
+  AvnuCalls,
   AvnuOptions,
   ClaimRewardsToCallsParams,
   InvokeClaimRewardsParams,
@@ -24,7 +25,7 @@ import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postReq
  * @returns The AVNU staking info
  */
 const getAvnuStakingInfo = async (options?: AvnuOptions): Promise<StakingInfo> => {
-  return fetch(`${getBaseUrl(options)}/staking/${STAKING_API_VERSION}/info`, getRequest(options)).then((response) =>
+  return fetch(`${getBaseUrl(options)}/staking/${STAKING_API_VERSION}`, getRequest(options)).then((response) =>
     parseResponseWithSchema(response, StakingInfoSchema, options?.avnuPublicKey),
   );
 };
@@ -62,11 +63,11 @@ const actionToCalls = async (
   userAddress: string,
   body: unknown,
   options?: AvnuOptions,
-): Promise<Call[]> => {
+): Promise<AvnuCalls> => {
   return fetch(
     `${getBaseUrl(options)}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/${endpoint}`,
     postRequest(body, options),
-  ).then((response) => parseResponse<Call[]>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponse<AvnuCalls>(response, options?.avnuPublicKey));
 };
 
 /**
@@ -77,7 +78,7 @@ const actionToCalls = async (
  * @param options Optional SDK configuration
  * @returns The calls to execute
  */
-const stakeToCalls = async (params: StakeToCallsParams, options?: AvnuOptions): Promise<Call[]> => {
+const stakeToCalls = async (params: StakeToCallsParams, options?: AvnuOptions): Promise<AvnuCalls> => {
   const { poolAddress, userAddress, amount } = params;
   const body = { userAddress, amount: toBeHex(amount) };
   return actionToCalls('stake', poolAddress, userAddress, body, options);
@@ -91,7 +92,7 @@ const stakeToCalls = async (params: StakeToCallsParams, options?: AvnuOptions): 
  * @param options Optional SDK configuration
  * @returns The calls to execute
  */
-const initiateUnstakeToCalls = async (params: StakeToCallsParams, options?: AvnuOptions): Promise<Call[]> => {
+const initiateUnstakeToCalls = async (params: StakeToCallsParams, options?: AvnuOptions): Promise<AvnuCalls> => {
   const { poolAddress, userAddress, amount } = params;
   const body = { userAddress, amount: toBeHex(amount) };
   return actionToCalls('initiate-withdraw', poolAddress, userAddress, body, options);
@@ -104,7 +105,7 @@ const initiateUnstakeToCalls = async (params: StakeToCallsParams, options?: Avnu
  * @param options Optional SDK configuration
  * @returns The calls to execute
  */
-const unstakeToCalls = async (params: UnstakeToCallsParams, options?: AvnuOptions): Promise<Call[]> => {
+const unstakeToCalls = async (params: UnstakeToCallsParams, options?: AvnuOptions): Promise<AvnuCalls> => {
   const { poolAddress, userAddress } = params;
   const body = { userAddress };
   return actionToCalls('claim-withdraw', poolAddress, userAddress, body, options);
@@ -118,7 +119,7 @@ const unstakeToCalls = async (params: UnstakeToCallsParams, options?: AvnuOption
  * @param options Optional SDK configuration
  * @returns The calls to execute
  */
-const claimRewardsToCalls = async (params: ClaimRewardsToCallsParams, options?: AvnuOptions): Promise<Call[]> => {
+const claimRewardsToCalls = async (params: ClaimRewardsToCallsParams, options?: AvnuOptions): Promise<AvnuCalls> => {
   const { poolAddress, userAddress, restake } = params;
   const body = { userAddress, restake };
   return actionToCalls('claim-rewards', poolAddress, userAddress, body, options);
@@ -138,7 +139,7 @@ const claimRewardsToCalls = async (params: ClaimRewardsToCallsParams, options?: 
  */
 const executeStake = async (params: InvokeStakeParams, options?: AvnuOptions): Promise<InvokeTransactionResponse> => {
   const { provider, paymaster, poolAddress, amount } = params;
-  const calls = await stakeToCalls({ poolAddress, userAddress: provider.address, amount }, options);
+  const { calls } = await stakeToCalls({ poolAddress, userAddress: provider.address, amount }, options);
   if (paymaster && paymaster.active) {
     return executeAllPaymasterFlow({ paymaster, provider, calls });
   }
@@ -162,7 +163,7 @@ const executeInitiateUnstake = async (
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
   const { provider, paymaster, poolAddress, amount } = params;
-  const calls = await initiateUnstakeToCalls({ poolAddress, userAddress: provider.address, amount }, options);
+  const { calls } = await initiateUnstakeToCalls({ poolAddress, userAddress: provider.address, amount }, options);
   if (paymaster && paymaster.active) {
     return executeAllPaymasterFlow({ paymaster, provider, calls });
   }
@@ -185,7 +186,7 @@ const executeUnstake = async (
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
   const { provider, paymaster, poolAddress } = params;
-  const calls = await unstakeToCalls({ poolAddress, userAddress: provider.address }, options);
+  const { calls } = await unstakeToCalls({ poolAddress, userAddress: provider.address }, options);
   if (paymaster && paymaster.active) {
     return executeAllPaymasterFlow({ paymaster, provider, calls });
   }
@@ -209,7 +210,7 @@ const executeClaimRewards = async (
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
   const { provider, paymaster, poolAddress, restake } = params;
-  const calls = await claimRewardsToCalls({ poolAddress, userAddress: provider.address, restake }, options);
+  const { calls } = await claimRewardsToCalls({ poolAddress, userAddress: provider.address, restake }, options);
   if (paymaster && paymaster.active) {
     return executeAllPaymasterFlow({ paymaster, provider, calls });
   }
