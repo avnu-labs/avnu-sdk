@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { STRK, ETH } from '@/lib/tokens';
-import { getQuotes, executeSwap, type Quote } from '@avnu/avnu-sdk';
+import { getQuotes, executeSwap, type Quote, calculateMinReceivedAmount } from '@avnu/avnu-sdk';
+import { cn } from '@/lib/utils';
 
-const SLIPPAGE = 100; // 1% = 100 bps
+const SLIPPAGE = 0.01; // 1 = 100%
 
 export default function SwapPage() {
   const { account, address } = useAccount();
@@ -56,7 +57,8 @@ export default function SwapPage() {
 
     try {
       const result = await executeSwap({
-        provider: account as unknown as Parameters<typeof executeSwap>[0]['provider'],
+        // @ts-expect-error - account in this repo comes from main repo node-modules
+        provider: account,
         quote,
         slippage: SLIPPAGE,
       });
@@ -139,8 +141,19 @@ export default function SwapPage() {
           {quote && (
             <div className="p-3 bg-muted/50 rounded-md text-sm space-y-1">
               <div className="flex justify-between">
+                <span className="text-muted-foreground">Min received amount</span>
+                <span>
+                  {formatUnits(
+                    calculateMinReceivedAmount(quote.buyAmount, SLIPPAGE * 100),
+                    ETH.decimals
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-muted-foreground">Price impact</span>
-                <span>{(quote.priceImpact * 100).toFixed(2)}%</span>
+                <span className={cn(quote.priceImpact < 0 ? 'text-red-500' : 'text-green-500')}>
+                  {(quote.priceImpact / 100).toFixed(2)}%
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Gas fees</span>
@@ -148,7 +161,7 @@ export default function SwapPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Slippage</span>
-                <span>{SLIPPAGE / 100}%</span>
+                <span>{SLIPPAGE * 100}%</span>
               </div>
             </div>
           )}
@@ -166,14 +179,15 @@ export default function SwapPage() {
             <Button className="w-full" disabled>
               Connect Wallet
             </Button>
-          ) : !quote ? (
-            <Button className="w-full" onClick={handleGetQuote} disabled={isLoading || !amount}>
-              {isLoading ? 'Getting Quote...' : 'Get Quote'}
-            </Button>
           ) : (
-            <Button className="w-full" onClick={handleExecuteSwap} disabled={isExecuting}>
-              {isExecuting ? 'Executing...' : 'Execute Swap'}
-            </Button>
+            <>
+              <Button className="w-full" onClick={handleGetQuote} disabled={isLoading || !amount}>
+                {isLoading ? 'Getting Quote...' : 'Get Quote'}
+              </Button>
+              <Button className="w-full" onClick={handleExecuteSwap} disabled={isExecuting}>
+                {isExecuting ? 'Executing...' : 'Execute Swap'}
+              </Button>
+            </>
           )}
         </CardContent>
       </Card>
