@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import qs from 'qs';
 import { z } from 'zod';
+import { IMPULSE_API_VERSION, PRICES_API_VERSION } from './constants';
 import { FeedDateRange, PriceFeedType } from './enums';
 import {
   ByExchangeTVLDataSchema,
@@ -25,7 +26,6 @@ import {
   TokenPriceResponse,
 } from './types';
 import { getImpulseBaseUrl, getRequest, parseResponseWithSchema, postRequest } from './utils';
-import { IMPULSE_API_VERSION, PRICES_API_VERSION } from './constants';
 
 /**
  * Internal utils to get the start and end dates for a given date range
@@ -103,8 +103,8 @@ const getMarketData = (options?: AvnuOptions): Promise<TokenMarketData[]> =>
  * @returns The market data for the token
  */
 const getTokenMarketData = (tokenAddress: string, options?: AvnuOptions): Promise<TokenMarketData> =>
-  fetch(`${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}`, getRequest(options)).then((response) =>
-    parseResponseWithSchema(response, TokenMarketDataSchema, options?.avnuPublicKey),
+  fetch(`${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}`, getRequest(options)).then(
+    (response) => parseResponseWithSchema(response, TokenMarketDataSchema, options?.avnuPublicKey),
   );
 
 /**
@@ -244,9 +244,10 @@ const getPrices = (tokenAddresses: string[], options?: AvnuOptions): Promise<Tok
   const requestBody: { tokens: string[] } = {
     tokens: tokenAddresses,
   };
-  return fetch(`${getImpulseBaseUrl(options)}/${PRICES_API_VERSION}/tokens/prices`, postRequest(requestBody, options)).then((response) =>
-    parseResponseWithSchema(response, z.array(TokenPriceSchema), options?.avnuPublicKey),
-  );
+  return fetch(
+    `${getImpulseBaseUrl(options)}/${PRICES_API_VERSION}/tokens/prices`,
+    postRequest(requestBody, options),
+  ).then((response) => parseResponseWithSchema(response, z.array(TokenPriceSchema), options?.avnuPublicKey));
 };
 
 export {

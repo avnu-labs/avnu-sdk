@@ -1,5 +1,5 @@
 import fetchMock from 'fetch-mock';
-import { IMPULSE_BASE_URL } from './constants';
+import { IMPULSE_API_VERSION, IMPULSE_BASE_URL, PRICES_API_VERSION } from './constants';
 import { FeedDateRange, FeedResolution, PriceFeedType } from './enums';
 import {
   aByExchangeTVLData,
@@ -33,7 +33,7 @@ describe('Impulse services', () => {
     it('should return a list of TokenMarketData', async () => {
       // Given
       const response = [aTokenMarketData()];
-      fetchMock.get(`${IMPULSE_BASE_URL}/v1/tokens`, response);
+      fetchMock.get(`${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens`, response);
 
       // When
       const result = await getMarketData();
@@ -44,7 +44,7 @@ describe('Impulse services', () => {
 
     it('should throw Error with status code when status > 400', async () => {
       // Given
-      fetchMock.get(`${IMPULSE_BASE_URL}/v1/tokens`, 401);
+      fetchMock.get(`${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens`, 401);
 
       // When
       try {
@@ -60,7 +60,7 @@ describe('Impulse services', () => {
       // Given
       const impulseBaseUrl = 'https://example.com';
       const response = [aTokenMarketData()];
-      fetchMock.get(`${impulseBaseUrl}/v1/tokens`, response);
+      fetchMock.get(`${impulseBaseUrl}/${IMPULSE_API_VERSION}/tokens`, response);
 
       // When
       const result = await getMarketData({ impulseBaseUrl });
@@ -75,7 +75,7 @@ describe('Impulse services', () => {
       // Given
       const tokenAddress = '0x0token';
       const response = aTokenMarketData();
-      fetchMock.get(`${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}`, response);
+      fetchMock.get(`${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}`, response);
 
       // When
       const result = await getTokenMarketData(tokenAddress);
@@ -87,7 +87,7 @@ describe('Impulse services', () => {
     it('should throw Error with status code when status > 400', async () => {
       // Given
       const tokenAddress = '0x0invalid';
-      fetchMock.get(`${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}`, 404);
+      fetchMock.get(`${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}`, 404);
 
       // When
       try {
@@ -110,7 +110,7 @@ describe('Impulse services', () => {
         resolution: FeedResolution.HOURLY,
       };
       const response = [aSimplePriceData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/prices/line?`, response);
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/line?`, response);
 
       // When
       const result = await getPriceFeed(tokenAddress, feedProps);
@@ -128,7 +128,7 @@ describe('Impulse services', () => {
         resolution: FeedResolution.HOURLY,
       };
       const response = [aCandlePriceData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/prices/candle?`, response);
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/candle?`, response);
 
       // When
       const result = await getPriceFeed(tokenAddress, feedProps);
@@ -147,7 +147,7 @@ describe('Impulse services', () => {
         resolution: FeedResolution.HOURLY,
       };
       const response = [aSimplePriceData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/prices/line?`, response);
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/line?`, response);
 
       // When
       const result = await getPriceFeed(tokenAddress, feedProps, quoteTokenAddress);
@@ -165,7 +165,10 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const simpleProps = { dateRange: FeedDateRange.ONE_DAY };
       const response = [aByExchangeVolumeData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/exchange-volumes?`, response);
+      fetchMock.get(
+        `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes?`,
+        response,
+      );
 
       // When
       const result = await getVolumeByExchange(tokenAddress, simpleProps);
@@ -179,7 +182,10 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const simpleProps = { dateRange: FeedDateRange.ONE_WEEK };
       const response = [aByExchangeVolumeData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/exchange-volumes?`, response);
+      fetchMock.get(
+        `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes?`,
+        response,
+      );
 
       // When
       const result = await getVolumeByExchange(tokenAddress, simpleProps);
@@ -198,7 +204,10 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.HOURLY };
       const response = [aByExchangeVolumeData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/exchange-volumes/line?`, response);
+      fetchMock.get(
+        `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?`,
+        response,
+      );
 
       // When
       const result = await getExchangeVolumeFeed(tokenAddress, feedProps);
@@ -212,7 +221,10 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.DAILY };
       const response = [aByExchangeVolumeData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/exchange-volumes/line?`, response);
+      fetchMock.get(
+        `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?`,
+        response,
+      );
 
       // When
       const result = await getExchangeVolumeFeed(tokenAddress, feedProps);
@@ -230,7 +242,7 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const simpleProps = { dateRange: FeedDateRange.ONE_DAY };
       const response = [aByExchangeTVLData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/exchange-tvl?`, response);
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
 
       // When
       const result = await getTVLByExchange(tokenAddress, simpleProps);
@@ -244,7 +256,7 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const simpleProps = { dateRange: FeedDateRange.ONE_MONTH };
       const response = [aByExchangeTVLData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/exchange-tvl?`, response);
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
 
       // When
       const result = await getTVLByExchange(tokenAddress, simpleProps);
@@ -263,7 +275,10 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.HOURLY };
       const response = [aByExchangeTVLData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/exchange-tvl/line?`, response);
+      fetchMock.get(
+        `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl/line?`,
+        response,
+      );
 
       // When
       const result = await getExchangeTVLFeed(tokenAddress, feedProps);
@@ -277,7 +292,10 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.FOUR_HOUR };
       const response = [aByExchangeTVLData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/exchange-tvl/line?`, response);
+      fetchMock.get(
+        `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl/line?`,
+        response,
+      );
 
       // When
       const result = await getExchangeTVLFeed(tokenAddress, feedProps);
@@ -295,7 +313,7 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.HOURLY };
       const response = [aSimpleVolumeData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/volumes/line?`, response);
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/volumes/line?`, response);
 
       // When
       const result = await getTransferVolumeFeed(tokenAddress, feedProps);
@@ -309,7 +327,7 @@ describe('Impulse services', () => {
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.WEEKLY };
       const response = [aSimpleVolumeData()];
-      fetchMock.get(`begin:${IMPULSE_BASE_URL}/v1/tokens/${tokenAddress}/volumes/line?`, response);
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/volumes/line?`, response);
 
       // When
       const result = await getTransferVolumeFeed(tokenAddress, feedProps);
@@ -333,7 +351,7 @@ describe('Impulse services', () => {
           starknetMarket: { usd: 1700 },
         },
       ];
-      fetchMock.post(`${IMPULSE_BASE_URL}/v3/tokens/prices`, response);
+      fetchMock.post(`${IMPULSE_BASE_URL}/${PRICES_API_VERSION}/tokens/prices`, response);
 
       // When
       const result = await getPrices(request.tokens);
@@ -353,7 +371,7 @@ describe('Impulse services', () => {
         },
       ];
 
-      fetchMock.post(`${impulseBaseUrl}/v3/tokens/prices`, response);
+      fetchMock.post(`${impulseBaseUrl}/${PRICES_API_VERSION}/tokens/prices`, response);
 
       // When
       const result = await getPrices(request.tokens, { impulseBaseUrl });
@@ -366,7 +384,7 @@ describe('Impulse services', () => {
     it('should throw Error with status code and text when status is higher than 400', async () => {
       // Given
       const request = aPriceRequest();
-      fetchMock.post(`${IMPULSE_BASE_URL}/v3/tokens/prices`, 401);
+      fetchMock.post(`${IMPULSE_BASE_URL}/${PRICES_API_VERSION}/tokens/prices`, 401);
 
       // When
       try {

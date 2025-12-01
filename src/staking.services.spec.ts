@@ -1,6 +1,6 @@
 import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
-import { BASE_URL } from './constants';
+import { BASE_URL, STAKING_API_VERSION } from './constants';
 import { aCall, aDelegationPool, aStakingInfo, aUserStakingInfo } from './fixtures';
 import {
   claimRewardsToCalls,
@@ -34,7 +34,7 @@ describe('Staking services', () => {
           },
         ],
       };
-      fetchMock.get(`${BASE_URL}/staking/v2/info`, response);
+      fetchMock.get(`${BASE_URL}/staking/${STAKING_API_VERSION}/info`, response);
 
       // When
       const result = await getAvnuStakingInfo();
@@ -45,7 +45,7 @@ describe('Staking services', () => {
 
     it('should throw Error with status code when status > 400', async () => {
       // Given
-      fetchMock.get(`${BASE_URL}/staking/v2/info`, 401);
+      fetchMock.get(`${BASE_URL}/staking/${STAKING_API_VERSION}/info`, 401);
 
       // When
       try {
@@ -70,7 +70,7 @@ describe('Staking services', () => {
           },
         ],
       };
-      fetchMock.get(`${baseUrl}/staking/v2/info`, response);
+      fetchMock.get(`${baseUrl}/staking/${STAKING_API_VERSION}/info`, response);
 
       // When
       const result = await getAvnuStakingInfo({ baseUrl });
@@ -95,7 +95,10 @@ describe('Staking services', () => {
         expectedYearlyStrkRewards: toBeHex(parseUnits('50', 18)),
         aprs: [{ date: '2024-01-01', apr: 5.5 }],
       };
-      fetchMock.get(`${BASE_URL}/staking/v2/pools/${tokenAddress}/members/${userAddress}`, response);
+      fetchMock.get(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${tokenAddress}/members/${userAddress}`,
+        response,
+      );
 
       // When
       const result = await getUserStakingInfo(tokenAddress, userAddress);
@@ -108,7 +111,7 @@ describe('Staking services', () => {
       // Given
       const tokenAddress = '0x0token';
       const userAddress = '0x0user';
-      fetchMock.get(`${BASE_URL}/staking/v2/pools/${tokenAddress}/members/${userAddress}`, 404);
+      fetchMock.get(`${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${tokenAddress}/members/${userAddress}`, 404);
 
       // When
       try {
@@ -128,7 +131,10 @@ describe('Staking services', () => {
       const userAddress = '0x0user';
       const amount = parseUnits('100', 18);
       const response = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/${userAddress}/stake`, response);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/stake`,
+        response,
+      );
 
       // When
       const result = await stakeToCalls({ poolAddress, userAddress, amount });
@@ -142,7 +148,7 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const userAddress = '0x0user';
       const amount = parseUnits('100', 18);
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/${userAddress}/stake`, {
+      fetchMock.post(`${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/stake`, {
         status: 400,
         body: { messages: ['Bad Request'] },
       });
@@ -160,7 +166,10 @@ describe('Staking services', () => {
       const userAddress = '0x0user';
       const amount = parseUnits('100', 18);
       const response = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/${userAddress}/initiate-withdraw`, response);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/initiate-withdraw`,
+        response,
+      );
 
       // When
       const result = await initiateUnstakeToCalls({ poolAddress, userAddress, amount });
@@ -174,10 +183,13 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const userAddress = '0x0user';
       const amount = parseUnits('100', 18);
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/${userAddress}/initiate-withdraw`, {
-        status: 400,
-        body: { messages: ['Bad Request'] },
-      });
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/initiate-withdraw`,
+        {
+          status: 400,
+          body: { messages: ['Bad Request'] },
+        },
+      );
 
       // When & Then
       expect.assertions(1);
@@ -193,7 +205,10 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const userAddress = '0x0user';
       const response = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/${userAddress}/claim-withdraw`, response);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/claim-withdraw`,
+        response,
+      );
 
       // When
       const result = await unstakeToCalls({ poolAddress, userAddress });
@@ -206,10 +221,13 @@ describe('Staking services', () => {
       // Given
       const poolAddress = '0x0pool';
       const userAddress = '0x0user';
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/${userAddress}/claim-withdraw`, {
-        status: 400,
-        body: { messages: ['Bad Request'] },
-      });
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/claim-withdraw`,
+        {
+          status: 400,
+          body: { messages: ['Bad Request'] },
+        },
+      );
 
       // When & Then
       expect.assertions(1);
@@ -224,7 +242,10 @@ describe('Staking services', () => {
       const userAddress = '0x0user';
       const restake = true;
       const response = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/${userAddress}/claim-rewards`, response);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/claim-rewards`,
+        response,
+      );
 
       // When
       const result = await claimRewardsToCalls({ poolAddress, userAddress, restake });
@@ -239,7 +260,10 @@ describe('Staking services', () => {
       const userAddress = '0x0user';
       const restake = false;
       const response = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/${userAddress}/claim-rewards`, response);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/claim-rewards`,
+        response,
+      );
 
       // When
       const result = await claimRewardsToCalls({ poolAddress, userAddress, restake });
@@ -256,7 +280,7 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const amount = parseUnits('100', 18);
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/0x0user/stake`, calls);
+      fetchMock.post(`${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/stake`, calls);
 
       // When
       const result = await executeStake({ provider: mockAccount, poolAddress, amount });
@@ -273,7 +297,7 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const amount = parseUnits('100', 18);
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/0x0user/stake`, calls);
+      fetchMock.post(`${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/stake`, calls);
 
       // When
       const result = await executeStake({
@@ -297,7 +321,10 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const amount = parseUnits('100', 18);
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/0x0user/initiate-withdraw`, calls);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/initiate-withdraw`,
+        calls,
+      );
 
       // When
       const result = await executeInitiateUnstake({ provider: mockAccount, poolAddress, amount });
@@ -314,7 +341,10 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const amount = parseUnits('100', 18);
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/0x0user/initiate-withdraw`, calls);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/initiate-withdraw`,
+        calls,
+      );
 
       // When
       const result = await executeInitiateUnstake({
@@ -337,7 +367,10 @@ describe('Staking services', () => {
       const mockAccount = createMockAccount('0x0user');
       const poolAddress = '0x0pool';
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/0x0user/claim-withdraw`, calls);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/claim-withdraw`,
+        calls,
+      );
 
       // When
       const result = await executeUnstake({ provider: mockAccount, poolAddress });
@@ -353,7 +386,10 @@ describe('Staking services', () => {
       const mockPaymaster = createMockPaymaster();
       const poolAddress = '0x0pool';
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/0x0user/claim-withdraw`, calls);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/claim-withdraw`,
+        calls,
+      );
 
       // When
       const result = await executeUnstake({
@@ -376,7 +412,10 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const restake = true;
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/0x0user/claim-rewards`, calls);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/claim-rewards`,
+        calls,
+      );
 
       // When
       const result = await executeClaimRewards({ provider: mockAccount, poolAddress, restake });
@@ -393,7 +432,10 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const restake = false;
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/staking/v2/pools/${poolAddress}/members/0x0user/claim-rewards`, calls);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/claim-rewards`,
+        calls,
+      );
 
       // When
       const result = await executeClaimRewards({

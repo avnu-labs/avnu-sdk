@@ -1,6 +1,6 @@
 import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
-import { BASE_URL } from './constants';
+import { BASE_URL, DCA_API_VERSION } from './constants';
 import { cancelDcaToCalls, createDcaToCalls, executeCancelDca, executeCreateDca, getDcaOrders } from './dca.services';
 import { aCall, aDCACreateOrder, aDCAOrder, aPage } from './fixtures';
 import { createMockAccount, createMockPaymaster, mockExecutionParams } from './test-utils';
@@ -26,7 +26,7 @@ describe('DCA services', () => {
       ]);
 
       const request = { traderAddress: '0x0' };
-      fetchMock.get(`begin:${BASE_URL}/dca/v1/orders?`, response);
+      fetchMock.get(`begin:${BASE_URL}/dca/${DCA_API_VERSION}/orders?`, response);
 
       // When
       const result = (await getDcaOrders(request)).content;
@@ -40,7 +40,7 @@ describe('DCA services', () => {
     it('should throw Error with status code when status > 400', async () => {
       // Given
       const request = { traderAddress: '0x0' };
-      fetchMock.get(`begin:${BASE_URL}/dca/v1/orders?`, 401);
+      fetchMock.get(`begin:${BASE_URL}/dca/${DCA_API_VERSION}/orders?`, 401);
 
       // When
       try {
@@ -58,7 +58,7 @@ describe('DCA services', () => {
       // Given
       const order = aDCACreateOrder();
       const response = [aCall()];
-      fetchMock.post(`${BASE_URL}/dca/v1/orders`, response);
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, response);
 
       // When
       const result = await createDcaToCalls(order);
@@ -70,7 +70,7 @@ describe('DCA services', () => {
     it('should throw Error with status code when status > 400', async () => {
       // Given
       const order = aDCACreateOrder();
-      fetchMock.post(`${BASE_URL}/dca/v1/orders`, {
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, {
         status: 400,
         body: { messages: ['Bad Request'] },
       });
@@ -86,7 +86,7 @@ describe('DCA services', () => {
       // Given
       const orderAddress = '0x0order';
       const response = [aCall()];
-      fetchMock.post(`${BASE_URL}/dca/v1/orders/${orderAddress}/cancel`, response);
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, response);
 
       // When
       const result = await cancelDcaToCalls(orderAddress);
@@ -98,7 +98,7 @@ describe('DCA services', () => {
     it('should throw Error with status code when status > 400', async () => {
       // Given
       const orderAddress = '0x0order';
-      fetchMock.post(`${BASE_URL}/dca/v1/orders/${orderAddress}/cancel`, {
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, {
         status: 400,
         body: { messages: ['Bad Request'] },
       });
@@ -115,7 +115,7 @@ describe('DCA services', () => {
       const mockAccount = createMockAccount('0x0user');
       const order = aDCACreateOrder();
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/dca/v1/orders`, calls);
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, calls);
 
       // When
       const result = await executeCreateDca({ provider: mockAccount, order });
@@ -131,7 +131,7 @@ describe('DCA services', () => {
       const mockPaymaster = createMockPaymaster();
       const order = aDCACreateOrder();
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/dca/v1/orders`, calls);
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, calls);
 
       // When
       const result = await executeCreateDca({
@@ -153,7 +153,7 @@ describe('DCA services', () => {
       const mockAccount = createMockAccount('0x0user');
       const orderAddress = '0x0order';
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/dca/v1/orders/${orderAddress}/cancel`, calls);
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, calls);
 
       // When
       const result = await executeCancelDca({ provider: mockAccount, orderAddress });
@@ -169,7 +169,7 @@ describe('DCA services', () => {
       const mockPaymaster = createMockPaymaster();
       const orderAddress = '0x0order';
       const calls = [aCall()];
-      fetchMock.post(`${BASE_URL}/dca/v1/orders/${orderAddress}/cancel`, calls);
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, calls);
 
       // When
       const result = await executeCancelDca({

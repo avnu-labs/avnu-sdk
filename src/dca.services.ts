@@ -1,5 +1,6 @@
 import qs from 'qs';
 import { Call } from 'starknet';
+import { DCA_API_VERSION } from './constants';
 import { executeAllPaymasterFlow } from './paymaster.services';
 import { DcaOrderSchema, PageSchema } from './schemas';
 import {
@@ -30,7 +31,7 @@ const getDcaOrders = async (
 ): Promise<Page<DcaOrder>> => {
   const params = qs.stringify({ traderAddress, status, page, size, sort }, { arrayFormat: 'repeat' });
 
-  return fetch(`${getBaseUrl(options)}/dca/v1/orders?${params}`, getRequest(options)).then((response) =>
+  return fetch(`${getBaseUrl(options)}/dca/${DCA_API_VERSION}/orders?${params}`, getRequest(options)).then((response) =>
     parseResponseWithSchema(response, PageSchema(DcaOrderSchema), options?.avnuPublicKey),
   );
 };
@@ -44,7 +45,7 @@ const getDcaOrders = async (
  */
 const actionToCalls = async (endpoint: string, body: unknown, options?: AvnuOptions): Promise<Call[]> => {
   return fetch(
-    `${getBaseUrl(options)}/dca/v1/orders${endpoint ? `/${endpoint}` : ''}`,
+    `${getBaseUrl(options)}/dca/${DCA_API_VERSION}/orders${endpoint ? `/${endpoint}` : ''}`,
     postRequest(body, options),
   ).then((response) => parseResponse<Call[]>(response, options?.avnuPublicKey));
 };

@@ -1,6 +1,14 @@
 import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import { AccountInterface, ExecutionParameters, PaymasterInterface } from 'starknet';
-import { BASE_URL, IMPULSE_BASE_URL } from './constants';
+import {
+  BASE_URL,
+  DCA_API_VERSION,
+  IMPULSE_API_VERSION,
+  IMPULSE_BASE_URL,
+  STAKING_API_VERSION,
+  SWAP_API_VERSION,
+  TOKEN_API_VERSION,
+} from './constants';
 
 // Mock ExecutionParameters (using type assertion since we only need it for mocking)
 export const mockExecutionParams = {
@@ -31,9 +39,8 @@ export const createMockPaymaster = (): jest.Mocked<PaymasterInterface> =>
   }) as unknown as jest.Mocked<PaymasterInterface>;
 
 // URL Builders
-export const buildSwapUrl = (path: string): string => `${BASE_URL}/swap/v3${path}`;
-export const buildDcaUrl = (path: string): string => `${BASE_URL}/dca/v1${path}`;
-export const buildTokenUrl = (path: string): string => `${BASE_URL}/v1/starknet/tokens${path}`;
-export const buildStakingUrl = (path: string): string => `${BASE_URL}/staking/v2${path}`;
-export const buildImpulseUrl = (path: string): string => `${IMPULSE_BASE_URL}/v1${path}`;
-export const buildImpulseV3Url = (path: string): string => `${IMPULSE_BASE_URL}/v3${path}`;
+export const buildSwapUrl = (path: string): string => `${BASE_URL}/swap/${SWAP_API_VERSION}${path}`;
+export const buildDcaUrl = (path: string): string => `${BASE_URL}/dca/${DCA_API_VERSION}${path}`;
+export const buildTokenUrl = (path: string): string => `${BASE_URL}/${TOKEN_API_VERSION}/starknet/tokens${path}`;
+export const buildStakingUrl = (path: string): string => `${BASE_URL}/staking/${STAKING_API_VERSION}${path}`;
+export const buildImpulseUrl = (path: string): string => `${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}${path}`;

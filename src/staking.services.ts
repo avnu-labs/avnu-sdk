@@ -1,5 +1,6 @@
 import { toBeHex } from 'ethers';
 import { Call } from 'starknet';
+import { STAKING_API_VERSION } from './constants';
 import { executeAllPaymasterFlow } from './paymaster.services';
 import { StakingInfoSchema, UserStakingInfoSchema } from './schemas';
 import {
@@ -23,7 +24,7 @@ import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postReq
  * @returns The AVNU staking info
  */
 const getAvnuStakingInfo = async (options?: AvnuOptions): Promise<StakingInfo> => {
-  return fetch(`${getBaseUrl(options)}/staking/v2/info`, getRequest(options)).then((response) =>
+  return fetch(`${getBaseUrl(options)}/staking/${STAKING_API_VERSION}/info`, getRequest(options)).then((response) =>
     parseResponseWithSchema(response, StakingInfoSchema, options?.avnuPublicKey),
   );
 };
@@ -41,7 +42,7 @@ const getUserStakingInfo = async (
   options?: AvnuOptions,
 ): Promise<UserStakingInfo> => {
   return fetch(
-    `${getBaseUrl(options)}/staking/v2/pools/${tokenAddress}/members/${userAddress}`,
+    `${getBaseUrl(options)}/staking/${STAKING_API_VERSION}/pools/${tokenAddress}/members/${userAddress}`,
     getRequest(options),
   ).then((response) => parseResponseWithSchema(response, UserStakingInfoSchema, options?.avnuPublicKey));
 };
@@ -63,7 +64,7 @@ const actionToCalls = async (
   options?: AvnuOptions,
 ): Promise<Call[]> => {
   return fetch(
-    `${getBaseUrl(options)}/staking/v2/pools/${poolAddress}/members/${userAddress}/${endpoint}`,
+    `${getBaseUrl(options)}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/${userAddress}/${endpoint}`,
     postRequest(body, options),
   ).then((response) => parseResponse<Call[]>(response, options?.avnuPublicKey));
 };
