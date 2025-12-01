@@ -96,7 +96,8 @@ export default function StakingPage() {
     }
   };
 
-  const formatAmount = (amount: bigint) => parseFloat(formatUnits(amount, STRK.decimals)).toFixed(2);
+  const formatAmount = (amount: bigint) =>
+    parseFloat(formatUnits(amount, STRK.decimals)).toFixed(2);
 
   return (
     <div className="space-y-6 max-w-md">
@@ -108,7 +109,13 @@ export default function StakingPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Image src={STRK.logoUri!} alt={STRK.symbol} width={24} height={24} className="rounded-full" />
+            <Image
+              src={STRK.logoUri!}
+              alt={STRK.symbol}
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
             STRK Staking
           </CardTitle>
           <CardDescription>
@@ -124,7 +131,9 @@ export default function StakingPage() {
             </div>
             <div className="p-3 bg-muted rounded-md">
               <p className="text-sm text-muted-foreground">Rewards</p>
-              <p className="font-bold">{userInfo ? formatAmount(userInfo.unclaimedRewards) : '0'} STRK</p>
+              <p className="font-bold">
+                {userInfo ? formatAmount(userInfo.unclaimedRewards) : '0'} STRK
+              </p>
             </div>
             <div className="p-3 bg-muted rounded-md">
               <p className="text-sm text-muted-foreground">APR</p>
@@ -134,24 +143,46 @@ export default function StakingPage() {
 
           <Tabs defaultValue="stake">
             <TabsList className="w-full">
-              <TabsTrigger value="stake" className="flex-1">Stake</TabsTrigger>
-              <TabsTrigger value="unstake" className="flex-1">Unstake</TabsTrigger>
+              <TabsTrigger value="stake" className="flex-1">
+                Stake
+              </TabsTrigger>
+              <TabsTrigger value="unstake" className="flex-1">
+                Unstake
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="stake" className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label>Amount to stake</Label>
-                <Input type="number" placeholder="0.0" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} />
+                <Input
+                  type="number"
+                  placeholder="0.0"
+                  value={stakeAmount}
+                  onChange={(e) => setStakeAmount(e.target.value)}
+                />
               </div>
-              <Button className="w-full" onClick={handleStake} disabled={!account || !stakeAmount || loading}>
+              <Button
+                className="w-full"
+                onClick={handleStake}
+                disabled={!account || !stakeAmount || loading}
+              >
                 {loading ? 'Staking...' : 'Stake STRK'}
               </Button>
             </TabsContent>
             <TabsContent value="unstake" className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label>Amount to unstake</Label>
-                <Input type="number" placeholder="0.0" value={unstakeAmount} onChange={(e) => setUnstakeAmount(e.target.value)} />
+                <Input
+                  type="number"
+                  placeholder="0.0"
+                  value={unstakeAmount}
+                  onChange={(e) => setUnstakeAmount(e.target.value)}
+                />
               </div>
-              <Button className="w-full" onClick={handleInitiateUnstake} disabled={!account || !unstakeAmount || loading}>
+              <Button
+                className="w-full"
+                onClick={handleInitiateUnstake}
+                disabled={!account || !unstakeAmount || loading}
+              >
                 {loading ? 'Processing...' : 'Initiate Unstake'}
               </Button>
             </TabsContent>
@@ -160,9 +191,15 @@ export default function StakingPage() {
           <div className="flex items-center justify-between pt-2 border-t">
             <div className="flex items-center gap-2">
               <Switch id="restake" checked={restake} onCheckedChange={setRestake} />
-              <Label htmlFor="restake" className="text-sm">Restake rewards</Label>
+              <Label htmlFor="restake" className="text-sm">
+                Restake rewards
+              </Label>
             </div>
-            <Button variant="outline" onClick={handleClaimRewards} disabled={!account || !userInfo?.unclaimedRewards || loading}>
+            <Button
+              variant="outline"
+              onClick={handleClaimRewards}
+              disabled={!account || !userInfo?.unclaimedRewards || loading}
+            >
               Claim Rewards
             </Button>
           </div>
@@ -174,12 +211,24 @@ export default function StakingPage() {
           <CardTitle className="text-sm">SDK Functions</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1">
-          <p><code>getAvnuStakingInfo()</code> - Get staking info</p>
-          <p><code>getUserStakingInfo(token, user)</code> - User staking info</p>
-          <p><code>executeStake(params)</code> - Stake tokens</p>
-          <p><code>executeInitiateUnstake(params)</code> - Start unstaking</p>
-          <p><code>executeUnstake(params)</code> - Complete unstaking</p>
-          <p><code>executeClaimRewards(params)</code> - Claim rewards</p>
+          <p>
+            <code>getAvnuStakingInfo()</code> - Get staking info
+          </p>
+          <p>
+            <code>getUserStakingInfo(token, user)</code> - User staking info
+          </p>
+          <p>
+            <code>executeStake(params)</code> - Stake tokens
+          </p>
+          <p>
+            <code>executeInitiateUnstake(params)</code> - Start unstaking
+          </p>
+          <p>
+            <code>executeUnstake(params)</code> - Complete unstaking
+          </p>
+          <p>
+            <code>executeClaimRewards(params)</code> - Claim rewards
+          </p>
         </CardContent>
       </Card>
     </div>
