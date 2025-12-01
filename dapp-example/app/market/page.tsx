@@ -4,9 +4,20 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Area, AreaChart, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
 import { STRK } from '@/lib/tokens';
-import { getPriceFeed, FeedDateRange, FeedResolution, PriceFeedType, type SimplePriceData } from '@avnu/avnu-sdk';
+import {
+  getPriceFeed,
+  FeedDateRange,
+  FeedResolution,
+  PriceFeedType,
+  type SimplePriceData,
+} from '@avnu/avnu-sdk';
 
 const chartConfig = {
   price: { label: 'Price (USD)', color: 'hsl(var(--chart-1))' },
@@ -36,7 +47,13 @@ export default function MarketPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Image src={STRK.logoUri!} alt={STRK.symbol} width={24} height={24} className="rounded-full" />
+            <Image
+              src={STRK.logoUri!}
+              alt={STRK.symbol}
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
             {STRK.symbol} Price Chart
           </CardTitle>
           <CardDescription>
@@ -45,7 +62,9 @@ export default function MarketPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="h-64 flex items-center justify-center text-muted-foreground">Loading...</div>
+            <div className="h-64 flex items-center justify-center text-muted-foreground">
+              Loading...
+            </div>
           ) : (
             <ChartContainer config={chartConfig} className="h-64 w-full">
               <AreaChart data={priceData}>
@@ -59,7 +78,9 @@ export default function MarketPage() {
                   dataKey="date"
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  tickFormatter={(value) =>
+                    new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                  }
                   minTickGap={50}
                 />
                 <YAxis
@@ -77,7 +98,12 @@ export default function MarketPage() {
                     />
                   }
                 />
-                <Area dataKey="value" type="monotone" fill="url(#fillPrice)" stroke="var(--color-price)" />
+                <Area
+                  dataKey="value"
+                  type="monotone"
+                  fill="url(#fillPrice)"
+                  stroke="var(--color-price)"
+                />
               </AreaChart>
             </ChartContainer>
           )}

@@ -87,9 +87,15 @@ export default function TokensPage() {
           <CardTitle className="text-sm">SDK Functions</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1">
-          <p><code>fetchTokens(request)</code> - Get tokens with pagination</p>
-          <p><code>fetchTokenByAddress(address)</code> - Get specific token</p>
-          <p><code>fetchVerifiedTokenBySymbol(symbol)</code> - Get verified token</p>
+          <p>
+            <code>fetchTokens(request)</code> - Get tokens with pagination
+          </p>
+          <p>
+            <code>fetchTokenByAddress(address)</code> - Get specific token
+          </p>
+          <p>
+            <code>fetchVerifiedTokenBySymbol(symbol)</code> - Get verified token
+          </p>
         </CardContent>
       </Card>
     </div>

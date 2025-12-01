@@ -21,13 +21,9 @@ export default function DcaPage() {
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState<DcaOrder[]>([]);
 
-  const fetchOrders = () => {
+  useEffect(() => {
     if (!address) return;
     getDcaOrders({ traderAddress: address }).then((page) => setOrders(page.content));
-  };
-
-  useEffect(() => {
-    fetchOrders();
   }, [address]);
 
   const handleCreate = async () => {
@@ -71,26 +67,52 @@ export default function DcaPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
-              <Image src={STRK.logoUri!} alt={STRK.symbol} width={20} height={20} className="rounded-full" />
+              <Image
+                src={STRK.logoUri!}
+                alt={STRK.symbol}
+                width={20}
+                height={20}
+                className="rounded-full"
+              />
               <span className="font-medium">{STRK.symbol}</span>
               <span className="text-muted-foreground">→</span>
-              <Image src={ETH.logoUri!} alt={ETH.symbol} width={20} height={20} className="rounded-full" />
+              <Image
+                src={ETH.logoUri!}
+                alt={ETH.symbol}
+                width={20}
+                height={20}
+                className="rounded-full"
+              />
               <span className="font-medium">{ETH.symbol}</span>
             </div>
 
             <div className="space-y-2">
               <Label>Amount per cycle</Label>
-              <Input type="number" placeholder="10" value={amountPerCycle} onChange={(e) => setAmountPerCycle(e.target.value)} />
+              <Input
+                type="number"
+                placeholder="10"
+                value={amountPerCycle}
+                onChange={(e) => setAmountPerCycle(e.target.value)}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Repetitions</Label>
-                <Input type="number" placeholder="7" value={repetitions} onChange={(e) => setRepetitions(e.target.value)} />
+                <Input
+                  type="number"
+                  placeholder="7"
+                  value={repetitions}
+                  onChange={(e) => setRepetitions(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Frequency</Label>
-                <select className="w-full h-9 px-3 rounded-md border bg-transparent" value={frequency} onChange={(e) => setFrequency(e.target.value)}>
+                <select
+                  className="w-full h-9 px-3 rounded-md border bg-transparent"
+                  value={frequency}
+                  onChange={(e) => setFrequency(e.target.value)}
+                >
                   <option value="3600">Hourly</option>
                   <option value="86400">Daily</option>
                   <option value="604800">Weekly</option>
@@ -98,7 +120,11 @@ export default function DcaPage() {
               </div>
             </div>
 
-            <Button className="w-full" onClick={handleCreate} disabled={!account || !amountPerCycle || loading}>
+            <Button
+              className="w-full"
+              onClick={handleCreate}
+              disabled={!account || !amountPerCycle || loading}
+            >
               {loading ? 'Creating...' : 'Create DCA Order'}
             </Button>
           </CardContent>
@@ -119,9 +145,16 @@ export default function DcaPage() {
             ) : (
               <div className="space-y-2">
                 {orders.map((order) => (
-                  <div key={order.id} className="p-3 border rounded-md flex items-center justify-between">
-                    <span className="text-sm">{order.executedTradesCount}/{order.iterations} trades</span>
-                    <Badge variant={order.status === 'ACTIVE' ? 'default' : 'secondary'}>{order.status}</Badge>
+                  <div
+                    key={order.id}
+                    className="p-3 border rounded-md flex items-center justify-between"
+                  >
+                    <span className="text-sm">
+                      {order.executedTradesCount}/{order.iterations} trades
+                    </span>
+                    <Badge variant={order.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                      {order.status}
+                    </Badge>
                   </div>
                 ))}
               </div>
@@ -135,11 +168,21 @@ export default function DcaPage() {
           <CardTitle className="text-sm">SDK Functions</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1">
-          <p><code>getDcaOrders(params)</code> - Fetch DCA orders</p>
-          <p><code>createDcaToCalls(order)</code> - Build create calls</p>
-          <p><code>executeCreateDca(params)</code> - Execute creation</p>
-          <p><code>cancelDcaToCalls(address)</code> - Build cancel calls</p>
-          <p><code>executeCancelDca(params)</code> - Execute cancellation</p>
+          <p>
+            <code>getDcaOrders(params)</code> - Fetch DCA orders
+          </p>
+          <p>
+            <code>createDcaToCalls(order)</code> - Build create calls
+          </p>
+          <p>
+            <code>executeCreateDca(params)</code> - Execute creation
+          </p>
+          <p>
+            <code>cancelDcaToCalls(address)</code> - Build cancel calls
+          </p>
+          <p>
+            <code>executeCancelDca(params)</code> - Execute cancellation
+          </p>
         </CardContent>
       </Card>
     </div>
