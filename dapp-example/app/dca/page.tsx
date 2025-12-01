@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import moment from 'moment';
-import { parseUnits } from 'ethers';
+import { parseUnits, toBeHex } from 'ethers';
 import { useAccount } from '@starknet-react/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -34,10 +34,11 @@ export default function DcaPage() {
     if (!account || !address || !amountPerCycle) return;
     setLoading(true);
     try {
-      const amountPerCycleWei = parseUnits(amountPerCycle, STRK.decimals).toString();
-      const totalAmount = (BigInt(amountPerCycleWei) * BigInt(repetitions)).toString();
+      const amountPerCycleWei = toBeHex(parseUnits(amountPerCycle, STRK.decimals));
+      const totalAmount = toBeHex(BigInt(amountPerCycleWei) * BigInt(repetitions));
       await executeCreateDca({
-        provider: account as unknown as Parameters<typeof executeCreateDca>[0]['provider'],
+        // @ts-expect-error - account in this repo comes from main repo node-modules
+        provider: account,
         order: {
           sellTokenAddress: STRK.address,
           buyTokenAddress: ETH.address,
@@ -48,7 +49,6 @@ export default function DcaPage() {
           traderAddress: address,
         },
       });
-      fetchOrders();
     } finally {
       setLoading(false);
     }

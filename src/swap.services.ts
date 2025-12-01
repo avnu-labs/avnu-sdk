@@ -12,7 +12,7 @@ import {
   QuoteRequest,
   QuoteToCallsParams,
   Source,
-  SwapCalls,
+  AvnuCalls,
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
 
@@ -63,12 +63,12 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
  * @param options Optional SDK configuration
  * @returns The SwapCalls containing the calls to execute the trade and the chainId
  */
-const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promise<SwapCalls> => {
+const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promise<AvnuCalls> => {
   const { quoteId, takerAddress, slippage, executeApprove } = params;
   return fetch(
     `${getBaseUrl(options)}/swap/${SWAP_API_VERSION}/build`,
     postRequest({ quoteId, takerAddress, slippage, includeApprove: executeApprove }, options),
-  ).then((response) => parseResponse<SwapCalls>(response, options?.avnuPublicKey));
+  ).then((response) => parseResponse<AvnuCalls>(response, options?.avnuPublicKey));
 };
 
 /**

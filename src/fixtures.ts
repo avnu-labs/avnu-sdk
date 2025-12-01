@@ -21,7 +21,7 @@ import {
   SimpleVolumeData,
   Source,
   StakingInfo,
-  SwapCalls,
+  AvnuCalls,
   Token,
   TokenMarketData,
   TokenPrice,
@@ -247,7 +247,7 @@ export const anInvokeTransactionResponse = (): InvokeTransactionResponse => ({
   transactionHash: '0x0',
 });
 
-export const aSwapCalls = (): SwapCalls => ({
+export const aSwapCalls = (): AvnuCalls => ({
   chainId: constants.StarknetChainId.SN_SEPOLIA,
   calls: [
     {

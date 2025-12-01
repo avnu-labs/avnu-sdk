@@ -127,7 +127,7 @@ export interface InvokeSwapParams extends InvokeParams {
   executeApprove?: boolean;
 }
 
-export interface SwapCalls {
+export interface AvnuCalls {
   chainId: string;
   calls: Call[];
 }
