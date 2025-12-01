@@ -1,6 +1,7 @@
 import { toBeHex } from 'ethers';
 import qs from 'qs';
 import { z } from 'zod';
+import { SWAP_API_VERSION } from './constants';
 import { executeAllPaymasterFlow } from './paymaster.services';
 import { QuoteSchema, SourceSchema } from './schemas';
 import {
@@ -14,7 +15,6 @@ import {
   SwapCalls,
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
-import { SWAP_API_VERSION } from './constants';
 
 /**
  * Get the supported sources
@@ -46,8 +46,8 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
     },
     { arrayFormat: 'repeat' },
   );
-  return fetch(`${getBaseUrl(options)}/swap/${SWAP_API_VERSION}/quotes?${queryParams}`, getRequest(options)).then((response) =>
-    parseResponseWithSchema(response, z.array(QuoteSchema), options?.avnuPublicKey),
+  return fetch(`${getBaseUrl(options)}/swap/${SWAP_API_VERSION}/quotes?${queryParams}`, getRequest(options)).then(
+    (response) => parseResponseWithSchema(response, z.array(QuoteSchema), options?.avnuPublicKey),
   );
 };
 
