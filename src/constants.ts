@@ -5,3 +5,5 @@ export const SEPOLIA_IMPULSE_BASE_URL = 'https://sepolia.impulse.avnu.fi';
 
 export const SWAP_API_VERSION = 'v3';
 export const TOKEN_API_VERSION = 'v1';
+export const IMPULSE_API_VERSION = 'v1';
+export const PRICES_API_VERSION = 'v3';
