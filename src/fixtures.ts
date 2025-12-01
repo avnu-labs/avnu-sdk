@@ -1,18 +1,31 @@
+import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import { parseUnits, toBeHex } from 'ethers';
 import moment from 'moment';
-import { constants } from 'starknet';
+import { Call, constants } from 'starknet';
 import { DcaOrderStatus, SourceType } from './enums';
 import {
+  Action,
+  Apr,
+  ByExchangeTVLData,
+  ByExchangeVolumeData,
+  CandlePriceData,
   CreateDcaOrder,
   DcaOrder,
+  DelegationPool,
   InvokeTransactionResponse,
   Page,
   Quote,
   QuoteRequest,
+  SignedPaymasterTransaction,
+  SimplePriceData,
+  SimpleVolumeData,
   Source,
+  StakingInfo,
   SwapCalls,
   Token,
+  TokenMarketData,
   TokenPrice,
+  UserStakingInfo,
 } from './types';
 
 /* SWAP PART */
@@ -245,6 +258,13 @@ export const aSwapCalls = (): SwapCalls => ({
   ],
 });
 
+export const aCall = (overrides: Partial<Call> = {}): Call => ({
+  contractAddress: '0xcontract',
+  entrypoint: 'transfer',
+  calldata: ['0x1', '0x2'],
+  ...overrides,
+});
+
 export const ethToken = (): Token => ({
   name: 'Ethereum',
   address: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
@@ -326,4 +346,150 @@ export const aDCAOrder = (): DcaOrder => ({
   cancelledTradesCount: 1,
   pendingTradesCount: 1,
   trades: [],
+});
+
+/* STAKING PART */
+
+export const aDelegationPool = (): DelegationPool => ({
+  poolAddress: '0x0pool1',
+  tokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+  stakedAmount: parseUnits('500', 18),
+  stakedAmountInUsd: 850000,
+  apr: 5.5,
+});
+
+export const aStakingInfo = (): StakingInfo => ({
+  selfStakedAmount: parseUnits('1000', 18),
+  selfStakedAmountInUsd: 1700000,
+  operationalAddress: '0x0operational',
+  rewardAddress: '0x0reward',
+  stakerAddress: '0x0staker',
+  commission: 5,
+  delegationPools: [aDelegationPool()],
+});
+
+export const anApr = (): Apr => ({
+  date: new Date('2024-01-01'),
+  apr: 5.5,
+});
+
+export const anAction = (): Action => ({
+  blockNumber: BigInt(1000),
+  date: new Date('2024-01-01'),
+  transactionHash: '0x0txhash',
+  gasFee: {
+    gasFeeAmount: 0.001,
+    gasFeeAmountUsd: 0.01,
+    gasFeeTokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+  },
+  type: 'Swap',
+  metadata: {
+    sellTokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+    sellAmount: parseUnits('1', 18),
+    sellAmountUsd: 1700,
+    buyTokenAddress: '0x72df4dc5b6c4df72e4288857317caf2ce9da166ab8719ab8306516a2fddfff7',
+    buyAmount: parseUnits('1700', 6),
+    buyAmountUsd: 1700,
+  },
+});
+
+export const aUserStakingInfo = (): UserStakingInfo => ({
+  tokenAddress: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+  tokenPriceInUsd: 1700,
+  poolAddress: '0x0pool1',
+  userAddress: '0x0user',
+  amount: parseUnits('100', 18),
+  amountInUsd: 170000,
+  unclaimedRewards: parseUnits('10', 18),
+  unclaimedRewardsInUsd: 17000,
+  unpoolAmount: BigInt(0),
+  unpoolAmountInUsd: 0,
+  unpoolTime: undefined,
+  totalClaimedRewards: parseUnits('5', 18),
+  totalClaimedRewardsHistoricalUsd: 8000,
+  totalClaimedRewardsUsd: 8500,
+  userActions: [],
+  totalUserActionsCount: 0,
+  expectedYearlyStrkRewards: parseUnits('50', 18),
+  aprs: [anApr()],
+});
+
+/* PAYMASTER PART */
+
+export const aPreparedTypedData = (): OutsideExecutionTypedData =>
+  ({
+    domain: { name: 'test', version: '1', chainId: '0x1' },
+    message: {},
+    types: {},
+    primaryType: 'test',
+  }) as unknown as OutsideExecutionTypedData;
+
+export const aSignedPaymasterTransaction = (): SignedPaymasterTransaction => ({
+  typedData: aPreparedTypedData(),
+  signature: ['0x1', '0x2'],
+});
+
+/* IMPULSE / MARKET DATA PART */
+
+export const aSimplePriceData = (): SimplePriceData => ({
+  date: '2024-01-01T00:00:00Z',
+  value: 1700,
+  valueUsd: 1700,
+});
+
+export const aCandlePriceData = (): CandlePriceData => ({
+  date: '2024-01-01T00:00:00Z',
+  open: 1690,
+  high: 1720,
+  low: 1680,
+  close: 1700,
+  volume: 1000000,
+});
+
+export const aSimpleVolumeData = (): SimpleVolumeData => ({
+  date: '2024-01-01',
+  value: 1000000,
+});
+
+export const aByExchangeVolumeData = (): ByExchangeVolumeData => ({
+  date: '2024-01-01',
+  value: 500000,
+  exchange: 'JediSwap',
+});
+
+export const aByExchangeTVLData = (): ByExchangeTVLData => ({
+  date: '2024-01-01',
+  value: 10000000,
+  valueUsd: 10000000,
+  exchange: 'JediSwap',
+});
+
+export const aTokenMarketData = (): TokenMarketData => ({
+  position: 1,
+  address: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
+  name: 'Ethereum',
+  symbol: 'ETH',
+  decimals: 18,
+  logoUri: 'https://example.com/eth.png',
+  verified: true,
+  linePriceFeedInUsd: [aSimplePriceData()],
+  coingeckoId: 'ethereum',
+  website: 'https://ethereum.org',
+  market: {
+    currentPrice: 1700,
+    marketCap: 200000000000,
+    fullyDilutedValuation: 200000000000,
+    starknetTvl: 50000000,
+    priceChange1h: 0.5,
+    priceChangePercentage1h: 0.03,
+    priceChange24h: 10,
+    priceChangePercentage24h: 0.6,
+    priceChange7d: 50,
+    priceChangePercentage7d: 3,
+    marketCapChange24h: 1000000,
+    marketCapChangePercentage24h: 0.5,
+    starknetVolume24h: 1000000,
+    starknetTradingVolume24h: 900000,
+    totalSupply: 120000000,
+  },
 });
