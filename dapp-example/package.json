@@ -24,6 +24,7 @@
     "next": "16.0.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "recharts": "^2.15.4",
     "starknet": "^8.9.1",
     "tailwind-merge": "^3.4.0"
   },

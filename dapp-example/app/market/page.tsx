@@ -1,11 +1,31 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { Area, AreaChart, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { STRK } from '@/lib/tokens';
+import { getPriceFeed, FeedDateRange, FeedResolution, PriceFeedType, type SimplePriceData } from '@avnu/avnu-sdk';
+
+const chartConfig = {
+  price: { label: 'Price (USD)', color: 'hsl(var(--chart-1))' },
+} satisfies ChartConfig;
 
 export default function MarketPage() {
+  const [priceData, setPriceData] = useState<SimplePriceData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getPriceFeed(STRK.address, {
+      type: PriceFeedType.LINE,
+      dateRange: FeedDateRange.ONE_WEEK,
+      resolution: FeedResolution.HOURLY,
+    })
+      .then((data) => setPriceData(data as SimplePriceData[]))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
@@ -16,26 +36,51 @@ export default function MarketPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Image
-              src={STRK.logoUri!}
-              alt={STRK.symbol}
-              width={24}
-              height={24}
-              className="rounded-full"
-            />
+            <Image src={STRK.logoUri!} alt={STRK.symbol} width={24} height={24} className="rounded-full" />
             {STRK.symbol} Price Chart
           </CardTitle>
           <CardDescription>
             Uses <code className="text-xs bg-muted px-1 rounded">getPriceFeed()</code>
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="h-64 bg-muted rounded-md flex items-center justify-center text-muted-foreground">
-            Price chart placeholder
-          </div>
-          <Button className="w-full" disabled>
-            Load Price Data
-          </Button>
+        <CardContent>
+          {loading ? (
+            <div className="h-64 flex items-center justify-center text-muted-foreground">Loading...</div>
+          ) : (
+            <ChartContainer config={chartConfig} className="h-64 w-full">
+              <AreaChart data={priceData}>
+                <defs>
+                  <linearGradient id="fillPrice" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-price)" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="var(--color-price)" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  minTickGap={50}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `$${value.toFixed(3)}`}
+                  domain={['auto', 'auto']}
+                  width={60}
+                />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      labelFormatter={(value) => new Date(value).toLocaleString()}
+                      formatter={(value) => [`$${Number(value).toFixed(4)}`, 'Price']}
+                    />
+                  }
+                />
+                <Area dataKey="value" type="monotone" fill="url(#fillPrice)" stroke="var(--color-price)" />
+              </AreaChart>
+            </ChartContainer>
+          )}
         </CardContent>
       </Card>
 
