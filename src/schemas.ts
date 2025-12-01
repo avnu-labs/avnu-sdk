@@ -47,6 +47,11 @@ export const hexToBigInt = z.union([z.string(), z.number(), z.bigint()]).transfo
   return BigInt(val);
 });
 
+export const hexToNumber = z.union([z.string(), z.number(), z.bigint()]).transform((val) => {
+  if (typeof val === 'number') return val;
+  return Number(val);
+});
+
 // Transform ISO date string to Date
 export const isoStringToDate = z.string().transform((val) => new Date(val));
 
@@ -177,9 +182,9 @@ export const QuoteSchema = z.object({
   buyAmount: hexToBigInt,
   buyAmountInUsd: z.number(),
   fee: FeeSchema,
-  blockNumber: z.number().optional(),
+  blockNumber: hexToNumber.optional(),
   chainId: z.string(),
-  expiry: z.number().optional(),
+  expiry: z.number().optional().nullable(),
   routes: z.array(RouteSchema),
   gasFees: hexToBigInt,
   gasFeesInUsd: z.number().optional(),

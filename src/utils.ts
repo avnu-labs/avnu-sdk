@@ -1,13 +1,11 @@
 import { ec, hash } from 'starknet';
 import { z } from 'zod';
-import { BASE_URL, IMPULSE_BASE_URL, SEPOLIA_BASE_URL, SEPOLIA_IMPULSE_BASE_URL } from './constants';
+import { BASE_URL, IMPULSE_BASE_URL } from './constants';
 import { AvnuOptions, ContractError, RequestError } from './types';
 
-export const getBaseUrl = (options?: AvnuOptions): string =>
-  options?.baseUrl ?? (process.env.NODE_ENV === 'dev' ? SEPOLIA_BASE_URL : BASE_URL);
+export const getBaseUrl = (options?: AvnuOptions): string => options?.baseUrl ?? BASE_URL;
 
-export const getImpulseBaseUrl = (options?: AvnuOptions): string =>
-  options?.impulseBaseUrl ?? (process.env.NODE_ENV === 'dev' ? SEPOLIA_IMPULSE_BASE_URL : IMPULSE_BASE_URL);
+export const getImpulseBaseUrl = (options?: AvnuOptions): string => options?.impulseBaseUrl ?? IMPULSE_BASE_URL;
 
 export const getRequest = (options?: AvnuOptions): RequestInit => ({
   signal: options?.abortSignal,

@@ -177,7 +177,7 @@ export interface Quote {
   fee: Fee;
   blockNumber?: number;
   chainId: string;
-  expiry?: number;
+  expiry?: number | null;
   routes: Route[];
   gasFees: bigint; // In FRI
   gasFeesInUsd?: number;

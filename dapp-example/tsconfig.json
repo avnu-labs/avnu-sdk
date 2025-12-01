@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@avnu/avnu-sdk": ["../src/index.ts"]
     }
   },
   "include": [
