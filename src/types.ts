@@ -157,6 +157,15 @@ export interface Route {
   alternativeSwapCount: number;
 }
 
+export interface Fee {
+  feeToken: string;
+  avnuFees: bigint;
+  avnuFeesInUsd: number;
+  avnuFeesBps: bigint;
+  integratorFees: bigint;
+  integratorFeesInUsd: number;
+  integratorFeesBps: bigint;
+}
 export interface Quote {
   quoteId: string;
   sellTokenAddress: string;
@@ -165,20 +174,13 @@ export interface Quote {
   buyTokenAddress: string;
   buyAmount: bigint;
   buyAmountInUsd: number;
-  buyAmountWithoutFees: bigint;
-  buyAmountWithoutFeesInUsd: number;
+  fee: Fee;
   blockNumber?: number;
   chainId: string;
   expiry?: number;
   routes: Route[];
   gasFees: bigint; // In FRI
-  gasFeesInUsd: number;
-  avnuFees: bigint;
-  avnuFeesInUsd: number;
-  avnuFeesBps: bigint;
-  integratorFees: bigint;
-  integratorFeesInUsd: number;
-  integratorFeesBps: bigint;
+  gasFeesInUsd?: number;
   priceImpact: number;
   sellTokenPriceInUsd?: number;
   buyTokenPriceInUsd?: number;

@@ -14,6 +14,7 @@ import {
   SwapCalls,
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
+import { SWAP_API_VERSION } from './constants';
 
 /**
  * Get the supported sources
@@ -22,7 +23,7 @@ import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postReq
  * @returns The available liquidity sources
  */
 const getSources = (options?: AvnuOptions): Promise<Source[]> =>
-  fetch(`${getBaseUrl(options)}/swap/v2/sources`, getRequest(options)).then((response) =>
+  fetch(`${getBaseUrl(options)}/swap/${SWAP_API_VERSION}/sources`, getRequest(options)).then((response) =>
     parseResponseWithSchema(response, z.array(SourceSchema), options?.avnuPublicKey),
   );
 
@@ -45,7 +46,7 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
     },
     { arrayFormat: 'repeat' },
   );
-  return fetch(`${getBaseUrl(options)}/swap/v2/quotes?${queryParams}`, getRequest(options)).then((response) =>
+  return fetch(`${getBaseUrl(options)}/swap/${SWAP_API_VERSION}/quotes?${queryParams}`, getRequest(options)).then((response) =>
     parseResponseWithSchema(response, z.array(QuoteSchema), options?.avnuPublicKey),
   );
 };
@@ -65,7 +66,7 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
 const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promise<SwapCalls> => {
   const { quoteId, takerAddress, slippage, executeApprove } = params;
   return fetch(
-    `${getBaseUrl(options)}/swap/v2/build`,
+    `${getBaseUrl(options)}/swap/${SWAP_API_VERSION}/build`,
     postRequest({ quoteId, takerAddress, slippage, includeApprove: executeApprove }, options),
   ).then((response) => parseResponse<SwapCalls>(response, options?.avnuPublicKey));
 };

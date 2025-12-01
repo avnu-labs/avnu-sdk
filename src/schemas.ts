@@ -6,6 +6,7 @@ import {
   type CandlePriceData,
   type DcaOrder,
   DcaTrade,
+  Fee,
   MarketPrice,
   type Quote,
   Route,
@@ -157,6 +158,16 @@ export const RouteSchema: z.ZodType<Route> = z.lazy(() =>
   }),
 );
 
+export const FeeSchema = z.object({
+  feeToken: z.string(),
+  avnuFees: hexToBigInt,
+  avnuFeesInUsd: z.number(),
+  avnuFeesBps: hexToBigInt,
+  integratorFees: hexToBigInt,
+  integratorFeesInUsd: z.number(),
+  integratorFeesBps: hexToBigInt,
+}) satisfies z.ZodType<Fee>;
+
 export const QuoteSchema = z.object({
   quoteId: z.string(),
   sellTokenAddress: z.string(),
@@ -165,20 +176,13 @@ export const QuoteSchema = z.object({
   buyTokenAddress: z.string(),
   buyAmount: hexToBigInt,
   buyAmountInUsd: z.number(),
-  buyAmountWithoutFees: hexToBigInt,
-  buyAmountWithoutFeesInUsd: z.number(),
+  fee: FeeSchema,
   blockNumber: z.number().optional(),
   chainId: z.string(),
   expiry: z.number().optional(),
   routes: z.array(RouteSchema),
   gasFees: hexToBigInt,
-  gasFeesInUsd: z.number(),
-  avnuFees: hexToBigInt,
-  avnuFeesInUsd: z.number(),
-  avnuFeesBps: hexToBigInt,
-  integratorFees: hexToBigInt,
-  integratorFeesInUsd: z.number(),
-  integratorFeesBps: hexToBigInt,
+  gasFeesInUsd: z.number().optional(),
   priceImpact: z.number(),
   sellTokenPriceInUsd: z.number().optional(),
   buyTokenPriceInUsd: z.number().optional(),
