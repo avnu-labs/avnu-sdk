@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { fetchTokens, type Token } from '@avnu/avnu-sdk';
 
+const FETCH_TOKENS_SIZE = 5;
 export default function TokensPage() {
   const [search, setSearch] = useState('');
   const [tokens, setTokens] = useState<Token[]>([]);
@@ -15,7 +16,7 @@ export default function TokensPage() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setLoading(true);
-      fetchTokens({ search: search || undefined, size: 20 })
+      fetchTokens({ search: search || undefined, size: FETCH_TOKENS_SIZE })
         .then((page) => setTokens(page.content))
         .finally(() => setLoading(false));
     }, 300);
@@ -31,7 +32,7 @@ export default function TokensPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Token List</CardTitle>
+          <CardTitle>Token List (first {tokens.length} tokens)</CardTitle>
           <CardDescription>
             Uses <code className="text-xs bg-muted px-1 rounded">fetchTokens()</code>
           </CardDescription>
@@ -78,6 +79,17 @@ export default function TokensPage() {
               ))
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">SDK Functions</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground space-y-1">
+          <p><code>fetchTokens(request)</code> - Get tokens with pagination</p>
+          <p><code>fetchTokenByAddress(address)</code> - Get specific token</p>
+          <p><code>fetchVerifiedTokenBySymbol(symbol)</code> - Get verified token</p>
         </CardContent>
       </Card>
     </div>

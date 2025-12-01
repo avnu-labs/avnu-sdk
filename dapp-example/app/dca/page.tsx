@@ -129,6 +129,19 @@ export default function DcaPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">SDK Functions</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground space-y-1">
+          <p><code>getDcaOrders(params)</code> - Fetch DCA orders</p>
+          <p><code>createDcaToCalls(order)</code> - Build create calls</p>
+          <p><code>executeCreateDca(params)</code> - Execute creation</p>
+          <p><code>cancelDcaToCalls(address)</code> - Build cancel calls</p>
+          <p><code>executeCancelDca(params)</code> - Execute cancellation</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
