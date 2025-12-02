@@ -201,7 +201,11 @@ export default function SwapPage() {
         <CardHeader>
           <CardTitle className="text-sm flex items-center justify-between">
             SDK Functions
-            <a href={getSourceUrl('app/swap/page.tsx')} target="_blank" className="text-muted-foreground font-normal underline">
+            <a
+              href={getSourceUrl('app/swap/page.tsx')}
+              target="_blank"
+              className="text-muted-foreground font-normal underline"
+            >
               View source
             </a>
           </CardTitle>

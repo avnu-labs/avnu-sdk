@@ -120,7 +120,11 @@ export default function MarketPage() {
         <CardHeader>
           <CardTitle className="text-sm flex items-center justify-between">
             Available SDK Functions
-            <a href={getSourceUrl('app/market/page.tsx')} target="_blank" className="text-muted-foreground font-normal underline">
+            <a
+              href={getSourceUrl('app/market/page.tsx')}
+              target="_blank"
+              className="text-muted-foreground font-normal underline"
+            >
               View source
             </a>
           </CardTitle>

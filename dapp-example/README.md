@@ -6,14 +6,14 @@ A minimal Next.js application demonstrating all features of the [AVNU SDK](https
 
 ## Features Demonstrated
 
-| Page | Description | Documentation |
-|------|-------------|---------------|
-| **Swap** | Token exchange with route optimization | [docs](https://docs.avnu.fi/docs/swap) |
-| **DCA** | Dollar Cost Averaging orders | [docs](https://docs.avnu.fi/docs/dca) |
-| **Tokens** | Token information and search | [docs](https://docs.avnu.fi/docs/tokens) |
-| **Market Data** | Prices, volumes, TVL feeds | [docs](https://docs.avnu.fi/docs/markets) |
-| **Staking** | AVNU stake delegation | [docs](https://docs.avnu.fi/docs/staking) |
-| **Paymaster** | Gasless transactions | [docs](https://docs.avnu.fi/docs/paymaster) |
+| Page            | Description                            | Documentation                               |
+| --------------- | -------------------------------------- | ------------------------------------------- |
+| **Swap**        | Token exchange with route optimization | [docs](https://docs.avnu.fi/docs/swap)      |
+| **DCA**         | Dollar Cost Averaging orders           | [docs](https://docs.avnu.fi/docs/dca)       |
+| **Tokens**      | Token information and search           | [docs](https://docs.avnu.fi/docs/tokens)    |
+| **Market Data** | Prices, volumes, TVL feeds             | [docs](https://docs.avnu.fi/docs/markets)   |
+| **Staking**     | AVNU stake delegation                  | [docs](https://docs.avnu.fi/docs/staking)   |
+| **Paymaster**   | Gasless transactions                   | [docs](https://docs.avnu.fi/docs/paymaster) |
 
 ## Getting Started
 
