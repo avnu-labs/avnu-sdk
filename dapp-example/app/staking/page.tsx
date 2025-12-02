@@ -106,8 +106,8 @@ export default function StakingPage() {
         <h1 className="text-2xl font-bold">Staking</h1>
         <p className="text-muted-foreground">
           Stake STRK tokens •{' '}
-          <a href={getSourceUrl('app/staking/page.tsx')} target="_blank" className="underline">
-            View source
+          <a href="https://docs.avnu.fi/docs/staking" target="_blank" className="underline">
+            View docs
           </a>
         </p>
       </div>

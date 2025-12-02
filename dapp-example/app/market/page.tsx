@@ -44,8 +44,8 @@ export default function MarketPage() {
         <h1 className="text-2xl font-bold">Market Data</h1>
         <p className="text-muted-foreground">
           STRK price feed and market insights •{' '}
-          <a href={getSourceUrl('app/market/page.tsx')} target="_blank" className="underline">
-            View source
+          <a href="https://docs.avnu.fi/docs/markets" target="_blank" className="underline">
+            View docs
           </a>
         </p>
       </div>

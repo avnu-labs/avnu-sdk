@@ -30,8 +30,8 @@ export default function TokensPage() {
         <h1 className="text-2xl font-bold">Tokens</h1>
         <p className="text-muted-foreground">
           Browse and search available tokens •{' '}
-          <a href={getSourceUrl('app/tokens/page.tsx')} target="_blank" className="underline">
-            View source
+          <a href="https://docs.avnu.fi/docs/tokens" target="_blank" className="underline">
+            View docs
           </a>
         </p>
       </div>

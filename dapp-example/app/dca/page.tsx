@@ -57,8 +57,8 @@ export default function DcaPage() {
         <h1 className="text-2xl font-bold">DCA</h1>
         <p className="text-muted-foreground">
           Dollar Cost Averaging STRK → ETH •{' '}
-          <a href={getSourceUrl('app/dca/page.tsx')} target="_blank" className="underline">
-            View source
+          <a href="https://docs.avnu.fi/docs/dca" target="_blank" className="underline">
+            View docs
           </a>
         </p>
       </div>
