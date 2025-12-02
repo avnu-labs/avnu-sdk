@@ -1,4 +1,5 @@
 import qs from 'qs';
+import { TOKEN_API_VERSION } from './constants';
 import { PageSchema, TokenSchema } from './schemas';
 import { AvnuOptions, GetTokensRequest, Page, Token } from './types';
 import { getBaseUrl, getRequest, parseResponseWithSchema } from './utils';
@@ -24,8 +25,8 @@ const fetchTokens = async (request?: GetTokensRequest, options?: AvnuOptions): P
     },
     { arrayFormat: 'repeat' },
   );
-  return fetch(`${getBaseUrl(options)}/v1/starknet/tokens?${queryParams}`, getRequest(options)).then((response) =>
-    parseResponseWithSchema(response, PageSchema(TokenSchema), options?.avnuPublicKey),
+  return fetch(`${getBaseUrl(options)}/${TOKEN_API_VERSION}/starknet/tokens?${queryParams}`, getRequest(options)).then(
+    (response) => parseResponseWithSchema(response, PageSchema(TokenSchema), options?.avnuPublicKey),
   );
 };
 
@@ -36,8 +37,8 @@ const fetchTokens = async (request?: GetTokensRequest, options?: AvnuOptions): P
  * @returns The token if found
  */
 const fetchTokenByAddress = async (tokenAddress: string, options?: AvnuOptions): Promise<Token> => {
-  return fetch(`${getBaseUrl(options)}/v1/starknet/tokens/${tokenAddress}`, getRequest(options)).then((response) =>
-    parseResponseWithSchema(response, TokenSchema, options?.avnuPublicKey),
+  return fetch(`${getBaseUrl(options)}/${TOKEN_API_VERSION}/starknet/tokens/${tokenAddress}`, getRequest(options)).then(
+    (response) => parseResponseWithSchema(response, TokenSchema, options?.avnuPublicKey),
   );
 };
 

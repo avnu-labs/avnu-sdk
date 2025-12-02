@@ -49,7 +49,7 @@ yarn analyze            # Analyze bundle with size-limit
 ```
 src/
 ├── index.ts              # Entry point, exports all modules
-├── constants.ts          # API URLs (mainnet, sepolia, impulse)
+├── constants.ts          # API URLs and version constants
 ├── enums.ts              # Enumerations (FeedDateRange, PriceFeedType, etc.)
 ├── types.ts              # Complete TypeScript definitions
 ├── schemas.ts            # Zod schemas with transformers
@@ -61,6 +61,7 @@ src/
 ├── impulse.services.ts   # Market data service
 ├── staking.services.ts   # Staking service
 ├── fixtures.ts           # Test fixtures
+├── test-utils.ts         # Shared test utilities (mocks, URL builders)
 └── *.spec.ts             # Unit tests
 ```
 
@@ -101,7 +102,7 @@ Calculate min/max amounts with slippage (slippage in bps: 100 = 1%).
 
 **Key types:**
 - `QuoteRequest`: sellTokenAddress, buyTokenAddress, sellAmount, takerAddress, size
-- `Quote`: routes, sellAmount, buyAmount, sellAmountInUsd, buyAmountInUsd, priceRatioUsd, gasFeesInUsd
+- `Quote`: routes, sellAmount, buyAmount, sellAmountInUsd, buyAmountInUsd, priceImpact, gasFeesInUsd
 - `Route`: percent, sellAmount, buyAmount, routes (sub-routes)
 - `SwapCalls`: calls, approvalCalls, contractAddress, calldata
 
@@ -368,9 +369,8 @@ export enum FeedResolution {
   ONE_MIN = '1',
   FIVE_MIN = '5',
   FIFTEEN_MIN = '15',
-  THIRTY_MIN = '30',
   HOURLY = '1H',
-  FOUR_HOURLY = '4H',
+  FOUR_HOUR = '4H',
   DAILY = '1D',
   WEEKLY = '1W',
   MONTHLY = '1M',
@@ -469,11 +469,22 @@ Build fetch options with abort signal support.
 
 ### Constants (constants.ts)
 
+**Base URLs:**
 ```typescript
 export const BASE_URL = 'https://starknet.api.avnu.fi'
 export const SEPOLIA_BASE_URL = 'https://sepolia.api.avnu.fi'
 export const IMPULSE_BASE_URL = 'https://starknet.impulse.avnu.fi'
 export const SEPOLIA_IMPULSE_BASE_URL = 'https://sepolia.impulse.avnu.fi'
+```
+
+**API Version Constants:**
+```typescript
+export const TOKEN_API_VERSION = 'v1'
+export const IMPULSE_API_VERSION = 'v1'
+export const SWAP_API_VERSION = 'v3'
+export const PRICES_API_VERSION = 'v3'
+export const STAKING_API_VERSION = 'v3'
+export const DCA_API_VERSION = 'v3'
 ```
 
 ## Key Patterns
@@ -560,17 +571,49 @@ interface RequestError {
 **Framework**: Jest with `fetch-mock` for API mocking
 
 **Test files**: `*.spec.ts`
-- `swap.services.spec.ts`
-- `dca.services.spec.ts`
-- `token.services.spec.ts`
-- `impulse.services.spec.ts`
+- `swap.services.spec.ts` - Swap service tests (quotes, sources, execution)
+- `dca.services.spec.ts` - DCA order creation, cancellation, execution
+- `token.services.spec.ts` - Token fetching and search
+- `impulse.services.spec.ts` - Market data, price feeds, volume, TVL
+- `staking.services.spec.ts` - Staking info, stake/unstake/claim execution
+- `paymaster.services.spec.ts` - Build, sign, execute paymaster flow
+
+**Test Utilities** (`test-utils.ts`):
+```typescript
+// Mock factories for starknet interfaces
+createMockAccount(address?: string): jest.Mocked<AccountInterface>
+createMockPaymaster(): jest.Mocked<PaymasterInterface>
+mockExecutionParams: ExecutionParameters
+
+// URL builders for consistent test setup
+buildSwapUrl(path: string): string      // BASE_URL/swap/v3{path}
+buildDcaUrl(path: string): string       // BASE_URL/dca/v3{path}
+buildTokenUrl(path: string): string     // BASE_URL/v1/starknet/tokens{path}
+buildStakingUrl(path: string): string   // BASE_URL/staking/v3{path}
+buildImpulseUrl(path: string): string   // IMPULSE_BASE_URL/v1{path}
+```
 
 **Fixtures** (`fixtures.ts`):
 ```typescript
+// Swap fixtures
 aQuote(), aQuoteRequest(), aPrice(), aPriceRequest()
-aSwapCalls(), anInvokeTransactionResponse()
-ethToken(), btcToken()
-aPage<T>(), aSource(), aDCAOrder(), aDCACreateOrder()
+aSwapCalls(), anInvokeTransactionResponse(), aCall()
+ethToken(), btcToken(), aPage<T>(), aSource()
+
+// DCA fixtures
+aDCAOrder(), aDCACreateOrder()
+
+// Staking fixtures
+aDelegationPool(), aStakingInfo(), aUserStakingInfo()
+anApr(), anAction()
+
+// Paymaster fixtures
+aPreparedTypedData(), aSignedPaymasterTransaction()
+
+// Impulse/Market data fixtures
+aSimplePriceData(), aCandlePriceData()
+aSimpleVolumeData(), aByExchangeVolumeData(), aByExchangeTVLData()
+aTokenMarketData()
 ```
 
 Helper pattern: `aX()` with optional overrides.

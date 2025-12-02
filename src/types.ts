@@ -37,7 +37,7 @@ export interface Token {
   name: string;
   symbol: string;
   decimals: number;
-  logoUri: string;
+  logoUri: string | null;
   lastDailyVolumeUsd: number;
   extensions: { [key: string]: string };
   tags: TokenTag[];
@@ -127,7 +127,7 @@ export interface InvokeSwapParams extends InvokeParams {
   executeApprove?: boolean;
 }
 
-export interface SwapCalls {
+export interface AvnuCalls {
   chainId: string;
   calls: Call[];
 }
@@ -152,11 +152,20 @@ export interface Route {
   percent: number;
   sellTokenAddress: string;
   buyTokenAddress: string;
-  routeInfo?: Map<string, string>;
+  routeInfo?: Record<string, string>;
   routes: Route[];
   alternativeSwapCount: number;
 }
 
+export interface Fee {
+  feeToken: string;
+  avnuFees: bigint;
+  avnuFeesInUsd: number;
+  avnuFeesBps: bigint;
+  integratorFees: bigint;
+  integratorFeesInUsd: number;
+  integratorFeesBps: bigint;
+}
 export interface Quote {
   quoteId: string;
   sellTokenAddress: string;
@@ -165,21 +174,14 @@ export interface Quote {
   buyTokenAddress: string;
   buyAmount: bigint;
   buyAmountInUsd: number;
-  buyAmountWithoutFees: bigint;
-  buyAmountWithoutFeesInUsd: number;
+  fee: Fee;
   blockNumber?: number;
   chainId: string;
-  expiry?: number;
+  expiry?: number | null;
   routes: Route[];
   gasFees: bigint; // In FRI
-  gasFeesInUsd: number;
-  avnuFees: bigint;
-  avnuFeesInUsd: number;
-  avnuFeesBps: bigint;
-  integratorFees: bigint;
-  integratorFeesInUsd: number;
-  integratorFeesBps: bigint;
-  priceImpactInUsd: number;
+  gasFeesInUsd?: number;
+  priceImpact: number;
   sellTokenPriceInUsd?: number;
   buyTokenPriceInUsd?: number;
   exactTokenTo?: boolean;
@@ -265,7 +267,7 @@ export interface UserStakingInfo {
   unpoolAmountInUsd: number | undefined;
   unpoolTime: Date | undefined;
   totalClaimedRewards: bigint;
-  totalClaimedRewardsHistoricalUsd: number;
+  totalClaimedRewardsHistoricalUsd?: number;
   totalClaimedRewardsUsd: number;
   userActions: Action[];
   totalUserActionsCount: number;
@@ -370,9 +372,9 @@ export type ActionType =
   | 'StakingClaimRewards';
 
 export interface GasFeeInfo {
-  gasFeeAmount: number;
+  gasFeeAmount?: bigint;
   gasFeeAmountUsd?: number;
-  gasFeeTokenAddress: string;
+  gasFeeTokenAddress?: string;
 }
 
 export type ActionMetadata =
@@ -393,6 +395,7 @@ export interface SwapMetadata {
   buyTokenAddress: string;
   buyAmount: bigint;
   buyAmountUsd?: number;
+  integratorName?: string;
 }
 
 export interface DcaOrderMetadata {
@@ -512,7 +515,7 @@ export interface TokenMarketData {
   name: string;
   symbol: string;
   decimals: number;
-  logoUri: string;
+  logoUri: string | null;
   verified: boolean;
   linePriceFeedInUsd: SimplePriceData[];
   coingeckoId?: string;

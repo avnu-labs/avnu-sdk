@@ -1,15 +1,16 @@
 import { parseUnits, toBeHex } from 'ethers';
 import fetchMock from 'fetch-mock';
-import { BASE_URL } from './constants';
-import { createDcaToCalls, getDcaOrders } from './dca.services';
-import { aDCACreateOrder, aDCAOrder, aPage } from './fixtures';
+import { BASE_URL, DCA_API_VERSION } from './constants';
+import { cancelDcaToCalls, createDcaToCalls, executeCancelDca, executeCreateDca, getDcaOrders } from './dca.services';
+import { aAvnuCalls, aDCACreateOrder, aDCAOrder, aPage } from './fixtures';
+import { createMockAccount, createMockPaymaster, mockExecutionParams } from './test-utils';
 
 describe('DCA services', () => {
   beforeEach(() => {
     fetchMock.restore();
   });
 
-  describe('Fetching orders', () => {
+  describe('getDcaOrders', () => {
     it('should return a list of orders', async () => {
       const order = aDCAOrder();
       // Given
@@ -25,7 +26,7 @@ describe('DCA services', () => {
       ]);
 
       const request = { traderAddress: '0x0' };
-      fetchMock.get(`begin:${BASE_URL}/dca/v1/orders?`, response);
+      fetchMock.get(`begin:${BASE_URL}/dca/${DCA_API_VERSION}/orders?`, response);
 
       // When
       const result = (await getDcaOrders(request)).content;
@@ -36,25 +37,151 @@ describe('DCA services', () => {
       expect(result).toStrictEqual(expected);
     });
 
-    describe('createDcaToCalls', () => {
-      it('should return an array of calls', async () => {
-        // Given
-        const order = aDCACreateOrder();
-        const response = [
-          {
-            contractAddress: '0x0',
-            calldata: '0x0',
-            value: '0x0',
-          },
-        ];
-        fetchMock.post(`begin:${BASE_URL}/dca/v1/orders`, response);
+    it('should throw Error with status code when status > 400', async () => {
+      // Given
+      const request = { traderAddress: '0x0' };
+      fetchMock.get(`begin:${BASE_URL}/dca/${DCA_API_VERSION}/orders?`, 401);
 
-        // When
-        const result = await createDcaToCalls(order);
-
+      // When
+      try {
+        await getDcaOrders(request);
+      } catch (error) {
         // Then
-        expect(result).toStrictEqual(response);
+        expect(error).toStrictEqual(new Error('401 Unauthorized'));
+      }
+      expect.assertions(1);
+    });
+  });
+
+  describe('createDcaToCalls', () => {
+    it('should return an array of calls', async () => {
+      // Given
+      const order = aDCACreateOrder();
+      const response = aAvnuCalls();
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, response);
+
+      // When
+      const result = await createDcaToCalls(order);
+
+      // Then
+      expect(result).toStrictEqual(response);
+    });
+
+    it('should throw Error with status code when status > 400', async () => {
+      // Given
+      const order = aDCACreateOrder();
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, {
+        status: 400,
+        body: { messages: ['Bad Request'] },
       });
+
+      // When & Then
+      expect.assertions(1);
+      await expect(createDcaToCalls(order)).rejects.toEqual(new Error('Bad Request'));
+    });
+  });
+
+  describe('cancelDcaToCalls', () => {
+    it('should return an array of calls', async () => {
+      // Given
+      const orderAddress = '0x0order';
+      const response = aAvnuCalls();
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, response);
+
+      // When
+      const result = await cancelDcaToCalls(orderAddress);
+
+      // Then
+      expect(result).toStrictEqual(response);
+    });
+
+    it('should throw Error with status code when status > 400', async () => {
+      // Given
+      const orderAddress = '0x0order';
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, {
+        status: 400,
+        body: { messages: ['Bad Request'] },
+      });
+
+      // When & Then
+      expect.assertions(1);
+      await expect(cancelDcaToCalls(orderAddress)).rejects.toEqual(new Error('Bad Request'));
+    });
+  });
+
+  describe('executeCreateDca', () => {
+    it('should execute without paymaster', async () => {
+      // Given
+      const mockAccount = createMockAccount('0x0user');
+      const order = aDCACreateOrder();
+      const avnuCalls = aAvnuCalls();
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, avnuCalls);
+
+      // When
+      const result = await executeCreateDca({ provider: mockAccount, order });
+
+      // Then
+      expect(result).toStrictEqual({ transactionHash: '0xabc' });
+      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls);
+    });
+
+    it('should execute with paymaster', async () => {
+      // Given
+      const mockAccount = createMockAccount('0x0user');
+      const mockPaymaster = createMockPaymaster();
+      const order = aDCACreateOrder();
+      const calls = aAvnuCalls();
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders`, calls);
+
+      // When
+      const result = await executeCreateDca({
+        provider: mockAccount,
+        order,
+        paymaster: { active: true, provider: mockPaymaster, params: mockExecutionParams },
+      });
+
+      // Then
+      expect(result).toStrictEqual({ transactionHash: '0xdef' });
+      expect(mockPaymaster.buildTransaction).toHaveBeenCalled();
+      expect(mockPaymaster.executeTransaction).toHaveBeenCalled();
+    });
+  });
+
+  describe('executeCancelDca', () => {
+    it('should execute without paymaster', async () => {
+      // Given
+      const mockAccount = createMockAccount('0x0user');
+      const orderAddress = '0x0order';
+      const avnuCalls = aAvnuCalls();
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, avnuCalls);
+
+      // When
+      const result = await executeCancelDca({ provider: mockAccount, orderAddress });
+
+      // Then
+      expect(result).toStrictEqual({ transactionHash: '0xabc' });
+      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls);
+    });
+
+    it('should execute with paymaster', async () => {
+      // Given
+      const mockAccount = createMockAccount('0x0user');
+      const mockPaymaster = createMockPaymaster();
+      const orderAddress = '0x0order';
+      const calls = aAvnuCalls();
+      fetchMock.post(`${BASE_URL}/dca/${DCA_API_VERSION}/orders/${orderAddress}/cancel`, calls);
+
+      // When
+      const result = await executeCancelDca({
+        provider: mockAccount,
+        orderAddress,
+        paymaster: { active: true, provider: mockPaymaster, params: mockExecutionParams },
+      });
+
+      // Then
+      expect(result).toStrictEqual({ transactionHash: '0xdef' });
+      expect(mockPaymaster.buildTransaction).toHaveBeenCalled();
+      expect(mockPaymaster.executeTransaction).toHaveBeenCalled();
     });
   });
 });

@@ -46,7 +46,7 @@ await executeSwap({
 
 For complete documentation, examples, and API reference, visit:
 
-**[https://doc.avnu.fi/](https://doc.avnu.fi/)**
+**[https://docs.avnu.fi/](https://docs.avnu.fi/)**
 
 ## Requirements
 

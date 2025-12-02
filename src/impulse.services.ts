@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import qs from 'qs';
 import { z } from 'zod';
+import { IMPULSE_API_VERSION, PRICES_API_VERSION } from './constants';
 import { FeedDateRange, PriceFeedType } from './enums';
 import {
   ByExchangeTVLDataSchema,
@@ -91,7 +92,7 @@ const getSimpleQueryParams = (simpleProps: SimpleFeedProps) => {
  * @returns The list of tokens with their market data
  */
 const getMarketData = (options?: AvnuOptions): Promise<TokenMarketData[]> =>
-  fetch(`${getImpulseBaseUrl(options)}/v1/tokens`, getRequest(options)).then((response) =>
+  fetch(`${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens`, getRequest(options)).then((response) =>
     parseResponseWithSchema(response, z.array(TokenMarketDataSchema), options?.avnuPublicKey),
   );
 
@@ -102,8 +103,8 @@ const getMarketData = (options?: AvnuOptions): Promise<TokenMarketData[]> =>
  * @returns The market data for the token
  */
 const getTokenMarketData = (tokenAddress: string, options?: AvnuOptions): Promise<TokenMarketData> =>
-  fetch(`${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}`, getRequest(options)).then((response) =>
-    parseResponseWithSchema(response, TokenMarketDataSchema, options?.avnuPublicKey),
+  fetch(`${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}`, getRequest(options)).then(
+    (response) => parseResponseWithSchema(response, TokenMarketDataSchema, options?.avnuPublicKey),
   );
 
 /**
@@ -127,7 +128,7 @@ const getPriceFeed = (
   const schema =
     feedProps.type === PriceFeedType.CANDLE ? z.array(CandlePriceDataSchema) : z.array(SimplePriceDataSchema);
   return fetch(
-    `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/prices/${type}?${queryParams}`,
+    `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/${type}?${queryParams}`,
     getRequest(options),
   ).then((response) => parseResponseWithSchema(response, schema, options?.avnuPublicKey));
 };
@@ -146,7 +147,7 @@ const getVolumeByExchange = (
 ): Promise<ByExchangeVolumeData[]> => {
   const queryParams = getSimpleQueryParams(simpleProps);
   return fetch(
-    `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/exchange-volumes?${queryParams}`,
+    `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes?${queryParams}`,
     getRequest(options),
   ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
 };
@@ -167,7 +168,7 @@ const getExchangeVolumeFeed = (
 ): Promise<ByExchangeVolumeData[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
-    `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/exchange-volumes/line?${queryParams}`,
+    `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?${queryParams}`,
     getRequest(options),
   ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
 };
@@ -186,7 +187,7 @@ const getTVLByExchange = (
 ): Promise<ByExchangeTVLData[]> => {
   const queryParams = getSimpleQueryParams(simpleProps);
   return fetch(
-    `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/exchange-tvl?${queryParams}`,
+    `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?${queryParams}`,
     getRequest(options),
   ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
 };
@@ -207,7 +208,7 @@ const getExchangeTVLFeed = (
 ): Promise<ByExchangeTVLData[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
-    `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/exchange-tvl/line?${queryParams}`,
+    `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl/line?${queryParams}`,
     getRequest(options),
   ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
 };
@@ -228,7 +229,7 @@ const getTransferVolumeFeed = (
 ): Promise<SimpleVolumeData[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
-    `${getImpulseBaseUrl(options)}/v1/tokens/${tokenAddress}/volumes/line?${queryParams}`,
+    `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/volumes/line?${queryParams}`,
     getRequest(options),
   ).then((response) => parseResponseWithSchema(response, z.array(SimpleVolumeDataSchema), options?.avnuPublicKey));
 };
@@ -243,9 +244,10 @@ const getPrices = (tokenAddresses: string[], options?: AvnuOptions): Promise<Tok
   const requestBody: { tokens: string[] } = {
     tokens: tokenAddresses,
   };
-  return fetch(`${getImpulseBaseUrl(options)}/v3/tokens/prices`, postRequest(requestBody, options)).then((response) =>
-    parseResponseWithSchema(response, z.array(TokenPriceSchema), options?.avnuPublicKey),
-  );
+  return fetch(
+    `${getImpulseBaseUrl(options)}/${PRICES_API_VERSION}/tokens/prices`,
+    postRequest(requestBody, options),
+  ).then((response) => parseResponseWithSchema(response, z.array(TokenPriceSchema), options?.avnuPublicKey));
 };
 
 export {

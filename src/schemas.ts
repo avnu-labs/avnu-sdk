@@ -6,6 +6,7 @@ import {
   type CandlePriceData,
   type DcaOrder,
   DcaTrade,
+  Fee,
   MarketPrice,
   type Quote,
   Route,
@@ -46,6 +47,11 @@ export const hexToBigInt = z.union([z.string(), z.number(), z.bigint()]).transfo
   return BigInt(val);
 });
 
+export const hexToNumber = z.union([z.string(), z.number(), z.bigint()]).transform((val) => {
+  if (typeof val === 'number') return val;
+  return Number(val);
+});
+
 // Transform ISO date string to Date
 export const isoStringToDate = z.string().transform((val) => new Date(val));
 
@@ -69,7 +75,7 @@ export const TokenSchema = z.object({
   name: z.string(),
   symbol: z.string(),
   decimals: z.number(),
-  logoUri: z.string(),
+  logoUri: z.string().nullable(),
   lastDailyVolumeUsd: z.number(),
   extensions: z.record(z.string(), z.string()),
   tags: z.array(z.enum(['Unknown', 'Verified', 'Community', 'Unruggable', 'AVNU'])),
@@ -151,11 +157,21 @@ export const RouteSchema: z.ZodType<Route> = z.lazy(() =>
     percent: z.number(),
     sellTokenAddress: z.string(),
     buyTokenAddress: z.string(),
-    routeInfo: z.map(z.string(), z.string()).optional(),
+    routeInfo: z.record(z.string(), z.string()).optional(),
     routes: z.array(RouteSchema),
     alternativeSwapCount: z.number(),
   }),
 );
+
+export const FeeSchema = z.object({
+  feeToken: z.string(),
+  avnuFees: hexToBigInt,
+  avnuFeesInUsd: z.number(),
+  avnuFeesBps: hexToBigInt,
+  integratorFees: hexToBigInt,
+  integratorFeesInUsd: z.number(),
+  integratorFeesBps: hexToBigInt,
+}) satisfies z.ZodType<Fee>;
 
 export const QuoteSchema = z.object({
   quoteId: z.string(),
@@ -165,21 +181,14 @@ export const QuoteSchema = z.object({
   buyTokenAddress: z.string(),
   buyAmount: hexToBigInt,
   buyAmountInUsd: z.number(),
-  buyAmountWithoutFees: hexToBigInt,
-  buyAmountWithoutFeesInUsd: z.number(),
-  blockNumber: z.number().optional(),
+  fee: FeeSchema,
+  blockNumber: hexToNumber.optional(),
   chainId: z.string(),
-  expiry: z.number().optional(),
+  expiry: z.number().optional().nullable(),
   routes: z.array(RouteSchema),
   gasFees: hexToBigInt,
-  gasFeesInUsd: z.number(),
-  avnuFees: hexToBigInt,
-  avnuFeesInUsd: z.number(),
-  avnuFeesBps: hexToBigInt,
-  integratorFees: hexToBigInt,
-  integratorFeesInUsd: z.number(),
-  integratorFeesBps: hexToBigInt,
-  priceImpactInUsd: z.number(),
+  gasFeesInUsd: z.number().optional(),
+  priceImpact: z.number(),
   sellTokenPriceInUsd: z.number().optional(),
   buyTokenPriceInUsd: z.number().optional(),
   exactTokenTo: z.boolean().optional(),
@@ -191,9 +200,9 @@ export const QuoteSchema = z.object({
  */
 
 export const GasFeeInfoSchema = z.object({
-  gasFeeAmount: z.number(),
+  gasFeeAmount: hexToBigInt.optional(),
   gasFeeAmountUsd: z.number().optional(),
-  gasFeeTokenAddress: z.string(),
+  gasFeeTokenAddress: z.string().optional(),
 });
 
 export const SwapMetadataSchema = z.object({
@@ -203,6 +212,7 @@ export const SwapMetadataSchema = z.object({
   buyTokenAddress: z.string(),
   buyAmount: hexToBigInt,
   buyAmountUsd: z.number().optional(),
+  integratorName: z.string().optional(),
 });
 
 export const DcaOrderMetadataSchema = z.object({
@@ -322,7 +332,7 @@ export const UserStakingInfoSchema = z.object({
   unpoolAmountInUsd: z.number().or(z.undefined()),
   unpoolTime: hexTimestampToDate,
   totalClaimedRewards: hexToBigInt,
-  totalClaimedRewardsHistoricalUsd: z.number(),
+  totalClaimedRewardsHistoricalUsd: z.number().optional(),
   totalClaimedRewardsUsd: z.number(),
   userActions: z.array(ActionSchema),
   totalUserActionsCount: z.number(),
@@ -391,7 +401,7 @@ export const TokenMarketDataSchema = z.object({
   name: z.string(),
   symbol: z.string(),
   decimals: z.number(),
-  logoUri: z.string(),
+  logoUri: z.string().nullable(),
   verified: z.boolean(),
   linePriceFeedInUsd: z.array(SimplePriceDataSchema),
   coingeckoId: z.string().optional(),
