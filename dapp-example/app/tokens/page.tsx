@@ -24,7 +24,7 @@ export default function TokensPage() {
   }, [search]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl">
       <div>
         <h1 className="text-2xl font-bold">Tokens</h1>
         <p className="text-muted-foreground">Browse and search available tokens</p>

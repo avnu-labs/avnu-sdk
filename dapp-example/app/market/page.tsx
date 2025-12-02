@@ -38,7 +38,7 @@ export default function MarketPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl">
       <div>
         <h1 className="text-2xl font-bold">Market Data</h1>
         <p className="text-muted-foreground">STRK price feed and market insights</p>

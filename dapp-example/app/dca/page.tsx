@@ -51,14 +51,14 @@ export default function DcaPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl">
       <div>
         <h1 className="text-2xl font-bold">DCA</h1>
         <p className="text-muted-foreground">Dollar Cost Averaging STRK → ETH</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
+      <div className="flex gap-6">
+        <Card className="w-md">
           <CardHeader>
             <CardTitle>Create DCA Order</CardTitle>
             <CardDescription>
@@ -130,7 +130,7 @@ export default function DcaPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="flex-1">
           <CardHeader>
             <CardTitle>Your Orders</CardTitle>
             <CardDescription>
