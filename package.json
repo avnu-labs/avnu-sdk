@@ -1,6 +1,6 @@
 {
   "name": "@avnu/avnu-sdk",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.2",
   "description": "TypeScript SDK for building exchange functionality on Layers 2 with the AVNU API",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
