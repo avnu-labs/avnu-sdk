@@ -18,6 +18,7 @@ import {
   PriceFeedType,
   type SimplePriceData,
 } from '@avnu/avnu-sdk';
+import { getSourceUrl } from '@/lib/utils';
 
 const chartConfig = {
   price: { label: 'Price (USD)', color: 'hsl(var(--chart-1))' },
@@ -41,7 +42,12 @@ export default function MarketPage() {
     <div className="space-y-6 max-w-6xl">
       <div>
         <h1 className="text-2xl font-bold">Market Data</h1>
-        <p className="text-muted-foreground">STRK price feed and market insights</p>
+        <p className="text-muted-foreground">
+          STRK price feed and market insights •{' '}
+          <a href={getSourceUrl('app/market/page.tsx')} target="_blank" className="underline">
+            View source
+          </a>
+        </p>
       </div>
 
       <Card>
@@ -112,7 +118,12 @@ export default function MarketPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Available SDK Functions</CardTitle>
+          <CardTitle className="text-sm flex items-center justify-between">
+            Available SDK Functions
+            <a href={getSourceUrl('app/market/page.tsx')} target="_blank" className="text-muted-foreground font-normal underline">
+              View source
+            </a>
+          </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1">
           <p className="font-medium text-foreground mt-2">Market Data</p>

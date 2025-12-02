@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { fetchTokens, type Token } from '@avnu/avnu-sdk';
+import { getSourceUrl } from '@/lib/utils';
 
 const FETCH_TOKENS_SIZE = 5;
 export default function TokensPage() {
@@ -27,7 +28,12 @@ export default function TokensPage() {
     <div className="space-y-6 max-w-6xl">
       <div>
         <h1 className="text-2xl font-bold">Tokens</h1>
-        <p className="text-muted-foreground">Browse and search available tokens</p>
+        <p className="text-muted-foreground">
+          Browse and search available tokens •{' '}
+          <a href={getSourceUrl('app/tokens/page.tsx')} target="_blank" className="underline">
+            View source
+          </a>
+        </p>
       </div>
 
       <Card>
@@ -84,7 +90,12 @@ export default function TokensPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">SDK Functions</CardTitle>
+          <CardTitle className="text-sm flex items-center justify-between">
+            SDK Functions
+            <a href={getSourceUrl('app/tokens/page.tsx')} target="_blank" className="text-muted-foreground font-normal underline">
+              View source
+            </a>
+          </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1">
           <p>

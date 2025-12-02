@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { STRK, ETH } from '@/lib/tokens';
 import { getQuotes, executeSwap, type Quote } from '@avnu/avnu-sdk';
+import { getSourceUrl } from '@/lib/utils';
 
 const SELL_AMOUNT = parseUnits('1', STRK.decimals);
 const SLIPPAGE = 0.01; // 1 = 100%
@@ -61,7 +62,12 @@ export default function PaymasterPage() {
     <div className="space-y-6 max-w-6xl">
       <div>
         <h1 className="text-2xl font-bold">Paymaster</h1>
-        <p className="text-muted-foreground">Gasless transactions - Pay gas with ETH</p>
+        <p className="text-muted-foreground">
+          Gasless transactions - Pay gas with ETH •{' '}
+          <a href={getSourceUrl('app/paymaster/page.tsx')} target="_blank" className="underline">
+            View source
+          </a>
+        </p>
       </div>
 
       <div className="flex gap-6">
@@ -217,7 +223,12 @@ export default function PaymasterPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">SDK Functions</CardTitle>
+          <CardTitle className="text-sm flex items-center justify-between">
+            SDK Functions
+            <a href={getSourceUrl('app/paymaster/page.tsx')} target="_blank" className="text-muted-foreground font-normal underline">
+              View source
+            </a>
+          </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1">
           <p>

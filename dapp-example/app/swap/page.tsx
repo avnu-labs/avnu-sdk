@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { STRK, ETH } from '@/lib/tokens';
 import { getQuotes, executeSwap, type Quote, calculateMinReceivedAmount } from '@avnu/avnu-sdk';
-import { cn } from '@/lib/utils';
+import { cn, getSourceUrl } from '@/lib/utils';
 
 const SLIPPAGE = 0.01; // 1 = 100%
 
@@ -80,7 +80,12 @@ export default function SwapPage() {
     <div className="space-y-6 max-w-md">
       <div>
         <h1 className="text-2xl font-bold">Swap</h1>
-        <p className="text-muted-foreground">Exchange STRK for ETH</p>
+        <p className="text-muted-foreground">
+          Exchange STRK for ETH •{' '}
+          <a href={getSourceUrl('app/swap/page.tsx')} target="_blank" className="underline">
+            View source
+          </a>
+        </p>
       </div>
 
       <Card>
@@ -194,7 +199,12 @@ export default function SwapPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">SDK Functions</CardTitle>
+          <CardTitle className="text-sm flex items-center justify-between">
+            SDK Functions
+            <a href={getSourceUrl('app/swap/page.tsx')} target="_blank" className="text-muted-foreground font-normal underline">
+              View source
+            </a>
+          </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1">
           <p>
