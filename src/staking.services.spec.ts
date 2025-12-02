@@ -280,7 +280,10 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const amount = parseUnits('100', 18);
       const avnuCalls = aAvnuCalls();
-      fetchMock.post(`${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/stake`, avnuCalls);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/stake`,
+        avnuCalls,
+      );
 
       // When
       const result = await executeStake({ provider: mockAccount, poolAddress, amount });
@@ -297,7 +300,10 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const amount = parseUnits('100', 18);
       const avnuCalls = aAvnuCalls();
-      fetchMock.post(`${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/stake`, avnuCalls);
+      fetchMock.post(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/stake`,
+        avnuCalls,
+      );
 
       // When
       const result = await executeStake({

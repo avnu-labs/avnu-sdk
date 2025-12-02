@@ -1,5 +1,4 @@
 import { toBeHex } from 'ethers';
-import { Call } from 'starknet';
 import { STAKING_API_VERSION } from './constants';
 import { executeAllPaymasterFlow } from './paymaster.services';
 import { StakingInfoSchema, UserStakingInfoSchema } from './schemas';
