@@ -69,7 +69,8 @@ export default function PaymasterPage() {
           <CardHeader>
             <CardTitle>Transaction Flow</CardTitle>
             <CardDescription>
-              Uses <code className="text-xs bg-muted px-1 rounded">executeSwap()</code> with paymaster
+              Uses <code className="text-xs bg-muted px-1 rounded">executeSwap()</code> with
+              paymaster
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -167,7 +168,9 @@ export default function PaymasterPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Buy Amount</span>
-                      <span>{parseFloat(formatUnits(quote.buyAmount, ETH.decimals)).toFixed(8)} ETH</span>
+                      <span>
+                        {parseFloat(formatUnits(quote.buyAmount, ETH.decimals)).toFixed(8)} ETH
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Gas Fees (USD)</span>
