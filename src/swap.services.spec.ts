@@ -167,7 +167,7 @@ describe('Swap services', () => {
     it('should return min amount', () => {
       // Given
       const amount = BigInt(1000000);
-      const slippage = 30;
+      const slippage = 0.003; // 0.3%
 
       // When
       const result = calculateMinReceivedAmount(amount, slippage);
@@ -181,7 +181,7 @@ describe('Swap services', () => {
     it('should return max spend amount', () => {
       // Given
       const amount = BigInt(1000000);
-      const slippage = 30;
+      const slippage = 0.003; // 0.3%
 
       // When
       const result = calculateMaxSpendAmount(amount, slippage);

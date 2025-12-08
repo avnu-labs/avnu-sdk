@@ -98,7 +98,7 @@ Execute a swap with optional paymaster support (gasless/gasfree).
 calculateMinReceivedAmount(amount: bigint, slippage: number): bigint
 calculateMaxSpendAmount(amount: bigint, slippage: number): bigint
 ```
-Calculate min/max amounts with slippage (slippage in bps: 100 = 1%).
+Calculate min/max amounts with slippage (slippage as decimal: 0.01 = 1%).
 
 **Key types:**
 - `QuoteRequest`: sellTokenAddress, buyTokenAddress, sellAmount, takerAddress, size

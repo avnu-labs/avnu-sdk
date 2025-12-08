@@ -111,20 +111,20 @@ const executeSwap = async (params: InvokeSwapParams, options?: AvnuOptions): Pro
  * Calculate the min amount received from amount and slippage
  *
  * @param amount The amount to apply slippage
- * @param slippage The slippage to apply in bps. 10 is 0.1%
+ * @param slippage The slippage to apply as a decimal (0..1). 0.01 is 1%
  * @returns bigint
  */
 const calculateMinReceivedAmount = (amount: bigint, slippage: number): bigint =>
-  amount - (amount * BigInt(slippage)) / BigInt(10000);
+  amount - (amount * BigInt(Math.round(slippage * 10000))) / BigInt(10000);
 
 /**
  * Calculate the max amount spent from amount and slippage
  *
  * @param amount The amount to apply slippage
- * @param slippage The slippage to apply in bps. 10 is 0.1%
+ * @param slippage The slippage to apply as a decimal (0..1). 0.01 is 1%
  * @returns bigint
  */
 const calculateMaxSpendAmount = (amount: bigint, slippage: number): bigint =>
-  amount + (amount * BigInt(slippage)) / BigInt(10000);
+  amount + (amount * BigInt(Math.round(slippage * 10000))) / BigInt(10000);
 
 export { calculateMaxSpendAmount, calculateMinReceivedAmount, executeSwap, getQuotes, getSources, quoteToCalls };

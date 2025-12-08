@@ -37,7 +37,7 @@ const quotes = await getQuotes({
 
 await executeSwap({
   quote: quotes[0],
-  slippage: 100, // 1%
+  slippage: 0.01, // 1%
   account,
 });
 ```
