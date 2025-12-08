@@ -39,7 +39,6 @@ export default function PaymasterPage() {
     setTxHash(null);
     try {
       const result = await executeSwap({
-        // @ts-expect-error - starknet version mismatch
         provider: account,
         quote,
         slippage: SLIPPAGE,

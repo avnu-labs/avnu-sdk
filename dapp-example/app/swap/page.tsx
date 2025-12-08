@@ -147,10 +147,7 @@ export default function SwapPage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Min received amount</span>
                 <span>
-                  {formatUnits(
-                    calculateMinReceivedAmount(quote.buyAmount, SLIPPAGE),
-                    ETH.decimals
-                  )}
+                  {formatUnits(calculateMinReceivedAmount(quote.buyAmount, SLIPPAGE), ETH.decimals)}
                 </span>
               </div>
               <div className="flex justify-between">
