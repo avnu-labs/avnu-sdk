@@ -34,7 +34,6 @@ export default function DcaPage() {
       const amountPerCycleWei = toBeHex(parseUnits(amountPerCycle, STRK.decimals));
       const totalAmount = toBeHex(BigInt(amountPerCycleWei) * BigInt(repetitions));
       await executeCreateDca({
-        // @ts-expect-error - account in this repo comes from main repo node-modules
         provider: account,
         order: {
           sellTokenAddress: STRK.address,

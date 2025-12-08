@@ -52,7 +52,6 @@ export default function StakingPage() {
     setLoading(true);
     try {
       await executeStake({
-        // @ts-expect-error - starknet version mismatch
         provider: account,
         poolAddress,
         amount: parseUnits(stakeAmount, STRK.decimals),
@@ -69,7 +68,6 @@ export default function StakingPage() {
     setLoading(true);
     try {
       await executeInitiateUnstake({
-        // @ts-expect-error - starknet version mismatch
         provider: account,
         poolAddress,
         amount: parseUnits(unstakeAmount, STRK.decimals),
@@ -86,7 +84,6 @@ export default function StakingPage() {
     setLoading(true);
     try {
       await executeClaimRewards({
-        // @ts-expect-error - starknet version mismatch
         provider: account,
         poolAddress,
         restake,
