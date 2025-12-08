@@ -57,7 +57,6 @@ export default function SwapPage() {
 
     try {
       const result = await executeSwap({
-        // @ts-expect-error - account in this repo comes from main repo node-modules
         provider: account,
         quote,
         slippage: SLIPPAGE,
@@ -149,7 +148,7 @@ export default function SwapPage() {
                 <span className="text-muted-foreground">Min received amount</span>
                 <span>
                   {formatUnits(
-                    calculateMinReceivedAmount(quote.buyAmount, SLIPPAGE * 100),
+                    calculateMinReceivedAmount(quote.buyAmount, SLIPPAGE),
                     ETH.decimals
                   )}
                 </span>
