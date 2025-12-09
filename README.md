@@ -1,6 +1,38 @@
-# AVNU SDK
+<p align="center">
+  <a href="https://www.avnu.fi">
+    <img alt="avnu" src="assets/avnu-logo.svg" width="300">
+  </a>
+</p>
 
-TypeScript SDK for building exchange functionality on Starknet Layer 2 with the AVNU API.
+<p align="center">TypeScript SDK for building with avnu functionality on Starknet</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@avnu/avnu-sdk">
+    <img src='https://img.shields.io/npm/v/@avnu/avnu-sdk' />
+  </a>
+  <a href="https://bundlephobia.com/package/@avnu/avnu-sdk">
+    <img src='https://img.shields.io/bundlephobia/minzip/@avnu/avnu-sdk?color=success&label=size' />
+  </a>
+  <a href="https://www.npmjs.com/package/@avnu/avnu-sdk">
+    <img src='https://img.shields.io/npm/dt/@avnu/avnu-sdk?color=blueviolet' />
+  </a>
+  <a href="https://github.com/avnu-labs/avnu-sdk/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-black">
+  </a>
+  <a href="https://github.com/avnu-labs/avnu-sdk/stargazers">
+    <img src='https://img.shields.io/github/stars/avnu-labs/avnu-sdk?color=yellow' />
+  </a>
+  <a href="https://x.com/avnu_fi">
+    <img src="https://img.shields.io/badge/follow_us-Twitter-blue">
+  </a>
+
+</p>
+
+<p align="center">
+  <a href="https://docs.avnu.fi">Documentation</a> •
+  <a href="https://www.avnu.fi">Website</a> •
+  <a href="https://x.com/avnu_fi">Twitter</a>
+</p>
 
 ## Features
 
@@ -14,12 +46,10 @@ TypeScript SDK for building exchange functionality on Starknet Layer 2 with the 
 ## Installation
 
 ```bash
+// Using npm
 npm install @avnu/avnu-sdk
-```
 
-or
-
-```bash
+// or yarn 
 yarn add @avnu/avnu-sdk
 ```
 
