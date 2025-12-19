@@ -71,11 +71,7 @@ const getDatesFromRange = (dateRange?: FeedDateRange, fullDate: boolean = true) 
  * @returns The date
  */
 const getDate = (date: string | Date) => {
-  const format = 'YYYY-MM-DD';
-  if (typeof date === 'string') {
-    return dayjs(date).format(format);
-  }
-  return dayjs(date).format(format);
+  return dayjs(date).toISOString();
 };
 
 /**

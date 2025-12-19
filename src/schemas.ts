@@ -389,7 +389,6 @@ export const GlobalMarketSchema = z.object({
 export const SimplePriceDataSchema = z.object({
   date: z.string(),
   value: z.number(),
-  valueUsd: z.number(),
 }) satisfies z.ZodType<SimplePriceData>;
 
 export const SimpleVolumeDataSchema = z.object({

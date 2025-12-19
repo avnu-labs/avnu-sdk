@@ -506,7 +506,6 @@ export interface GlobalMarket {
 export interface SimplePriceData {
   date: string;
   value: number;
-  valueUsd: number;
 }
 
 export interface SimpleVolumeData {

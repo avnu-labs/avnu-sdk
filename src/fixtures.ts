@@ -458,7 +458,6 @@ export const aGlobalMarket = (): GlobalMarket => ({
 export const aSimplePriceData = (): SimplePriceData => ({
   date: '2024-01-01T00:00:00Z',
   value: 1700,
-  valueUsd: 1700,
 });
 
 export const aCandlePriceData = (): CandlePriceData => ({
