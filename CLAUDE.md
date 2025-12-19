@@ -263,7 +263,7 @@ getExchangeTVLFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOpt
 Historical exchange TVL feed data.
 
 **Key types:**
-- `TokenMarketData`: position, name, symbol, address, decimals, logoUri, coingeckoId, verified, starknet (StarknetMarket), global (GlobalMarket | null), tags, linePriceFeedInUsd
+- `TokenMarketData`: position, name, symbol, address, decimals, logoUri?, coingeckoId?, verified, starknet (StarknetMarket), global (GlobalMarket | null), tags (default []), linePriceFeedInUsd
 - `StarknetMarket`: usd, usdTvl, usdPriceChange1h, usdPriceChangePercentage1h, usdPriceChange24h, usdPriceChangePercentage24h, usdPriceChange7d, usdPriceChangePercentage7d, usdVolume24h, usdTradingVolume24h
 - `GlobalMarket`: usd, usdMarketCap, usdFdv, usdMarketCapChange24h, usdMarketCapChangePercentage24h
 - `PriceFeedProps`: type (LINE/CANDLE), dateRange, resolution
