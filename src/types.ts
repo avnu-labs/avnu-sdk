@@ -551,8 +551,8 @@ export interface TokenMarketData {
   symbol: string;
   address: string;
   decimals: number;
-  logoUri: string | null;
-  coingeckoId: string | null;
+  logoUri?: string | null;
+  coingeckoId?: string | null;
   verified: boolean;
   starknet: StarknetMarket;
   global: GlobalMarket | null;

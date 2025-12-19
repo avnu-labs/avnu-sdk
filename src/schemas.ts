@@ -434,12 +434,12 @@ export const TokenMarketDataSchema = z.object({
   symbol: z.string(),
   address: z.string(),
   decimals: z.number(),
-  logoUri: z.string().nullable(),
-  coingeckoId: z.string().nullable(),
+  logoUri: z.string().nullable().optional(),
+  coingeckoId: z.string().nullable().optional(),
   verified: z.boolean(),
   starknet: StarknetMarketSchema,
   global: GlobalMarketSchema.nullable(),
-  tags: z.array(z.enum(['Unknown', 'Verified', 'Community', 'Unruggable', 'AVNU'])),
+  tags: z.array(z.enum(['Unknown', 'Verified', 'Community', 'Unruggable', 'AVNU'])).default([]),
   linePriceFeedInUsd: z.array(SimplePriceDataSchema).default([]),
 }) satisfies z.ZodType<TokenMarketData>;
 
