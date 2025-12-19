@@ -5,6 +5,7 @@ import {
   aByExchangeTVLData,
   aByExchangeVolumeData,
   aCandlePriceData,
+  aExchangeLineVolumeData,
   aPrice,
   aPriceRequest,
   aSimplePriceData,
@@ -199,11 +200,11 @@ describe('Impulse services', () => {
   });
 
   describe('getExchangeVolumeFeed', () => {
-    it('should return ByExchangeVolumeData[]', async () => {
+    it('should return ExchangeLineVolumeData[]', async () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.HOURLY };
-      const response = [aByExchangeVolumeData()];
+      const response = [aExchangeLineVolumeData()];
       fetchMock.get(
         `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?`,
         response,
@@ -220,7 +221,7 @@ describe('Impulse services', () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.DAILY };
-      const response = [aByExchangeVolumeData()];
+      const response = [aExchangeLineVolumeData()];
       fetchMock.get(
         `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?`,
         response,

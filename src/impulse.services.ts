@@ -7,6 +7,7 @@ import {
   ByExchangeTVLDataSchema,
   ByExchangeVolumeDataSchema,
   CandlePriceDataSchema,
+  ExchangeLineVolumeDataSchema,
   SimplePriceDataSchema,
   SimpleVolumeDataSchema,
   TokenMarketDataSchema,
@@ -17,6 +18,7 @@ import {
   ByExchangeTVLData,
   ByExchangeVolumeData,
   CandlePriceData,
+  ExchangeLineVolumeData,
   FeedProps,
   PriceFeedProps,
   SimpleFeedProps,
@@ -165,12 +167,14 @@ const getExchangeVolumeFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
   options?: AvnuOptions,
-): Promise<ByExchangeVolumeData[]> => {
+): Promise<ExchangeLineVolumeData[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
+  ).then((response) =>
+    parseResponseWithSchema(response, z.array(ExchangeLineVolumeDataSchema), options?.avnuPublicKey),
+  );
 };
 
 /**
