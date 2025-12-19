@@ -429,7 +429,6 @@ export const CandlePriceDataSchema = z.object({
 }) satisfies z.ZodType<CandlePriceData>;
 
 export const TokenMarketDataSchema = z.object({
-  position: z.number().default(0),
   name: z.string(),
   symbol: z.string(),
   address: z.string(),

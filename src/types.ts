@@ -546,7 +546,6 @@ export interface CandlePriceData {
 }
 
 export interface TokenMarketData {
-  position: number;
   name: string;
   symbol: string;
   address: string;
