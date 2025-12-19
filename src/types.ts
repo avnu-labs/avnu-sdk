@@ -466,6 +466,10 @@ export interface StakingUnstakeMetadata {
 
 /* Impulse Market Part */
 
+export interface SimpleDateProps {
+  date?: string | Date;
+}
+
 export interface SimpleFeedProps {
   dateRange: FeedDateRange;
 }

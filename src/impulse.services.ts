@@ -21,6 +21,7 @@ import {
   ExchangeLineVolumeData,
   FeedProps,
   PriceFeedProps,
+  SimpleDateProps,
   SimpleFeedProps,
   SimplePriceData,
   SimpleVolumeData,
@@ -35,7 +36,7 @@ import { getImpulseBaseUrl, getRequest, parseResponseWithSchema, postRequest } f
  * @param fullDate True if the date should be in full ISO format, false if it should be in YYYY-MM-DD format
  * @returns The start and end dates
  */
-const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
+const getDatesFromRange = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
   const now = dayjs();
   let start;
   switch (dateRange) {
@@ -65,13 +66,35 @@ const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
 };
 
 /**
+ * Internal utils to get the date from a string
+ * @param date The date string
+ * @returns The date
+ */
+const getDate = (date: string | Date) => {
+  const format = 'YYYY-MM-DD';
+  if (typeof date === 'string') {
+    return dayjs(date).format(format);
+  }
+  return dayjs(date).format(format);
+};
+
+/**
+ * Internal utils to get the query params for a given date props
+ * @param dateProps The date props (date)
+ * @returns The query params
+ */
+const getDateQueryParams = (dateProps: SimpleDateProps) => {
+  const date = dateProps.date ? getDate(dateProps.date) : undefined;
+  return qs.stringify({ date }, { arrayFormat: 'repeat' });
+};
+/**
  * Internal utils to get the query params for a given feed props
  * @param feedProps The feed props (date range and resolution)
  * @param quoteTokenAddress The address of the quote token
  * @returns The query params
  */
 const getFeedQueryParams = (feedProps: FeedProps, quoteTokenAddress?: string) => {
-  const dates = getDate(feedProps.dateRange, true);
+  const dates = getDatesFromRange(feedProps.dateRange, true);
   return qs.stringify(
     { resolution: feedProps.resolution, startDate: dates?.start, endDate: dates?.end, quoteTokenAddress },
     { arrayFormat: 'repeat' },
@@ -84,7 +107,7 @@ const getFeedQueryParams = (feedProps: FeedProps, quoteTokenAddress?: string) =>
  * @returns The query params
  */
 const getSimpleQueryParams = (simpleProps: SimpleFeedProps) => {
-  const dates = getDate(simpleProps.dateRange, false);
+  const dates = getDatesFromRange(simpleProps.dateRange, false);
   return qs.stringify({ startDate: dates?.start, endDate: dates?.end }, { arrayFormat: 'repeat' });
 };
 
@@ -186,10 +209,10 @@ const getExchangeVolumeFeed = (
  */
 const getTVLByExchange = (
   tokenAddress: string,
-  simpleProps: SimpleFeedProps,
+  simpleDateProps: SimpleDateProps,
   options?: AvnuOptions,
 ): Promise<ByExchangeTVLData[]> => {
-  const queryParams = getSimpleQueryParams(simpleProps);
+  const queryParams = getDateQueryParams(simpleDateProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?${queryParams}`,
     getRequest(options),

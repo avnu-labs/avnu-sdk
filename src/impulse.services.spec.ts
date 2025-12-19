@@ -241,21 +241,20 @@ describe('Impulse services', () => {
     it('should return ByExchangeTVLData[]', async () => {
       // Given
       const tokenAddress = '0x0token';
-      const simpleProps = { dateRange: FeedDateRange.ONE_DAY };
       const response = [aByExchangeTVLData()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
 
       // When
-      const result = await getTVLByExchange(tokenAddress, simpleProps);
+      const result = await getTVLByExchange(tokenAddress, {});
 
       // Then
       expect(result).toStrictEqual(response);
     });
 
-    it('should apply dateRange filter', async () => {
+    it('should apply date filter as string', async () => {
       // Given
       const tokenAddress = '0x0token';
-      const simpleProps = { dateRange: FeedDateRange.ONE_MONTH };
+      const simpleProps = { date: '2024-01-01' };
       const response = [aByExchangeTVLData()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
 
@@ -265,8 +264,38 @@ describe('Impulse services', () => {
       // Then
       expect(result).toStrictEqual(response);
       const [url] = fetchMock.lastCall() || [];
-      expect(url).toContain('startDate=');
-      expect(url).toContain('endDate=');
+      expect(url).toContain('date=');
+    });
+
+    it('should apply date filter as Date', async () => {
+      // Given
+      const tokenAddress = '0x0token';
+      const simpleProps = { date: new Date('2024-01-01') };
+      const response = [aByExchangeTVLData()];
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
+
+      // When
+      const result = await getTVLByExchange(tokenAddress, simpleProps);
+
+      // Then
+      expect(result).toStrictEqual(response);
+      const [url] = fetchMock.lastCall() || [];
+      expect(url).toContain('date=');
+    });
+
+    it('should apply date filter as undefined', async () => {
+      // Given
+      const tokenAddress = '0x0token';
+      const response = [aByExchangeTVLData()];
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
+
+      // When
+      const result = await getTVLByExchange(tokenAddress, {});
+
+      // Then
+      expect(result).toStrictEqual(response);
+      const [url] = fetchMock.lastCall() || [];
+      expect(url).not.toContain('date=');
     });
   });
 
