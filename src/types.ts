@@ -466,6 +466,10 @@ export interface StakingUnstakeMetadata {
 
 /* Impulse Market Part */
 
+export interface SimpleDateProps {
+  date?: string | Date;
+}
+
 export interface SimpleFeedProps {
   dateRange: FeedDateRange;
 }
@@ -478,63 +482,69 @@ export interface PriceFeedProps extends FeedProps {
   type: PriceFeedType;
 }
 
-export interface PriceData {
-  value: number;
-  valueUsd?: number;
+export interface StarknetMarket {
+  usd: number;
+  usdTvl: number;
+  usdPriceChange1h: number;
+  usdPriceChangePercentage1h: number | null;
+  usdPriceChange24h: number;
+  usdPriceChangePercentage24h: number | null;
+  usdPriceChange7d: number;
+  usdPriceChangePercentage7d: number | null;
+  usdVolume24h: number;
+  usdTradingVolume24h: number;
 }
 
-export interface SimplePriceData extends PriceData {
+export interface GlobalMarket {
+  usd: number;
+  usdMarketCap: number;
+  usdFdv: number;
+  usdMarketCapChange24h: number;
+  usdMarketCapChangePercentage24h: number;
+}
+
+export interface DataPoint {
   date: string;
-}
-
-export interface SimpleVolumeData {
-  date: string;
   value: number;
 }
 
-export interface ByExchangeVolumeData extends SimpleVolumeData {
+export interface DataPointWithUsd {
+  date: string;
+  value: number;
+  valueUsd: number;
+}
+
+export interface ExchangeDataPoint extends DataPointWithUsd {
   exchange: string;
 }
 
-export interface ByExchangeTVLData extends SimplePriceData {
+export interface ExchangeRangeDataPoint {
+  value: number;
+  valueUsd: number;
   exchange: string;
+  startDate: string;
+  endDate: string;
 }
 
-export interface CandlePriceData {
+export interface CandleDataPoint {
   date: string;
-  close: number;
+  open: number;
   high: number;
   low: number;
-  open: number;
+  close: number;
   volume: number;
 }
 
 export interface TokenMarketData {
-  position: number;
-  address: string;
   name: string;
   symbol: string;
+  address: string;
   decimals: number;
-  logoUri: string | null;
+  logoUri?: string | null;
+  coingeckoId?: string | null;
   verified: boolean;
-  linePriceFeedInUsd: SimplePriceData[];
-  coingeckoId?: string;
-  website?: string;
-  market: {
-    currentPrice: number;
-    fullyDilutedValuation?: number | null;
-    totalSupply?: number | null;
-    priceChange1h: number;
-    priceChangePercentage1h?: number | null;
-    priceChange24h: number;
-    priceChangePercentage24h?: number | null;
-    priceChange7d: number;
-    priceChangePercentage7d?: number | null;
-    marketCap: number;
-    marketCapChange24h?: number | null;
-    marketCapChangePercentage24h?: number | null;
-    starknetVolume24h: number;
-    starknetTradingVolume24h: number;
-    starknetTvl: number;
-  };
+  starknet: StarknetMarket;
+  global: GlobalMarket | null;
+  tags: TokenTag[];
+  linePriceFeedInUsd: DataPoint[];
 }

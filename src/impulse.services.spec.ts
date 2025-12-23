@@ -2,13 +2,13 @@ import fetchMock from 'fetch-mock';
 import { IMPULSE_API_VERSION, IMPULSE_BASE_URL, PRICES_API_VERSION } from './constants';
 import { FeedDateRange, FeedResolution, PriceFeedType } from './enums';
 import {
-  aByExchangeTVLData,
-  aByExchangeVolumeData,
-  aCandlePriceData,
+  aCandleDataPoint,
+  aDataPoint,
+  aDataPointWithUsd,
+  anExchangeDataPoint,
+  anExchangeRangeDataPoint,
   aPrice,
   aPriceRequest,
-  aSimplePriceData,
-  aSimpleVolumeData,
   aTokenMarketData,
 } from './fixtures';
 import {
@@ -101,7 +101,7 @@ describe('Impulse services', () => {
   });
 
   describe('getPriceFeed', () => {
-    it('should return SimplePriceData[] for LINE type', async () => {
+    it('should return DataPoint[] for LINE type', async () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = {
@@ -109,7 +109,7 @@ describe('Impulse services', () => {
         dateRange: FeedDateRange.ONE_DAY,
         resolution: FeedResolution.HOURLY,
       };
-      const response = [aSimplePriceData()];
+      const response = [aDataPoint()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/line?`, response);
 
       // When
@@ -119,7 +119,7 @@ describe('Impulse services', () => {
       expect(result).toStrictEqual(response);
     });
 
-    it('should return CandlePriceData[] for CANDLE type', async () => {
+    it('should return CandleDataPoint[] for CANDLE type', async () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = {
@@ -127,7 +127,7 @@ describe('Impulse services', () => {
         dateRange: FeedDateRange.ONE_DAY,
         resolution: FeedResolution.HOURLY,
       };
-      const response = [aCandlePriceData()];
+      const response = [aCandleDataPoint()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/candle?`, response);
 
       // When
@@ -146,7 +146,7 @@ describe('Impulse services', () => {
         dateRange: FeedDateRange.ONE_DAY,
         resolution: FeedResolution.HOURLY,
       };
-      const response = [aSimplePriceData()];
+      const response = [aDataPoint()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/line?`, response);
 
       // When
@@ -160,11 +160,11 @@ describe('Impulse services', () => {
   });
 
   describe('getVolumeByExchange', () => {
-    it('should return ByExchangeVolumeData[]', async () => {
+    it('should return ExchangeRangeDataPoint[]', async () => {
       // Given
       const tokenAddress = '0x0token';
       const simpleProps = { dateRange: FeedDateRange.ONE_DAY };
-      const response = [aByExchangeVolumeData()];
+      const response = [anExchangeRangeDataPoint()];
       fetchMock.get(
         `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes?`,
         response,
@@ -181,7 +181,7 @@ describe('Impulse services', () => {
       // Given
       const tokenAddress = '0x0token';
       const simpleProps = { dateRange: FeedDateRange.ONE_WEEK };
-      const response = [aByExchangeVolumeData()];
+      const response = [anExchangeRangeDataPoint()];
       fetchMock.get(
         `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes?`,
         response,
@@ -199,11 +199,11 @@ describe('Impulse services', () => {
   });
 
   describe('getExchangeVolumeFeed', () => {
-    it('should return ByExchangeVolumeData[]', async () => {
+    it('should return ExchangeDataPoint[]', async () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.HOURLY };
-      const response = [aByExchangeVolumeData()];
+      const response = [anExchangeDataPoint()];
       fetchMock.get(
         `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?`,
         response,
@@ -220,7 +220,7 @@ describe('Impulse services', () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.DAILY };
-      const response = [aByExchangeVolumeData()];
+      const response = [anExchangeDataPoint()];
       fetchMock.get(
         `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?`,
         response,
@@ -237,25 +237,24 @@ describe('Impulse services', () => {
   });
 
   describe('getTVLByExchange', () => {
-    it('should return ByExchangeTVLData[]', async () => {
+    it('should return ExchangeDataPoint[]', async () => {
       // Given
       const tokenAddress = '0x0token';
-      const simpleProps = { dateRange: FeedDateRange.ONE_DAY };
-      const response = [aByExchangeTVLData()];
+      const response = [anExchangeDataPoint()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
 
       // When
-      const result = await getTVLByExchange(tokenAddress, simpleProps);
+      const result = await getTVLByExchange(tokenAddress, {});
 
       // Then
       expect(result).toStrictEqual(response);
     });
 
-    it('should apply dateRange filter', async () => {
+    it('should apply date filter as string', async () => {
       // Given
       const tokenAddress = '0x0token';
-      const simpleProps = { dateRange: FeedDateRange.ONE_MONTH };
-      const response = [aByExchangeTVLData()];
+      const simpleProps = { date: '2024-01-01' };
+      const response = [anExchangeDataPoint()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
 
       // When
@@ -264,17 +263,47 @@ describe('Impulse services', () => {
       // Then
       expect(result).toStrictEqual(response);
       const [url] = fetchMock.lastCall() || [];
-      expect(url).toContain('startDate=');
-      expect(url).toContain('endDate=');
+      expect(url).toContain('date=');
+    });
+
+    it('should apply date filter as Date', async () => {
+      // Given
+      const tokenAddress = '0x0token';
+      const simpleProps = { date: new Date('2024-01-01') };
+      const response = [anExchangeDataPoint()];
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
+
+      // When
+      const result = await getTVLByExchange(tokenAddress, simpleProps);
+
+      // Then
+      expect(result).toStrictEqual(response);
+      const [url] = fetchMock.lastCall() || [];
+      expect(url).toContain('date=');
+    });
+
+    it('should apply date filter as undefined', async () => {
+      // Given
+      const tokenAddress = '0x0token';
+      const response = [anExchangeDataPoint()];
+      fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?`, response);
+
+      // When
+      const result = await getTVLByExchange(tokenAddress, {});
+
+      // Then
+      expect(result).toStrictEqual(response);
+      const [url] = fetchMock.lastCall() || [];
+      expect(url).not.toContain('date=');
     });
   });
 
   describe('getExchangeTVLFeed', () => {
-    it('should return ByExchangeTVLData[]', async () => {
+    it('should return ExchangeDataPoint[]', async () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.HOURLY };
-      const response = [aByExchangeTVLData()];
+      const response = [anExchangeDataPoint()];
       fetchMock.get(
         `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl/line?`,
         response,
@@ -291,7 +320,7 @@ describe('Impulse services', () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.FOUR_HOUR };
-      const response = [aByExchangeTVLData()];
+      const response = [anExchangeDataPoint()];
       fetchMock.get(
         `begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl/line?`,
         response,
@@ -308,11 +337,11 @@ describe('Impulse services', () => {
   });
 
   describe('getTransferVolumeFeed', () => {
-    it('should return SimpleVolumeData[]', async () => {
+    it('should return DataPointWithUsd[]', async () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.HOURLY };
-      const response = [aSimpleVolumeData()];
+      const response = [aDataPointWithUsd()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/volumes/line?`, response);
 
       // When
@@ -326,7 +355,7 @@ describe('Impulse services', () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.WEEKLY };
-      const response = [aSimpleVolumeData()];
+      const response = [aDataPointWithUsd()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/volumes/line?`, response);
 
       // When

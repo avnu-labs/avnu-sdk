@@ -4,24 +4,25 @@ import { z } from 'zod';
 import { IMPULSE_API_VERSION, PRICES_API_VERSION } from './constants';
 import { FeedDateRange, PriceFeedType } from './enums';
 import {
-  ByExchangeTVLDataSchema,
-  ByExchangeVolumeDataSchema,
-  CandlePriceDataSchema,
-  SimplePriceDataSchema,
-  SimpleVolumeDataSchema,
+  CandleDataPointSchema,
+  DataPointSchema,
+  DataPointWithUsdSchema,
+  ExchangeDataPointSchema,
+  ExchangeRangeDataPointSchema,
   TokenMarketDataSchema,
   TokenPriceSchema,
 } from './schemas';
 import {
   AvnuOptions,
-  ByExchangeTVLData,
-  ByExchangeVolumeData,
-  CandlePriceData,
+  CandleDataPoint,
+  DataPoint,
+  DataPointWithUsd,
+  ExchangeDataPoint,
+  ExchangeRangeDataPoint,
   FeedProps,
   PriceFeedProps,
+  SimpleDateProps,
   SimpleFeedProps,
-  SimplePriceData,
-  SimpleVolumeData,
   TokenMarketData,
   TokenPriceResponse,
 } from './types';
@@ -33,7 +34,7 @@ import { getImpulseBaseUrl, getRequest, parseResponseWithSchema, postRequest } f
  * @param fullDate True if the date should be in full ISO format, false if it should be in YYYY-MM-DD format
  * @returns The start and end dates
  */
-const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
+const getDatesFromRange = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
   const now = dayjs();
   let start;
   switch (dateRange) {
@@ -63,13 +64,31 @@ const getDate = (dateRange?: FeedDateRange, fullDate: boolean = true) => {
 };
 
 /**
+ * Internal utils to get the date from a string
+ * @param date The date string
+ * @returns The date
+ */
+const getDate = (date: string | Date) => {
+  return dayjs(date).toISOString();
+};
+
+/**
+ * Internal utils to get the query params for a given date props
+ * @param dateProps The date props (date)
+ * @returns The query params
+ */
+const getDateQueryParams = (dateProps: SimpleDateProps) => {
+  const date = dateProps.date ? getDate(dateProps.date) : undefined;
+  return qs.stringify({ date }, { arrayFormat: 'repeat' });
+};
+/**
  * Internal utils to get the query params for a given feed props
  * @param feedProps The feed props (date range and resolution)
  * @param quoteTokenAddress The address of the quote token
  * @returns The query params
  */
 const getFeedQueryParams = (feedProps: FeedProps, quoteTokenAddress?: string) => {
-  const dates = getDate(feedProps.dateRange, true);
+  const dates = getDatesFromRange(feedProps.dateRange, true);
   return qs.stringify(
     { resolution: feedProps.resolution, startDate: dates?.start, endDate: dates?.end, quoteTokenAddress },
     { arrayFormat: 'repeat' },
@@ -82,7 +101,7 @@ const getFeedQueryParams = (feedProps: FeedProps, quoteTokenAddress?: string) =>
  * @returns The query params
  */
 const getSimpleQueryParams = (simpleProps: SimpleFeedProps) => {
-  const dates = getDate(simpleProps.dateRange, false);
+  const dates = getDatesFromRange(simpleProps.dateRange, false);
   return qs.stringify({ startDate: dates?.start, endDate: dates?.end }, { arrayFormat: 'repeat' });
 };
 
@@ -122,11 +141,10 @@ const getPriceFeed = (
   feedProps: PriceFeedProps,
   quoteTokenAddress?: string,
   options?: AvnuOptions,
-): Promise<SimplePriceData[] | CandlePriceData[]> => {
+): Promise<DataPoint[] | CandleDataPoint[]> => {
   const type = feedProps.type === PriceFeedType.CANDLE ? 'candle' : 'line';
   const queryParams = getFeedQueryParams(feedProps, quoteTokenAddress);
-  const schema =
-    feedProps.type === PriceFeedType.CANDLE ? z.array(CandlePriceDataSchema) : z.array(SimplePriceDataSchema);
+  const schema = feedProps.type === PriceFeedType.CANDLE ? z.array(CandleDataPointSchema) : z.array(DataPointSchema);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/${type}?${queryParams}`,
     getRequest(options),
@@ -144,12 +162,14 @@ const getVolumeByExchange = (
   tokenAddress: string,
   simpleProps: SimpleFeedProps,
   options?: AvnuOptions,
-): Promise<ByExchangeVolumeData[]> => {
+): Promise<ExchangeRangeDataPoint[]> => {
   const queryParams = getSimpleQueryParams(simpleProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
+  ).then((response) =>
+    parseResponseWithSchema(response, z.array(ExchangeRangeDataPointSchema), options?.avnuPublicKey),
+  );
 };
 
 /**
@@ -165,12 +185,12 @@ const getExchangeVolumeFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
   options?: AvnuOptions,
-): Promise<ByExchangeVolumeData[]> => {
+): Promise<ExchangeDataPoint[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(ExchangeDataPointSchema), options?.avnuPublicKey));
 };
 
 /**
@@ -182,14 +202,14 @@ const getExchangeVolumeFeed = (
  */
 const getTVLByExchange = (
   tokenAddress: string,
-  simpleProps: SimpleFeedProps,
+  simpleDateProps: SimpleDateProps,
   options?: AvnuOptions,
-): Promise<ByExchangeTVLData[]> => {
-  const queryParams = getSimpleQueryParams(simpleProps);
+): Promise<ExchangeDataPoint[]> => {
+  const queryParams = getDateQueryParams(simpleDateProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(ExchangeDataPointSchema), options?.avnuPublicKey));
 };
 
 /**
@@ -205,12 +225,12 @@ const getExchangeTVLFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
   options?: AvnuOptions,
-): Promise<ByExchangeTVLData[]> => {
+): Promise<ExchangeDataPoint[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl/line?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(ExchangeDataPointSchema), options?.avnuPublicKey));
 };
 
 /**
@@ -226,12 +246,12 @@ const getTransferVolumeFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
   options?: AvnuOptions,
-): Promise<SimpleVolumeData[]> => {
+): Promise<DataPointWithUsd[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/volumes/line?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(SimpleVolumeDataSchema), options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(DataPointWithUsdSchema), options?.avnuPublicKey));
 };
 
 /**

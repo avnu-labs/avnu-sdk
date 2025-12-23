@@ -226,7 +226,7 @@ getPriceFeed(
   feedProps: PriceFeedProps,
   quoteTokenAddress?: string,
   options?: AvnuOptions
-): Promise<SimplePriceData[] | CandlePriceData[]>
+): Promise<DataPoint[] | CandleDataPoint[]>
 ```
 Get price feed (LINE or CANDLE) for a token.
 
@@ -237,38 +237,44 @@ Get market prices for a list of tokens.
 
 **Volume feeds:**
 ```typescript
-getVolumeByExchange(tokenAddress: string, simpleProps: SimpleFeedProps, options?: AvnuOptions): Promise<ByExchangeVolumeData[]>
+getVolumeByExchange(tokenAddress: string, simpleProps: SimpleFeedProps, options?: AvnuOptions): Promise<ExchangeRangeDataPoint[]>
 ```
 Volume by exchange for a date range.
 
 ```typescript
-getExchangeVolumeFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<SimpleVolumeData[]>
+getExchangeVolumeFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<ExchangeDataPoint[]>
 ```
-Exchange volume feed data.
+Exchange volume feed data with per-exchange breakdown.
 
 ```typescript
-getTransferVolumeFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<SimpleVolumeData[]>
+getTransferVolumeFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<DataPointWithUsd[]>
 ```
 Transfer volume feed data.
 
 **TVL feeds:**
 ```typescript
-getTVLByExchange(tokenAddress: string, simpleProps: SimpleFeedProps, options?: AvnuOptions): Promise<ByExchangeTVLData[]>
+getTVLByExchange(tokenAddress: string, simpleDateProps: SimpleDateProps, options?: AvnuOptions): Promise<ExchangeDataPoint[]>
 ```
-TVL by exchange for a date range.
+TVL snapshot by exchange at a specific date.
 
 ```typescript
-getExchangeTVLFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<SimpleVolumeData[]>
+getExchangeTVLFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<ExchangeDataPoint[]>
 ```
-Exchange TVL feed data.
+Historical exchange TVL feed data.
 
 **Key types:**
-- `TokenMarketData`: position, symbol, address, price, marketCap, volume24h, tvl, priceChange24h, allTimeHigh, allTimeLow
+- `TokenMarketData`: name, symbol, address, decimals, logoUri?, coingeckoId?, verified, starknet (StarknetMarket), global (GlobalMarket | null), tags (default []), linePriceFeedInUsd
+- `StarknetMarket`: usd, usdTvl, usdPriceChange1h, usdPriceChangePercentage1h, usdPriceChange24h, usdPriceChangePercentage24h, usdPriceChange7d, usdPriceChangePercentage7d, usdVolume24h, usdTradingVolume24h
+- `GlobalMarket`: usd, usdMarketCap, usdFdv, usdMarketCapChange24h, usdMarketCapChangePercentage24h
 - `PriceFeedProps`: type (LINE/CANDLE), dateRange, resolution
 - `FeedDateRange`: ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR
 - `FeedResolution`: 1, 5, 15, 1H, 4H, 1D, 1W, 1M, 1Y
-- `SimplePriceData`: timestamp, price
-- `CandlePriceData`: timestamp, open, high, low, close, volume
+- `DataPoint`: date, value
+- `CandleDataPoint`: date, open, high, low, close, volume
+- `SimpleDateProps`: date (optional string or Date for snapshot queries)
+- `ExchangeDataPoint`: extends DataPointWithUsd + exchange (date, value, valueUsd, exchange)
+- `ExchangeRangeDataPoint`: value, valueUsd, exchange, startDate, endDate
+- `DataPointWithUsd`: date, value, valueUsd
 
 ---
 
@@ -480,7 +486,7 @@ export const SEPOLIA_IMPULSE_BASE_URL = 'https://sepolia.impulse.avnu.fi'
 **API Version Constants:**
 ```typescript
 export const TOKEN_API_VERSION = 'v1'
-export const IMPULSE_API_VERSION = 'v1'
+export const IMPULSE_API_VERSION = 'v3'
 export const SWAP_API_VERSION = 'v3'
 export const PRICES_API_VERSION = 'v3'
 export const STAKING_API_VERSION = 'v3'
@@ -590,7 +596,7 @@ buildSwapUrl(path: string): string      // BASE_URL/swap/v3{path}
 buildDcaUrl(path: string): string       // BASE_URL/dca/v3{path}
 buildTokenUrl(path: string): string     // BASE_URL/v1/starknet/tokens{path}
 buildStakingUrl(path: string): string   // BASE_URL/staking/v3{path}
-buildImpulseUrl(path: string): string   // IMPULSE_BASE_URL/v1{path}
+buildImpulseUrl(path: string): string   // IMPULSE_BASE_URL/v3{path}
 ```
 
 **Fixtures** (`fixtures.ts`):
@@ -611,9 +617,9 @@ anApr(), anAction()
 aPreparedTypedData(), aSignedPaymasterTransaction()
 
 // Impulse/Market data fixtures
-aSimplePriceData(), aCandlePriceData()
-aSimpleVolumeData(), aByExchangeVolumeData(), aByExchangeTVLData()
-aTokenMarketData()
+aDataPoint(), aCandleDataPoint()
+aDataPointWithUsd(), anExchangeDataPoint(), anExchangeRangeDataPoint()
+aTokenMarketData(), aStarknetMarket(), aGlobalMarket()
 ```
 
 Helper pattern: `aX()` with optional overrides.
