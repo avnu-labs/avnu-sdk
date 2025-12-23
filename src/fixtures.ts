@@ -7,15 +7,14 @@ import {
   Action,
   Apr,
   AvnuCalls,
-  ByExchangeTVLData,
-  ByExchangeVolumeData,
   CandlePriceData,
   CreateDcaOrder,
   DataPoint,
   DataPointWithUsd,
   DcaOrder,
   DelegationPool,
-  ExchangeLineVolumeData,
+  ExchangeDataPoint,
+  ExchangeRangeDataPoint,
   GlobalMarket,
   InvokeTransactionResponse,
   Page,
@@ -475,7 +474,7 @@ export const aDataPointWithUsd = (): DataPointWithUsd => ({
   valueUsd: 1000000,
 });
 
-export const aByExchangeVolumeData = (): ByExchangeVolumeData => ({
+export const anExchangeRangeDataPoint = (): ExchangeRangeDataPoint => ({
   value: 500000,
   valueUsd: 500000,
   exchange: 'JediSwap',
@@ -483,18 +482,11 @@ export const aByExchangeVolumeData = (): ByExchangeVolumeData => ({
   endDate: '2024-01-02',
 });
 
-export const aExchangeLineVolumeData = (): ExchangeLineVolumeData => ({
+export const anExchangeDataPoint = (): ExchangeDataPoint => ({
   date: '2024-01-01T00:00:00Z',
   value: 500000,
   valueUsd: 500000,
   exchange: 'JediSwap',
-});
-
-export const aByExchangeTVLData = (): ByExchangeTVLData => ({
-  exchange: 'JediSwap',
-  value: 10000000,
-  valueUsd: 10000000,
-  date: '2024-01-01T00:00:00Z',
 });
 
 export const aTokenMarketData = (): TokenMarketData => ({

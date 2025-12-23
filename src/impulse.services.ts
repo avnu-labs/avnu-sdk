@@ -4,23 +4,21 @@ import { z } from 'zod';
 import { IMPULSE_API_VERSION, PRICES_API_VERSION } from './constants';
 import { FeedDateRange, PriceFeedType } from './enums';
 import {
-  ByExchangeTVLDataSchema,
-  ByExchangeVolumeDataSchema,
   CandlePriceDataSchema,
   DataPointSchema,
   DataPointWithUsdSchema,
-  ExchangeLineVolumeDataSchema,
+  ExchangeDataPointSchema,
+  ExchangeRangeDataPointSchema,
   TokenMarketDataSchema,
   TokenPriceSchema,
 } from './schemas';
 import {
   AvnuOptions,
-  ByExchangeTVLData,
-  ByExchangeVolumeData,
   CandlePriceData,
   DataPoint,
   DataPointWithUsd,
-  ExchangeLineVolumeData,
+  ExchangeDataPoint,
+  ExchangeRangeDataPoint,
   FeedProps,
   PriceFeedProps,
   SimpleDateProps,
@@ -164,12 +162,14 @@ const getVolumeByExchange = (
   tokenAddress: string,
   simpleProps: SimpleFeedProps,
   options?: AvnuOptions,
-): Promise<ByExchangeVolumeData[]> => {
+): Promise<ExchangeRangeDataPoint[]> => {
   const queryParams = getSimpleQueryParams(simpleProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeVolumeDataSchema), options?.avnuPublicKey));
+  ).then((response) =>
+    parseResponseWithSchema(response, z.array(ExchangeRangeDataPointSchema), options?.avnuPublicKey),
+  );
 };
 
 /**
@@ -185,14 +185,12 @@ const getExchangeVolumeFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
   options?: AvnuOptions,
-): Promise<ExchangeLineVolumeData[]> => {
+): Promise<ExchangeDataPoint[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-volumes/line?${queryParams}`,
     getRequest(options),
-  ).then((response) =>
-    parseResponseWithSchema(response, z.array(ExchangeLineVolumeDataSchema), options?.avnuPublicKey),
-  );
+  ).then((response) => parseResponseWithSchema(response, z.array(ExchangeDataPointSchema), options?.avnuPublicKey));
 };
 
 /**
@@ -206,12 +204,12 @@ const getTVLByExchange = (
   tokenAddress: string,
   simpleDateProps: SimpleDateProps,
   options?: AvnuOptions,
-): Promise<ByExchangeTVLData[]> => {
+): Promise<ExchangeDataPoint[]> => {
   const queryParams = getDateQueryParams(simpleDateProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(ExchangeDataPointSchema), options?.avnuPublicKey));
 };
 
 /**
@@ -227,12 +225,12 @@ const getExchangeTVLFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
   options?: AvnuOptions,
-): Promise<ByExchangeTVLData[]> => {
+): Promise<ExchangeDataPoint[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/exchange-tvl/line?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(ByExchangeTVLDataSchema), options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(ExchangeDataPointSchema), options?.avnuPublicKey));
 };
 
 /**

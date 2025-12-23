@@ -1,14 +1,13 @@
 import { z } from 'zod';
 import { DcaOrderStatus, DcaTradeStatus, SourceType } from './enums';
 import {
-  type ByExchangeTVLData,
-  type ByExchangeVolumeData,
   type CandlePriceData,
   type DataPoint,
   type DataPointWithUsd,
   type DcaOrder,
   DcaTrade,
-  type ExchangeLineVolumeData,
+  type ExchangeDataPoint,
+  type ExchangeRangeDataPoint,
   Fee,
   type GlobalMarket,
   MarketPrice,
@@ -397,27 +396,20 @@ export const DataPointWithUsdSchema = z.object({
   valueUsd: z.number(),
 }) satisfies z.ZodType<DataPointWithUsd>;
 
-export const ByExchangeVolumeDataSchema = z.object({
+export const ExchangeDataPointSchema = z.object({
+  date: z.string(),
+  value: z.number(),
+  valueUsd: z.number(),
+  exchange: z.string(),
+}) satisfies z.ZodType<ExchangeDataPoint>;
+
+export const ExchangeRangeDataPointSchema = z.object({
   value: z.number(),
   valueUsd: z.number(),
   exchange: z.string(),
   startDate: z.string(),
   endDate: z.string(),
-}) satisfies z.ZodType<ByExchangeVolumeData>;
-
-export const ExchangeLineVolumeDataSchema = z.object({
-  date: z.string(),
-  value: z.number(),
-  valueUsd: z.number(),
-  exchange: z.string(),
-}) satisfies z.ZodType<ExchangeLineVolumeData>;
-
-export const ByExchangeTVLDataSchema = z.object({
-  exchange: z.string(),
-  value: z.number(),
-  valueUsd: z.number(),
-  date: z.string(),
-}) satisfies z.ZodType<ByExchangeTVLData>;
+}) satisfies z.ZodType<ExchangeRangeDataPoint>;
 
 export const CandlePriceDataSchema = z.object({
   date: z.string(),

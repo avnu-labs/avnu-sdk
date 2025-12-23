@@ -237,12 +237,12 @@ Get market prices for a list of tokens.
 
 **Volume feeds:**
 ```typescript
-getVolumeByExchange(tokenAddress: string, simpleProps: SimpleFeedProps, options?: AvnuOptions): Promise<ByExchangeVolumeData[]>
+getVolumeByExchange(tokenAddress: string, simpleProps: SimpleFeedProps, options?: AvnuOptions): Promise<ExchangeRangeDataPoint[]>
 ```
 Volume by exchange for a date range.
 
 ```typescript
-getExchangeVolumeFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<ExchangeLineVolumeData[]>
+getExchangeVolumeFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<ExchangeDataPoint[]>
 ```
 Exchange volume feed data with per-exchange breakdown.
 
@@ -253,12 +253,12 @@ Transfer volume feed data.
 
 **TVL feeds:**
 ```typescript
-getTVLByExchange(tokenAddress: string, simpleDateProps: SimpleDateProps, options?: AvnuOptions): Promise<ByExchangeTVLData[]>
+getTVLByExchange(tokenAddress: string, simpleDateProps: SimpleDateProps, options?: AvnuOptions): Promise<ExchangeDataPoint[]>
 ```
 TVL snapshot by exchange at a specific date.
 
 ```typescript
-getExchangeTVLFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<ByExchangeTVLData[]>
+getExchangeTVLFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<ExchangeDataPoint[]>
 ```
 Historical exchange TVL feed data.
 
@@ -272,9 +272,8 @@ Historical exchange TVL feed data.
 - `DataPoint`: date, value
 - `CandlePriceData`: date, open, high, low, close, volume
 - `SimpleDateProps`: date (optional string or Date for snapshot queries)
-- `ByExchangeVolumeData`: value, valueUsd, exchange, startDate, endDate
-- `ExchangeLineVolumeData`: date, value, valueUsd, exchange
-- `ByExchangeTVLData`: exchange, value, valueUsd, date
+- `ExchangeDataPoint`: extends DataPointWithUsd + exchange (date, value, valueUsd, exchange)
+- `ExchangeRangeDataPoint`: value, valueUsd, exchange, startDate, endDate
 - `DataPointWithUsd`: date, value, valueUsd
 
 ---
@@ -619,7 +618,7 @@ aPreparedTypedData(), aSignedPaymasterTransaction()
 
 // Impulse/Market data fixtures
 aDataPoint(), aCandlePriceData()
-aDataPointWithUsd(), aByExchangeVolumeData(), aExchangeLineVolumeData(), aByExchangeTVLData()
+aDataPointWithUsd(), anExchangeDataPoint(), anExchangeRangeDataPoint()
 aTokenMarketData(), aStarknetMarket(), aGlobalMarket()
 ```
 

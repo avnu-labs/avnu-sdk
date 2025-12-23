@@ -514,26 +514,16 @@ export interface DataPointWithUsd {
   valueUsd: number;
 }
 
-export interface ByExchangeVolumeData {
+export interface ExchangeDataPoint extends DataPointWithUsd {
+  exchange: string;
+}
+
+export interface ExchangeRangeDataPoint {
   value: number;
   valueUsd: number;
   exchange: string;
   startDate: string;
   endDate: string;
-}
-
-export interface ExchangeLineVolumeData {
-  date: string;
-  value: number;
-  valueUsd: number;
-  exchange: string;
-}
-
-export interface ByExchangeTVLData {
-  exchange: string;
-  value: number;
-  valueUsd: number;
-  date: string;
 }
 
 export interface CandlePriceData {
