@@ -7,9 +7,9 @@ import {
   ByExchangeTVLDataSchema,
   ByExchangeVolumeDataSchema,
   CandlePriceDataSchema,
+  DataPointSchema,
+  DataPointWithUsdSchema,
   ExchangeLineVolumeDataSchema,
-  SimplePriceDataSchema,
-  SimpleVolumeDataSchema,
   TokenMarketDataSchema,
   TokenPriceSchema,
 } from './schemas';
@@ -18,13 +18,13 @@ import {
   ByExchangeTVLData,
   ByExchangeVolumeData,
   CandlePriceData,
+  DataPoint,
+  DataPointWithUsd,
   ExchangeLineVolumeData,
   FeedProps,
   PriceFeedProps,
   SimpleDateProps,
   SimpleFeedProps,
-  SimplePriceData,
-  SimpleVolumeData,
   TokenMarketData,
   TokenPriceResponse,
 } from './types';
@@ -143,11 +143,10 @@ const getPriceFeed = (
   feedProps: PriceFeedProps,
   quoteTokenAddress?: string,
   options?: AvnuOptions,
-): Promise<SimplePriceData[] | CandlePriceData[]> => {
+): Promise<DataPoint[] | CandlePriceData[]> => {
   const type = feedProps.type === PriceFeedType.CANDLE ? 'candle' : 'line';
   const queryParams = getFeedQueryParams(feedProps, quoteTokenAddress);
-  const schema =
-    feedProps.type === PriceFeedType.CANDLE ? z.array(CandlePriceDataSchema) : z.array(SimplePriceDataSchema);
+  const schema = feedProps.type === PriceFeedType.CANDLE ? z.array(CandlePriceDataSchema) : z.array(DataPointSchema);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/${type}?${queryParams}`,
     getRequest(options),
@@ -249,12 +248,12 @@ const getTransferVolumeFeed = (
   tokenAddress: string,
   feedProps: FeedProps,
   options?: AvnuOptions,
-): Promise<SimpleVolumeData[]> => {
+): Promise<DataPointWithUsd[]> => {
   const queryParams = getFeedQueryParams(feedProps);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/volumes/line?${queryParams}`,
     getRequest(options),
-  ).then((response) => parseResponseWithSchema(response, z.array(SimpleVolumeDataSchema), options?.avnuPublicKey));
+  ).then((response) => parseResponseWithSchema(response, z.array(DataPointWithUsdSchema), options?.avnuPublicKey));
 };
 
 /**

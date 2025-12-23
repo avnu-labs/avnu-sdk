@@ -5,11 +5,11 @@ import {
   aByExchangeTVLData,
   aByExchangeVolumeData,
   aCandlePriceData,
+  aDataPoint,
+  aDataPointWithUsd,
   aExchangeLineVolumeData,
   aPrice,
   aPriceRequest,
-  aSimplePriceData,
-  aSimpleVolumeData,
   aTokenMarketData,
 } from './fixtures';
 import {
@@ -102,7 +102,7 @@ describe('Impulse services', () => {
   });
 
   describe('getPriceFeed', () => {
-    it('should return SimplePriceData[] for LINE type', async () => {
+    it('should return DataPoint[] for LINE type', async () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = {
@@ -110,7 +110,7 @@ describe('Impulse services', () => {
         dateRange: FeedDateRange.ONE_DAY,
         resolution: FeedResolution.HOURLY,
       };
-      const response = [aSimplePriceData()];
+      const response = [aDataPoint()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/line?`, response);
 
       // When
@@ -147,7 +147,7 @@ describe('Impulse services', () => {
         dateRange: FeedDateRange.ONE_DAY,
         resolution: FeedResolution.HOURLY,
       };
-      const response = [aSimplePriceData()];
+      const response = [aDataPoint()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/line?`, response);
 
       // When
@@ -338,11 +338,11 @@ describe('Impulse services', () => {
   });
 
   describe('getTransferVolumeFeed', () => {
-    it('should return SimpleVolumeData[]', async () => {
+    it('should return DataPointWithUsd[]', async () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.HOURLY };
-      const response = [aSimpleVolumeData()];
+      const response = [aDataPointWithUsd()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/volumes/line?`, response);
 
       // When
@@ -356,7 +356,7 @@ describe('Impulse services', () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = { dateRange: FeedDateRange.ONE_DAY, resolution: FeedResolution.WEEKLY };
-      const response = [aSimpleVolumeData()];
+      const response = [aDataPointWithUsd()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/volumes/line?`, response);
 
       // When

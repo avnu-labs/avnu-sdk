@@ -503,12 +503,12 @@ export interface GlobalMarket {
   usdMarketCapChangePercentage24h: number;
 }
 
-export interface SimplePriceData {
+export interface DataPoint {
   date: string;
   value: number;
 }
 
-export interface SimpleVolumeData {
+export interface DataPointWithUsd {
   date: string;
   value: number;
   valueUsd: number;
@@ -556,5 +556,5 @@ export interface TokenMarketData {
   starknet: StarknetMarket;
   global: GlobalMarket | null;
   tags: TokenTag[];
-  linePriceFeedInUsd: SimplePriceData[];
+  linePriceFeedInUsd: DataPoint[];
 }

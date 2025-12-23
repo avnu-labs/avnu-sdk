@@ -4,6 +4,8 @@ import {
   type ByExchangeTVLData,
   type ByExchangeVolumeData,
   type CandlePriceData,
+  type DataPoint,
+  type DataPointWithUsd,
   type DcaOrder,
   DcaTrade,
   type ExchangeLineVolumeData,
@@ -12,8 +14,6 @@ import {
   MarketPrice,
   type Quote,
   Route,
-  type SimplePriceData,
-  type SimpleVolumeData,
   Source,
   type StakingInfo,
   type StarknetMarket,
@@ -386,16 +386,16 @@ export const GlobalMarketSchema = z.object({
   usdMarketCapChangePercentage24h: z.number(),
 }) satisfies z.ZodType<GlobalMarket>;
 
-export const SimplePriceDataSchema = z.object({
+export const DataPointSchema = z.object({
   date: z.string(),
   value: z.number(),
-}) satisfies z.ZodType<SimplePriceData>;
+}) satisfies z.ZodType<DataPoint>;
 
-export const SimpleVolumeDataSchema = z.object({
+export const DataPointWithUsdSchema = z.object({
   date: z.string(),
   value: z.number(),
   valueUsd: z.number(),
-}) satisfies z.ZodType<SimpleVolumeData>;
+}) satisfies z.ZodType<DataPointWithUsd>;
 
 export const ByExchangeVolumeDataSchema = z.object({
   value: z.number(),
@@ -439,7 +439,7 @@ export const TokenMarketDataSchema = z.object({
   starknet: StarknetMarketSchema,
   global: GlobalMarketSchema.nullable(),
   tags: z.array(z.enum(['Unknown', 'Verified', 'Community', 'Unruggable', 'AVNU'])).default([]),
-  linePriceFeedInUsd: z.array(SimplePriceDataSchema).default([]),
+  linePriceFeedInUsd: z.array(DataPointSchema).default([]),
 }) satisfies z.ZodType<TokenMarketData>;
 
 export const MarketPriceSchema = z.object({

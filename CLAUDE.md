@@ -226,7 +226,7 @@ getPriceFeed(
   feedProps: PriceFeedProps,
   quoteTokenAddress?: string,
   options?: AvnuOptions
-): Promise<SimplePriceData[] | CandlePriceData[]>
+): Promise<DataPoint[] | CandlePriceData[]>
 ```
 Get price feed (LINE or CANDLE) for a token.
 
@@ -247,7 +247,7 @@ getExchangeVolumeFeed(tokenAddress: string, feedProps: FeedProps, options?: Avnu
 Exchange volume feed data with per-exchange breakdown.
 
 ```typescript
-getTransferVolumeFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<SimpleVolumeData[]>
+getTransferVolumeFeed(tokenAddress: string, feedProps: FeedProps, options?: AvnuOptions): Promise<DataPointWithUsd[]>
 ```
 Transfer volume feed data.
 
@@ -269,13 +269,13 @@ Historical exchange TVL feed data.
 - `PriceFeedProps`: type (LINE/CANDLE), dateRange, resolution
 - `FeedDateRange`: ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR
 - `FeedResolution`: 1, 5, 15, 1H, 4H, 1D, 1W, 1M, 1Y
-- `SimplePriceData`: date, value
+- `DataPoint`: date, value
 - `CandlePriceData`: date, open, high, low, close, volume
 - `SimpleDateProps`: date (optional string or Date for snapshot queries)
 - `ByExchangeVolumeData`: value, valueUsd, exchange, startDate, endDate
 - `ExchangeLineVolumeData`: date, value, valueUsd, exchange
 - `ByExchangeTVLData`: exchange, value, valueUsd, date
-- `SimpleVolumeData`: date, value, valueUsd
+- `DataPointWithUsd`: date, value, valueUsd
 
 ---
 
@@ -618,8 +618,8 @@ anApr(), anAction()
 aPreparedTypedData(), aSignedPaymasterTransaction()
 
 // Impulse/Market data fixtures
-aSimplePriceData(), aCandlePriceData()
-aSimpleVolumeData(), aByExchangeVolumeData(), aExchangeLineVolumeData(), aByExchangeTVLData()
+aDataPoint(), aCandlePriceData()
+aDataPointWithUsd(), aByExchangeVolumeData(), aExchangeLineVolumeData(), aByExchangeTVLData()
 aTokenMarketData(), aStarknetMarket(), aGlobalMarket()
 ```
 

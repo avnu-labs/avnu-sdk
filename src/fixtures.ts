@@ -11,6 +11,8 @@ import {
   ByExchangeVolumeData,
   CandlePriceData,
   CreateDcaOrder,
+  DataPoint,
+  DataPointWithUsd,
   DcaOrder,
   DelegationPool,
   ExchangeLineVolumeData,
@@ -20,8 +22,6 @@ import {
   Quote,
   QuoteRequest,
   SignedPaymasterTransaction,
-  SimplePriceData,
-  SimpleVolumeData,
   Source,
   StakingInfo,
   StarknetMarket,
@@ -455,7 +455,7 @@ export const aGlobalMarket = (): GlobalMarket => ({
   usdMarketCapChangePercentage24h: 0.5,
 });
 
-export const aSimplePriceData = (): SimplePriceData => ({
+export const aDataPoint = (): DataPoint => ({
   date: '2024-01-01T00:00:00Z',
   value: 1700,
 });
@@ -469,7 +469,7 @@ export const aCandlePriceData = (): CandlePriceData => ({
   volume: 1000000,
 });
 
-export const aSimpleVolumeData = (): SimpleVolumeData => ({
+export const aDataPointWithUsd = (): DataPointWithUsd => ({
   date: '2024-01-01T00:00:00Z',
   value: 1000000,
   valueUsd: 1000000,
@@ -508,5 +508,5 @@ export const aTokenMarketData = (): TokenMarketData => ({
   starknet: aStarknetMarket(),
   global: aGlobalMarket(),
   tags: ['Verified'],
-  linePriceFeedInUsd: [aSimplePriceData()],
+  linePriceFeedInUsd: [aDataPoint()],
 });

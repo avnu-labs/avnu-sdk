@@ -16,7 +16,7 @@ import {
   FeedDateRange,
   FeedResolution,
   PriceFeedType,
-  type SimplePriceData,
+  type DataPoint,
 } from '@avnu/avnu-sdk';
 import { getSourceUrl } from '@/lib/utils';
 
@@ -25,7 +25,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function MarketPage() {
-  const [priceData, setPriceData] = useState<SimplePriceData[]>([]);
+  const [priceData, setPriceData] = useState<DataPoint[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function MarketPage() {
       dateRange: FeedDateRange.ONE_WEEK,
       resolution: FeedResolution.HOURLY,
     })
-      .then((data) => setPriceData(data as SimplePriceData[]))
+      .then((data) => setPriceData(data as DataPoint[]))
       .finally(() => setLoading(false));
   }, []);
 
