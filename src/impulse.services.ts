@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { IMPULSE_API_VERSION, PRICES_API_VERSION } from './constants';
 import { FeedDateRange, PriceFeedType } from './enums';
 import {
-  CandlePriceDataSchema,
+  CandleDataPointSchema,
   DataPointSchema,
   DataPointWithUsdSchema,
   ExchangeDataPointSchema,
@@ -14,7 +14,7 @@ import {
 } from './schemas';
 import {
   AvnuOptions,
-  CandlePriceData,
+  CandleDataPoint,
   DataPoint,
   DataPointWithUsd,
   ExchangeDataPoint,
@@ -141,10 +141,10 @@ const getPriceFeed = (
   feedProps: PriceFeedProps,
   quoteTokenAddress?: string,
   options?: AvnuOptions,
-): Promise<DataPoint[] | CandlePriceData[]> => {
+): Promise<DataPoint[] | CandleDataPoint[]> => {
   const type = feedProps.type === PriceFeedType.CANDLE ? 'candle' : 'line';
   const queryParams = getFeedQueryParams(feedProps, quoteTokenAddress);
-  const schema = feedProps.type === PriceFeedType.CANDLE ? z.array(CandlePriceDataSchema) : z.array(DataPointSchema);
+  const schema = feedProps.type === PriceFeedType.CANDLE ? z.array(CandleDataPointSchema) : z.array(DataPointSchema);
   return fetch(
     `${getImpulseBaseUrl(options)}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/${type}?${queryParams}`,
     getRequest(options),

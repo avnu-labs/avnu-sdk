@@ -7,7 +7,7 @@ import {
   Action,
   Apr,
   AvnuCalls,
-  CandlePriceData,
+  CandleDataPoint,
   CreateDcaOrder,
   DataPoint,
   DataPointWithUsd,
@@ -459,7 +459,7 @@ export const aDataPoint = (): DataPoint => ({
   value: 1700,
 });
 
-export const aCandlePriceData = (): CandlePriceData => ({
+export const aCandleDataPoint = (): CandleDataPoint => ({
   date: '2024-01-01T00:00:00Z',
   open: 1690,
   high: 1720,

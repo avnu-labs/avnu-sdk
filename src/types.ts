@@ -526,12 +526,12 @@ export interface ExchangeRangeDataPoint {
   endDate: string;
 }
 
-export interface CandlePriceData {
+export interface CandleDataPoint {
   date: string;
-  close: number;
+  open: number;
   high: number;
   low: number;
-  open: number;
+  close: number;
   volume: number;
 }
 

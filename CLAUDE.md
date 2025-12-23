@@ -226,7 +226,7 @@ getPriceFeed(
   feedProps: PriceFeedProps,
   quoteTokenAddress?: string,
   options?: AvnuOptions
-): Promise<DataPoint[] | CandlePriceData[]>
+): Promise<DataPoint[] | CandleDataPoint[]>
 ```
 Get price feed (LINE or CANDLE) for a token.
 
@@ -270,7 +270,7 @@ Historical exchange TVL feed data.
 - `FeedDateRange`: ONE_HOUR, ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR
 - `FeedResolution`: 1, 5, 15, 1H, 4H, 1D, 1W, 1M, 1Y
 - `DataPoint`: date, value
-- `CandlePriceData`: date, open, high, low, close, volume
+- `CandleDataPoint`: date, open, high, low, close, volume
 - `SimpleDateProps`: date (optional string or Date for snapshot queries)
 - `ExchangeDataPoint`: extends DataPointWithUsd + exchange (date, value, valueUsd, exchange)
 - `ExchangeRangeDataPoint`: value, valueUsd, exchange, startDate, endDate
@@ -617,7 +617,7 @@ anApr(), anAction()
 aPreparedTypedData(), aSignedPaymasterTransaction()
 
 // Impulse/Market data fixtures
-aDataPoint(), aCandlePriceData()
+aDataPoint(), aCandleDataPoint()
 aDataPointWithUsd(), anExchangeDataPoint(), anExchangeRangeDataPoint()
 aTokenMarketData(), aStarknetMarket(), aGlobalMarket()
 ```

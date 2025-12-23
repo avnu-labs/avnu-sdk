@@ -2,7 +2,7 @@ import fetchMock from 'fetch-mock';
 import { IMPULSE_API_VERSION, IMPULSE_BASE_URL, PRICES_API_VERSION } from './constants';
 import { FeedDateRange, FeedResolution, PriceFeedType } from './enums';
 import {
-  aCandlePriceData,
+  aCandleDataPoint,
   aDataPoint,
   aDataPointWithUsd,
   anExchangeDataPoint,
@@ -119,7 +119,7 @@ describe('Impulse services', () => {
       expect(result).toStrictEqual(response);
     });
 
-    it('should return CandlePriceData[] for CANDLE type', async () => {
+    it('should return CandleDataPoint[] for CANDLE type', async () => {
       // Given
       const tokenAddress = '0x0token';
       const feedProps = {
@@ -127,7 +127,7 @@ describe('Impulse services', () => {
         dateRange: FeedDateRange.ONE_DAY,
         resolution: FeedResolution.HOURLY,
       };
-      const response = [aCandlePriceData()];
+      const response = [aCandleDataPoint()];
       fetchMock.get(`begin:${IMPULSE_BASE_URL}/${IMPULSE_API_VERSION}/tokens/${tokenAddress}/prices/candle?`, response);
 
       // When
