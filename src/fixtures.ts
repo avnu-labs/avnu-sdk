@@ -7,21 +7,23 @@ import {
   Action,
   Apr,
   AvnuCalls,
-  ByExchangeTVLData,
-  ByExchangeVolumeData,
-  CandlePriceData,
+  CandleDataPoint,
   CreateDcaOrder,
+  DataPoint,
+  DataPointWithUsd,
   DcaOrder,
   DelegationPool,
+  ExchangeDataPoint,
+  ExchangeRangeDataPoint,
+  GlobalMarket,
   InvokeTransactionResponse,
   Page,
   Quote,
   QuoteRequest,
   SignedPaymasterTransaction,
-  SimplePriceData,
-  SimpleVolumeData,
   Source,
   StakingInfo,
+  StarknetMarket,
   Token,
   TokenMarketData,
   TokenPrice,
@@ -431,13 +433,33 @@ export const aSignedPaymasterTransaction = (): SignedPaymasterTransaction => ({
 
 /* IMPULSE / MARKET DATA PART */
 
-export const aSimplePriceData = (): SimplePriceData => ({
-  date: '2024-01-01T00:00:00Z',
-  value: 1700,
-  valueUsd: 1700,
+export const aStarknetMarket = (): StarknetMarket => ({
+  usd: 1700,
+  usdTvl: 50000000,
+  usdPriceChange1h: 0.5,
+  usdPriceChangePercentage1h: 0.03,
+  usdPriceChange24h: 10,
+  usdPriceChangePercentage24h: 0.6,
+  usdPriceChange7d: 50,
+  usdPriceChangePercentage7d: 3,
+  usdVolume24h: 1000000,
+  usdTradingVolume24h: 900000,
 });
 
-export const aCandlePriceData = (): CandlePriceData => ({
+export const aGlobalMarket = (): GlobalMarket => ({
+  usd: 1700,
+  usdMarketCap: 200000000000,
+  usdFdv: 200000000000,
+  usdMarketCapChange24h: 1000000,
+  usdMarketCapChangePercentage24h: 0.5,
+});
+
+export const aDataPoint = (): DataPoint => ({
+  date: '2024-01-01T00:00:00Z',
+  value: 1700,
+});
+
+export const aCandleDataPoint = (): CandleDataPoint => ({
   date: '2024-01-01T00:00:00Z',
   open: 1690,
   high: 1720,
@@ -446,50 +468,37 @@ export const aCandlePriceData = (): CandlePriceData => ({
   volume: 1000000,
 });
 
-export const aSimpleVolumeData = (): SimpleVolumeData => ({
-  date: '2024-01-01',
+export const aDataPointWithUsd = (): DataPointWithUsd => ({
+  date: '2024-01-01T00:00:00Z',
   value: 1000000,
+  valueUsd: 1000000,
 });
 
-export const aByExchangeVolumeData = (): ByExchangeVolumeData => ({
-  date: '2024-01-01',
+export const anExchangeRangeDataPoint = (): ExchangeRangeDataPoint => ({
   value: 500000,
+  valueUsd: 500000,
   exchange: 'JediSwap',
+  startDate: '2024-01-01',
+  endDate: '2024-01-02',
 });
 
-export const aByExchangeTVLData = (): ByExchangeTVLData => ({
-  date: '2024-01-01',
-  value: 10000000,
-  valueUsd: 10000000,
+export const anExchangeDataPoint = (): ExchangeDataPoint => ({
+  date: '2024-01-01T00:00:00Z',
+  value: 500000,
+  valueUsd: 500000,
   exchange: 'JediSwap',
 });
 
 export const aTokenMarketData = (): TokenMarketData => ({
-  position: 1,
-  address: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
   name: 'Ethereum',
   symbol: 'ETH',
+  address: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
   decimals: 18,
   logoUri: 'https://example.com/eth.png',
-  verified: true,
-  linePriceFeedInUsd: [aSimplePriceData()],
   coingeckoId: 'ethereum',
-  website: 'https://ethereum.org',
-  market: {
-    currentPrice: 1700,
-    marketCap: 200000000000,
-    fullyDilutedValuation: 200000000000,
-    starknetTvl: 50000000,
-    priceChange1h: 0.5,
-    priceChangePercentage1h: 0.03,
-    priceChange24h: 10,
-    priceChangePercentage24h: 0.6,
-    priceChange7d: 50,
-    priceChangePercentage7d: 3,
-    marketCapChange24h: 1000000,
-    marketCapChangePercentage24h: 0.5,
-    starknetVolume24h: 1000000,
-    starknetTradingVolume24h: 900000,
-    totalSupply: 120000000,
-  },
+  verified: true,
+  starknet: aStarknetMarket(),
+  global: aGlobalMarket(),
+  tags: ['Verified'],
+  linePriceFeedInUsd: [aDataPoint()],
 });

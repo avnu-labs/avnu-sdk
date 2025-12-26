@@ -1,19 +1,21 @@
 import { z } from 'zod';
 import { DcaOrderStatus, DcaTradeStatus, SourceType } from './enums';
 import {
-  type ByExchangeTVLData,
-  type ByExchangeVolumeData,
-  type CandlePriceData,
+  type CandleDataPoint,
+  type DataPoint,
+  type DataPointWithUsd,
   type DcaOrder,
   DcaTrade,
+  type ExchangeDataPoint,
+  type ExchangeRangeDataPoint,
   Fee,
+  type GlobalMarket,
   MarketPrice,
   type Quote,
   Route,
-  type SimplePriceData,
-  type SimpleVolumeData,
   Source,
   type StakingInfo,
+  type StarknetMarket,
   type Token,
   type TokenMarketData,
   TokenPrice,
@@ -362,67 +364,74 @@ export const StakingInfoSchema = z.object({
  * Market Schemas
  */
 
-export const SimplePriceDataSchema = z.object({
-  date: z.string(),
-  value: z.number(),
-  valueUsd: z.number().optional(),
-}) satisfies z.ZodType<SimplePriceData>;
+export const StarknetMarketSchema = z.object({
+  usd: z.number(),
+  usdTvl: z.number(),
+  usdPriceChange1h: z.number(),
+  usdPriceChangePercentage1h: z.number().nullable(),
+  usdPriceChange24h: z.number(),
+  usdPriceChangePercentage24h: z.number().nullable(),
+  usdPriceChange7d: z.number(),
+  usdPriceChangePercentage7d: z.number().nullable(),
+  usdVolume24h: z.number(),
+  usdTradingVolume24h: z.number(),
+}) satisfies z.ZodType<StarknetMarket>;
 
-export const SimpleVolumeDataSchema = z.object({
-  date: z.string(),
-  value: z.number(),
-}) satisfies z.ZodType<SimpleVolumeData>;
+export const GlobalMarketSchema = z.object({
+  usd: z.number(),
+  usdMarketCap: z.number(),
+  usdFdv: z.number(),
+  usdMarketCapChange24h: z.number(),
+  usdMarketCapChangePercentage24h: z.number(),
+}) satisfies z.ZodType<GlobalMarket>;
 
-export const ByExchangeVolumeDataSchema = z.object({
+export const DataPointSchema = z.object({
   date: z.string(),
   value: z.number(),
+}) satisfies z.ZodType<DataPoint>;
+
+export const DataPointWithUsdSchema = z.object({
+  date: z.string(),
+  value: z.number(),
+  valueUsd: z.number(),
+}) satisfies z.ZodType<DataPointWithUsd>;
+
+export const ExchangeDataPointSchema = z.object({
+  date: z.string(),
+  value: z.number(),
+  valueUsd: z.number(),
   exchange: z.string(),
-}) satisfies z.ZodType<ByExchangeVolumeData>;
+}) satisfies z.ZodType<ExchangeDataPoint>;
 
-export const ByExchangeTVLDataSchema = z.object({
-  date: z.string(),
+export const ExchangeRangeDataPointSchema = z.object({
   value: z.number(),
-  valueUsd: z.number().optional(),
+  valueUsd: z.number(),
   exchange: z.string(),
-}) satisfies z.ZodType<ByExchangeTVLData>;
+  startDate: z.string(),
+  endDate: z.string(),
+}) satisfies z.ZodType<ExchangeRangeDataPoint>;
 
-export const CandlePriceDataSchema = z.object({
+export const CandleDataPointSchema = z.object({
   date: z.string(),
   close: z.number(),
   high: z.number(),
   low: z.number(),
   open: z.number(),
   volume: z.number(),
-}) satisfies z.ZodType<CandlePriceData>;
+}) satisfies z.ZodType<CandleDataPoint>;
 
 export const TokenMarketDataSchema = z.object({
-  position: z.number(),
-  address: z.string(),
   name: z.string(),
   symbol: z.string(),
+  address: z.string(),
   decimals: z.number(),
-  logoUri: z.string().nullable(),
+  logoUri: z.string().nullable().optional(),
+  coingeckoId: z.string().nullable().optional(),
   verified: z.boolean(),
-  linePriceFeedInUsd: z.array(SimplePriceDataSchema),
-  coingeckoId: z.string().optional(),
-  website: z.string().optional(),
-  market: z.object({
-    currentPrice: z.number(),
-    marketCap: z.number(),
-    fullyDilutedValuation: z.number().optional().nullable(),
-    starknetTvl: z.number(),
-    priceChange1h: z.number(),
-    priceChangePercentage1h: z.number().optional().nullable(),
-    priceChange24h: z.number(),
-    priceChangePercentage24h: z.number().optional().nullable(),
-    priceChange7d: z.number(),
-    priceChangePercentage7d: z.number().optional().nullable(),
-    marketCapChange24h: z.number().optional().nullable(),
-    marketCapChangePercentage24h: z.number().optional().nullable(),
-    starknetVolume24h: z.number(),
-    starknetTradingVolume24h: z.number(),
-    totalSupply: z.number().optional().nullable(),
-  }),
+  starknet: StarknetMarketSchema,
+  global: GlobalMarketSchema.nullable(),
+  tags: z.array(z.enum(['Unknown', 'Verified', 'Community', 'Unruggable', 'AVNU'])).default([]),
+  linePriceFeedInUsd: z.array(DataPointSchema).default([]),
 }) satisfies z.ZodType<TokenMarketData>;
 
 export const MarketPriceSchema = z.object({
