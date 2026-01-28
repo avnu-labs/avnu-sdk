@@ -191,8 +191,8 @@ export const QuoteSchema = z.object({
   gasFees: hexToBigInt,
   gasFeesInUsd: z.number().optional(),
   priceImpact: z.number(),
-  sellTokenPriceInUsd: z.number().optional(),
-  buyTokenPriceInUsd: z.number().optional(),
+  sellTokenPriceInUsd: z.number().nullish(),
+  buyTokenPriceInUsd: z.number().nullish(),
   exactTokenTo: z.boolean().optional(),
   estimatedSlippage: z.number().optional(),
 }) satisfies z.ZodType<Quote>;

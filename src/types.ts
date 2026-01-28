@@ -182,8 +182,8 @@ export interface Quote {
   gasFees: bigint; // In FRI
   gasFeesInUsd?: number;
   priceImpact: number;
-  sellTokenPriceInUsd?: number;
-  buyTokenPriceInUsd?: number;
+  sellTokenPriceInUsd?: number | null;
+  buyTokenPriceInUsd?: number | null;
   exactTokenTo?: boolean;
   estimatedSlippage?: number;
 }
