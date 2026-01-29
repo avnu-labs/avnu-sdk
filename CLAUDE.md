@@ -11,7 +11,7 @@ This file provides detailed guidance to Claude Code (claude.ai/code) when workin
 - **Staking**: AVNU stake delegation and management
 - **Market Data (Impulse)**: Prices, volumes, TVL, market data feeds
 - **Token Information**: Token metadata and information
-- **Paymaster**: Gasless and gasfree transaction support
+- **Paymaster**: Sponsored transaction support via starknet.js PaymasterInterface
 
 ## Development Commands
 
@@ -91,7 +91,7 @@ Build Starknet calls from a quote, including approval and slippage handling.
 ```typescript
 executeSwap(params: InvokeSwapParams, options?: AvnuOptions): Promise<InvokeTransactionResponse>
 ```
-Execute a swap with optional paymaster support (gasless/gasfree).
+Execute a swap with optional paymaster support for sponsored transactions.
 
 **Slippage helpers:**
 ```typescript
@@ -167,13 +167,13 @@ fetchVerifiedTokenBySymbol(symbol: string, options?: AvnuOptions): Promise<Token
 Get a verified or "unruggable" token by its symbol.
 
 **Key types:**
-- `Token`: address, chainId, decimals, name, symbol, tags, logoUri, usdPrice
-- `GetTokensRequest`: limit?, offset?, search?, tags?
-- `Page<T>`: content, totalElements, totalPages, size, page, hasNext
+- `Token`: address, name, symbol, decimals, logoUri, lastDailyVolumeUsd, extensions, tags
+- `GetTokensRequest`: page?, size?, sort?, search?, tags?
+- `Page<T>`: content, totalPages, totalElements, size, number
 
 ---
 
-#### 4. **paymaster.services.ts** - Gasless/Gasfree Transactions
+#### 4. **paymaster.services.ts** - Sponsored Transactions
 
 Complete workflow for paymaster transactions:
 
@@ -198,9 +198,9 @@ executeAllPaymasterFlow(params: ExecuteAllPaymasterFlowParams, options?: AvnuOpt
 Helper that chains build -> sign -> execute in a single function.
 
 **Key types:**
-- `PreparedInvokeTransaction`: contractAddress, entrypoint, calldata, typedDataMessage
-- `SignedPaymasterTransaction`: signature, typedDataMessage
-- `PaymasterOptions`: gasless (with gasTokenAddress + maxGasTokenAmount) | gasfree
+- `PaymasterParams`: provider (PaymasterInterface from starknet.js), params (ExecutionParameters)
+- `InvokePaymasterParams`: extends PaymasterParams with active (boolean) to enable/disable
+- `SignedPaymasterTransaction`: typedData, signature
 
 ---
 
@@ -408,11 +408,11 @@ export enum DcaOrderStatus {
 The `types.ts` file contains all TypeScript definitions:
 
 **Main categories:**
-- **API Requests/Responses**: `Quote`, `Price`, `Token`, `OrderReceipt`, `Page<T>`
-- **Execution types**: `InvokeSwapParams`, `InvokeCreateDcaParams`, `ExecuteSwapOptions`, `PaymasterOptions`
-- **Market Data**: `TokenMarketData`, `PriceData`, `VolumeData`, `FeedProps`
+- **API Requests/Responses**: `Quote`, `Token`, `Page<T>`, `TokenPrice`
+- **Execution types**: `InvokeSwapParams`, `InvokeCreateDcaParams`, `InvokeParams`, `InvokePaymasterParams`
+- **Market Data**: `TokenMarketData`, `StarknetMarket`, `GlobalMarket`, `FeedProps`
 - **Staking**: `StakingInfo`, `UserStakingInfo`, `Action`, `Apr`
-- **Options**: `AvnuOptions` (baseUrl, sepoliaNetwork, signal, avnuPublicKey)
+- **Options**: `AvnuOptions` (baseUrl, impulseBaseUrl, abortSignal, avnuPublicKey)
 
 **Important convention:** All amount fields (sellAmount, buyAmount, fees, etc.) are exposed as **BigInt** in the SDK, even though they are transmitted as **hex strings** by the API.
 
@@ -448,12 +448,12 @@ parseResponseWithSchema<T>(response, schema, avnuPublicKey?)
 ```typescript
 getBaseUrl(options?: AvnuOptions): string
 ```
-Returns `BASE_URL` (mainnet) or `SEPOLIA_BASE_URL` based on `options.sepoliaNetwork`.
+Returns `options.baseUrl` if provided, otherwise defaults to `BASE_URL` (mainnet).
 
 ```typescript
 getImpulseBaseUrl(options?: AvnuOptions): string
 ```
-Returns `IMPULSE_BASE_URL` or `SEPOLIA_IMPULSE_BASE_URL` for market data service.
+Returns `options.impulseBaseUrl` if provided, otherwise defaults to `IMPULSE_BASE_URL`.
 
 **Response parsing:**
 ```typescript
@@ -519,17 +519,16 @@ Endpoints returning lists use the `Page<T>` type:
 ```typescript
 {
   content: T[],
-  totalElements: number,
   totalPages: number,
+  totalElements: number,
   size: number,
-  page: number,
-  hasNext: boolean
+  number: number  // current page number (0-indexed)
 }
 ```
 
 ### 4. Abort Signals
 
-All requests support `AbortSignal` via `AvnuOptions.signal` to cancel in-flight requests.
+All requests support `AbortSignal` via `AvnuOptions.abortSignal` to cancel in-flight requests.
 
 ### 5. Signature Verification
 
@@ -663,8 +662,8 @@ The `examples/` directory contains integrations:
 
 7. **Build/Execute pattern**: DCA and Staking have separate functions for building and executing
 
-8. **Integrated paymaster**: All `execute*` functions natively support gasless/gasfree
+8. **Integrated paymaster**: All `execute*` functions accept `InvokePaymasterParams` (provider, params, active) for sponsored transactions
 
-9. **Pagination**: Use `Page<T>` type for lists, not simple arrays
+9. **Pagination**: Use `Page<T>` type for lists (content, totalPages, totalElements, size, number)
 
 10. **Action tracking**: Staking tracks user action history (Swap, DCA, Stake, etc.)
