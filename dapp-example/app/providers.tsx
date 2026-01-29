@@ -7,7 +7,7 @@ import { StarknetConfig, jsonRpcProvider, argent, braavos } from '@starknet-reac
 const connectors = [argent(), braavos()];
 
 function rpc() {
-  return { nodeUrl: 'https://starknet-mainnet.public.blastapi.io' };
+  return { nodeUrl: 'https://rpc.starknet.lava.build' };
 }
 
 export function Providers({ children }: { children: ReactNode }) {
