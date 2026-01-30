@@ -84,7 +84,7 @@ getQuotes(request: QuoteRequest, options?: AvnuOptions): Promise<Quote[]>
 Get best optimized quotes from on-chain and off-chain liquidity, sorted by best first.
 
 ```typescript
-quoteToCalls(params: QuoteToCallsParams, options?: AvnuOptions): Promise<SwapCalls>
+quoteToCalls(params: QuoteToCallsParams, options?: AvnuOptions): Promise<AvnuCalls>
 ```
 Build Starknet calls from a quote, including approval and slippage handling.
 
@@ -104,7 +104,7 @@ Calculate min/max amounts with slippage (slippage as decimal: 0.01 = 1%).
 - `QuoteRequest`: sellTokenAddress, buyTokenAddress, sellAmount, takerAddress, size
 - `Quote`: routes, sellAmount, buyAmount, sellAmountInUsd, buyAmountInUsd, priceImpact, gasFeesInUsd
 - `Route`: percent, sellAmount, buyAmount, routes (sub-routes)
-- `SwapCalls`: calls, approvalCalls, contractAddress, calldata
+- `AvnuCalls`: chainId, calls
 
 ---
 
@@ -602,7 +602,7 @@ buildImpulseUrl(path: string): string   // IMPULSE_BASE_URL/v3{path}
 ```typescript
 // Swap fixtures
 aQuote(), aQuoteRequest(), aPrice(), aPriceRequest()
-aSwapCalls(), anInvokeTransactionResponse(), aCall()
+aAvnuCalls(), anInvokeTransactionResponse(), aCall()
 ethToken(), btcToken(), aPage<T>(), aSource()
 
 // DCA fixtures
