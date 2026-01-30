@@ -61,7 +61,7 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
  * @param params.slippage The maximum acceptable slippage of the buyAmount amount (required)
  * @param params.executeApprove If true, the response will contain the approve call. True by default
  * @param options Optional SDK configuration
- * @returns The SwapCalls containing the calls to execute the trade and the chainId
+ * @returns The AvnuCalls containing the calls to execute the trade and the chainId
  */
 const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promise<AvnuCalls> => {
   const { quoteId, takerAddress, slippage, executeApprove } = params;
