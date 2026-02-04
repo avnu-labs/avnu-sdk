@@ -15,10 +15,11 @@ export const getRequest = (options?: AvnuOptions): RequestInit => ({
 });
 export const postRequest = (body: unknown, options?: AvnuOptions): RequestInit => ({
   method: 'POST',
+  signal: options?.abortSignal,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    ...(options?.avnuPublicKey && { 'ask-signature': 'true' }),
+    ...(options?.avnuPublicKey !== undefined && { 'ask-signature': 'true' }),
   },
   ...(body !== undefined && { body: JSON.stringify(body) }),
 });
@@ -33,16 +34,17 @@ export const postRequest = (body: unknown, options?: AvnuOptions): RequestInit =
 export const parseResponse = <T>(response: Response, avnuPublicKey?: string): Promise<T> => {
   if (response.status === 400) {
     return response.json().then((error: RequestError) => {
-      throw new Error(error.messages[0]);
+      const message = error?.messages?.[0] ?? 'Bad request';
+      throw new Error(message);
     });
   }
   if (response.status === 500) {
     return response.json().then((error: RequestError) => {
-      if (error.messages.length >= 0 && error.messages[0].includes('Contract error')) {
-        throw new ContractError(error.messages[0], error.revertError || '');
-      } else {
-        throw new Error(error.messages[0]);
+      const message = error?.messages?.[0] ?? 'Internal server error';
+      if (message.includes('Contract error')) {
+        throw new ContractError(message, error?.revertError || '');
       }
+      throw new Error(message);
     });
   }
   if (response.status > 400) {
