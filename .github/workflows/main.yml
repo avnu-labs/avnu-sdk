@@ -12,6 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Validate prerelease version on develop
+        if: github.ref_name == 'develop' || github.base_ref == 'develop'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ "$VERSION" != *-next* ]]; then
+            echo "::error::Version '$VERSION' on develop must contain '-next' (e.g. 4.1.0-next.0)."
+            exit 1
+          fi
       - uses: actions/setup-node@v3
         with:
           node-version: 22
