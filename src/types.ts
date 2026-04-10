@@ -193,6 +193,7 @@ export interface QuoteToCallsParams {
   slippage: number;
   takerAddress?: string;
   executeApprove?: boolean;
+  noteId?: string;
 }
 
 export interface Source {
