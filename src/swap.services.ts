@@ -64,11 +64,11 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
  * @returns The AvnuCalls containing the calls to execute the trade and the chainId
  */
 const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promise<AvnuCalls> => {
-  const { quoteId, takerAddress, slippage, executeApprove, noteId } = params;
+  const { quoteId, takerAddress, slippage, executeApprove, private: isPrivate } = params;
   return fetch(
     `${getBaseUrl(options)}/swap/${SWAP_API_VERSION}/build`,
     postRequest(
-      { quoteId, takerAddress, slippage, includeApprove: executeApprove, ...(noteId && { noteId }) },
+      { quoteId, takerAddress, slippage, includeApprove: executeApprove, ...(isPrivate && { private: true }) },
       options,
     ),
   ).then((response) => parseResponse<AvnuCalls>(response, options?.avnuPublicKey));
