@@ -130,6 +130,7 @@ export interface InvokeSwapParams extends InvokeParams {
 export interface AvnuCalls {
   chainId: string;
   calls: Call[];
+  executorAddress?: string;
 }
 
 export interface QuoteRequest {
@@ -193,6 +194,7 @@ export interface QuoteToCallsParams {
   slippage: number;
   takerAddress?: string;
   executeApprove?: boolean;
+  private?: boolean;
 }
 
 export interface Source {

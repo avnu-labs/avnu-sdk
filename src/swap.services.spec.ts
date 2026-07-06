@@ -126,7 +126,7 @@ describe('Swap services', () => {
   });
 
   describe('quoteToCalls', () => {
-    it('should return a SwapCalls', async () => {
+    it('should return AvnuCalls', async () => {
       // Given
       const response = aAvnuCalls();
       fetchMock.post(`${BASE_URL}/swap/${SWAP_API_VERSION}/build`, response);
