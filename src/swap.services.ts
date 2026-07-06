@@ -92,7 +92,7 @@ const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promis
 const executeSwap = async (params: InvokeSwapParams, options?: AvnuOptions): Promise<InvokeTransactionResponse> => {
   const { provider, paymaster, quote, executeApprove = true, slippage } = params;
 
-  const chainId = await provider.getChainId();
+  const chainId = await provider.provider.getChainId();
   if (chainId !== quote.chainId) {
     throw Error(`Invalid chainId`);
   }
