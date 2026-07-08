@@ -36,7 +36,7 @@
 
 ## Features
 
-- **Swap**: Token exchange execution with optimized routing
+- **Swap**: Token exchange execution with optimized routing, including private swaps
 - **DCA (Dollar Cost Averaging)**: Automated recurring orders
 - **Staking**: AVNU token staking and rewards management
 - **Market Data**: Real-time prices, volumes, TVL and market feeds
