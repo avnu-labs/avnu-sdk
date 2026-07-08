@@ -137,9 +137,9 @@ export interface AvnuCalls {
 /* Privacy (private swap) Part */
 
 /**
- * Priority tip for the AVNU privacy paymaster.
+ * Priority tip for the AVNU privacy paymaster. Defaults to 'normal' server-side.
  */
-export type PrivacyTip = 'low' | 'normal' | 'high';
+export type PrivacyTip = 'slow' | 'normal' | 'fast';
 
 /**
  * Fee mode for a private swap. The paymaster sponsors the gas and reimburses

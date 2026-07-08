@@ -379,7 +379,7 @@ End-to-end orchestrator that keeps all cryptography outside the SDK. Four steps:
 Both proving backends (wallet or privacy SDK) converge to the same `PrivateSwapCallAndProof` artifact.
 
 **Key types:**
-- `PrivacyTip`: priority tip for the paymaster ('low' / 'normal' / 'high')
+- `PrivacyTip`: priority tip for the paymaster ('slow' / 'normal' / 'fast', default 'normal')
 - `PrivateFeeMode`: poolFeeToken, tip? (maps to the `sponsored_private` paymaster fee mode)
 - `PaymasterCall`: to, selector, calldata (call shape for the paymaster JSON-RPC endpoints)
 - `PrivateSwapFee`: token, recipient, amount (pool fee returned by the `apply_action` build step)
