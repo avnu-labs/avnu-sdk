@@ -1,5 +1,7 @@
 import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import { AccountInterface, ExecutionParameters, PaymasterInterface } from 'starknet';
+import { aPrivateSwapCallAndProof } from './fixtures';
+import { PrivateSwapProver } from './types';
 
 // Mock ExecutionParameters (using type assertion since we only need it for mocking)
 export const mockExecutionParams = {
@@ -28,3 +30,9 @@ export const createMockPaymaster = (): jest.Mocked<PaymasterInterface> =>
     }),
     executeTransaction: jest.fn().mockResolvedValue({ transaction_hash: '0xdef' }),
   }) as unknown as jest.Mocked<PaymasterInterface>;
+
+// Mock PrivateSwapProver factory
+export const createMockPrivateSwapProver = (): jest.Mocked<PrivateSwapProver> =>
+  ({
+    buildAndProve: jest.fn().mockResolvedValue(aPrivateSwapCallAndProof()),
+  }) as unknown as jest.Mocked<PrivateSwapProver>;

@@ -12,6 +12,7 @@ This file provides detailed guidance to coding agents (Claude Code, and others v
 - **Market Data (Impulse)**: Prices, volumes, TVL, market data feeds
 - **Token Information**: Token metadata and information
 - **Paymaster**: Sponsored transaction support via starknet.js PaymasterInterface
+- **Private Swaps (Privacy)**: Shielded swaps routed through AVNU's private executor and privacy paymaster
 
 ## Development Commands
 
@@ -60,6 +61,7 @@ src/
 ├── paymaster.services.ts # Paymaster service
 ├── impulse.services.ts   # Market data service
 ├── staking.services.ts   # Staking service
+├── privacy.services.ts   # Private swap service
 ├── fixtures.ts           # Test fixtures
 ├── test-utils.ts         # Shared test utilities (mocks, URL builders)
 └── *.spec.ts             # Unit tests
@@ -67,7 +69,7 @@ src/
 
 ### Services
 
-The SDK is organized into **6 service modules** that map to AVNU API endpoints:
+The SDK is organized into **7 service modules** that map to AVNU API endpoints:
 
 ---
 
@@ -351,6 +353,46 @@ Execute rewards claiming.
 
 ---
 
+#### 7. **privacy.services.ts** - Private Swaps
+
+Shielded swaps routed through AVNU's private executor and the AVNU privacy paymaster (uses `getPaymasterBaseUrl()` and the paymaster JSON-RPC endpoints). The paymaster settles the swap directly from a zero-knowledge proof; **the SDK never handles private keys, notes, or proof generation** — the caller injects a `PrivateSwapProver` that produces the `{ call, proof }` artifact.
+
+```typescript
+buildPrivateSwapFee(params: BuildPrivateSwapFeeParams, options?: AvnuOptions): Promise<PrivateSwapFee>
+```
+Fetch the pool fee from the AVNU privacy paymaster via the `apply_action` build step (`sponsored_private` fee mode). The returned fee must be withdrawn to `recipient` inside the private transaction so the paymaster is reimbursed for the sponsored gas.
+
+```typescript
+submitPrivateSwap(params: SubmitPrivateSwapParams, options?: AvnuOptions): Promise<InvokeTransactionResponse>
+```
+Submit a proven private swap through the paymaster `apply_action` execute step. No user signature is required: the transaction settles on-chain straight from the proof.
+
+```typescript
+executePrivateSwap(params: ExecutePrivateSwapParams, options?: AvnuOptions): Promise<InvokeTransactionResponse>
+```
+End-to-end orchestrator that keeps all cryptography outside the SDK. Four steps:
+1. Fetch the pool fee from the paymaster (`buildPrivateSwapFee`, `apply_action` build).
+2. Build the private swap calls via `quoteToCalls({ private: true })` → `executorAddress` + `calls`.
+3. Delegate proof generation to the injected `prover` (a STRK20-capable wallet via `wallet_strk20PrepareInvoke`, or the Starknet privacy SDK) → `PrivateSwapCallAndProof`.
+4. Submit the proven transaction through the paymaster (`submitPrivateSwap`, `apply_action` execute).
+
+Both proving backends (wallet or privacy SDK) converge to the same `PrivateSwapCallAndProof` artifact.
+
+**Key types:**
+- `PrivacyTip`: priority tip for the paymaster ('low' / 'normal' / 'high')
+- `PrivateFeeMode`: poolFeeToken, tip? (maps to the `sponsored_private` paymaster fee mode)
+- `PaymasterCall`: to, selector, calldata (call shape for the paymaster JSON-RPC endpoints)
+- `PrivateSwapFee`: token, recipient, amount (pool fee returned by the `apply_action` build step)
+- `PrivacyProof`: data, proofFacts (forwarded verbatim to the paymaster)
+- `PrivateSwapCallAndProof`: call, proof (artifact both proving backends converge to)
+- `PrivateSwapPlan`: sellTokenAddress, sellAmount, buyTokenAddress, executorAddress, executorCalls, fee, takerAddress (backend-neutral description passed to the prover)
+- `PrivateSwapProver`: buildAndProve(plan) → PrivateSwapCallAndProof (injected; wallet or privacy SDK)
+- `BuildPrivateSwapFeeParams`: poolAddress, feeMode, paymasterApiKey?
+- `SubmitPrivateSwapParams`: callAndProof, feeMode, paymasterApiKey?
+- `ExecutePrivateSwapParams`: quote, slippage, takerAddress, poolAddress, feeMode, prover, paymasterApiKey?
+
+---
+
 ### Enumerations (enums.ts)
 
 ```typescript
@@ -482,6 +524,8 @@ export const BASE_URL = 'https://starknet.api.avnu.fi'
 export const SEPOLIA_BASE_URL = 'https://sepolia.api.avnu.fi'
 export const IMPULSE_BASE_URL = 'https://starknet.impulse.avnu.fi'
 export const SEPOLIA_IMPULSE_BASE_URL = 'https://sepolia.impulse.avnu.fi'
+export const PAYMASTER_BASE_URL = 'https://starknet.paymaster.avnu.fi'
+export const SEPOLIA_PAYMASTER_BASE_URL = 'https://sepolia.paymaster.avnu.fi'
 ```
 
 **API Version Constants:**
@@ -653,9 +697,9 @@ The `examples/` directory contains integrations:
 
 2. **BigInt everywhere**: All amounts are BigInt, not number or string in the public API
 
-3. **2 base URLs**: `getBaseUrl()` for swap/dca/token/paymaster/staking, `getImpulseBaseUrl()` for impulse
+3. **3 base URLs**: `getBaseUrl()` for swap/dca/token/paymaster/staking, `getImpulseBaseUrl()` for impulse, `getPaymasterBaseUrl()` for the privacy paymaster
 
-4. **6 services**: swap, dca, token, paymaster, impulse, staking (not 4)
+4. **7 services**: swap, dca, token, paymaster, impulse, staking, privacy (not 4)
 
 5. **Zod validation**: Use `parseResponseWithSchema` with schemas defined in `schemas.ts`
 
