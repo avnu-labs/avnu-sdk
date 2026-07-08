@@ -156,11 +156,10 @@ const executePrivateSwap = async (
   // 1. Fetch the pool fee from the paymaster (required for private swaps)
   const fee = await buildPrivateSwapFee({ poolAddress, feeMode, paymasterApiKey }, options);
 
-  // 2. Build the private swap calls through AVNU's private executor
-  const { calls, executorAddress } = await quoteToCalls(
-    { quoteId: quote.quoteId, takerAddress, slippage, private: true },
-    options,
-  );
+  // 2. Build the private swap calls through AVNU's private executor.
+  // takerAddress must NOT be sent: the API rejects it alongside private=true
+  // (the executor is the taker; the user address only appears inside the proof)
+  const { calls, executorAddress } = await quoteToCalls({ quoteId: quote.quoteId, slippage, private: true }, options);
   if (!executorAddress) {
     throw new Error('Private swap requires an executorAddress from quoteToCalls (ensure private swap is enabled)');
   }

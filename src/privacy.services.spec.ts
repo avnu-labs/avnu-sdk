@@ -212,6 +212,11 @@ describe('Privacy services', () => {
           takerAddress: '0xtaker',
         }),
       );
+      // The API rejects takerAddress alongside private=true (mutually exclusive)
+      const buildRequest = fetchMock.calls().find(([url]) => url.includes('/swap/'));
+      const buildBody = JSON.parse(buildRequest?.[1]?.body as unknown as string);
+      expect(buildBody.private).toBe(true);
+      expect(buildBody).not.toHaveProperty('takerAddress');
     });
 
     it('should throw Invalid chainId when the provided chainId does not match the quote (before any network call)', async () => {

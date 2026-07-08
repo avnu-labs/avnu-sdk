@@ -57,9 +57,10 @@ const getQuotes = (request: QuoteRequest, options?: AvnuOptions): Promise<Quote[
  *
  * @param params The parameters to build the swap calls
  * @param params.quoteId The id of the selected quote
- * @param params.takerAddress Required when taker address was not provided during the quote request
+ * @param params.takerAddress Required when taker address was not provided during the quote request. Mutually exclusive with private
  * @param params.slippage The maximum acceptable slippage of the buyAmount amount (required)
  * @param params.executeApprove If true, the response will contain the approve call. True by default
+ * @param params.private If true, builds the swap for private execution: the API sets the taker to its executor and returns executorAddress
  * @param options Optional SDK configuration
  * @returns The AvnuCalls containing the calls to execute the trade and the chainId
  */

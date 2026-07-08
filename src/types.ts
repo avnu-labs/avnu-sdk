@@ -303,6 +303,7 @@ export interface QuoteToCallsParams {
   slippage: number;
   takerAddress?: string;
   executeApprove?: boolean;
+  /** Build a private swap. Mutually exclusive with takerAddress: the API sets the taker to its executor. */
   private?: boolean;
 }
 
