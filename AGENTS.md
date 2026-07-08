@@ -389,7 +389,7 @@ Both proving backends (wallet or privacy SDK) converge to the same `PrivateSwapC
 - `PrivateSwapProver`: buildAndProve(plan) → PrivateSwapCallAndProof (injected; wallet or privacy SDK)
 - `BuildPrivateSwapFeeParams`: poolAddress, feeMode, paymasterApiKey?
 - `SubmitPrivateSwapParams`: callAndProof, feeMode, paymasterApiKey?
-- `ExecutePrivateSwapParams`: quote, slippage, takerAddress, poolAddress, feeMode, prover, paymasterApiKey?
+- `ExecutePrivateSwapParams`: quote, slippage, takerAddress, poolAddress, feeMode, prover, paymasterApiKey?, chainId? (fail-fast network check against quote.chainId)
 
 ---
 

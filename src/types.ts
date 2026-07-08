@@ -234,6 +234,12 @@ export interface ExecutePrivateSwapParams {
   feeMode: PrivateFeeMode;
   prover: PrivateSwapProver;
   paymasterApiKey?: string;
+  /**
+   * The chain the caller operates on (e.g. from the wallet). When provided, it is
+   * checked against `quote.chainId` before any network call so an obvious network
+   * mismatch fails fast, before the expensive proof generation.
+   */
+  chainId?: string;
 }
 
 export interface QuoteRequest {

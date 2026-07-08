@@ -214,6 +214,63 @@ describe('Privacy services', () => {
       );
     });
 
+    it('should throw Invalid chainId when the provided chainId does not match the quote (before any network call)', async () => {
+      // Given
+      const quote = aQuote();
+      const feeMode = aPrivateFeeMode();
+      const prover = createMockPrivateSwapProver();
+
+      // When & Then
+      expect.assertions(3);
+      await expect(
+        executePrivateSwap({
+          quote,
+          slippage: 0.01,
+          takerAddress: '0xtaker',
+          poolAddress: '0xpool',
+          feeMode,
+          prover,
+          chainId: '0xdeadbeef',
+        }),
+      ).rejects.toEqual(new Error('Invalid chainId'));
+      // No network round-trip and no proof generation happened
+      expect(fetchMock.calls()).toHaveLength(0);
+      expect(prover.buildAndProve).not.toHaveBeenCalled();
+    });
+
+    it('should proceed when the provided chainId matches the quote', async () => {
+      // Given
+      const quote = aQuote();
+      const feeMode = aPrivateFeeMode();
+      const prover = createMockPrivateSwapProver();
+
+      fetchMock.post(PAYMASTER_BASE_URL, (_url: string, opts) => {
+        const body = JSON.parse(opts.body as string);
+        return body.method === 'paymaster_buildTransaction'
+          ? { result: { fee_action: { token: '0xfee', recipient: '0xrecipient', amount: '0x3e8' } } }
+          : { result: { transaction_hash: '0xfinal' } };
+      });
+      fetchMock.post(`${BASE_URL}/swap/${SWAP_API_VERSION}/build`, {
+        chainId: quote.chainId,
+        calls: [aCall()],
+        executorAddress: '0xexecutor',
+      });
+
+      // When
+      const result = await executePrivateSwap({
+        quote,
+        slippage: 0.01,
+        takerAddress: '0xtaker',
+        poolAddress: '0xpool',
+        feeMode,
+        prover,
+        chainId: quote.chainId,
+      });
+
+      // Then
+      expect(result).toStrictEqual({ transactionHash: '0xfinal' });
+    });
+
     it('should throw when quoteToCalls returns no executorAddress', async () => {
       // Given
       const quote = aQuote();

@@ -146,7 +146,12 @@ const executePrivateSwap = async (
   params: ExecutePrivateSwapParams,
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
-  const { quote, slippage, takerAddress, poolAddress, feeMode, prover, paymasterApiKey } = params;
+  const { quote, slippage, takerAddress, poolAddress, feeMode, prover, paymasterApiKey, chainId } = params;
+
+  // Fail fast on a network mismatch, before the expensive paymaster and proving round-trips
+  if (chainId && chainId !== quote.chainId) {
+    throw new Error('Invalid chainId');
+  }
 
   // 1. Fetch the pool fee from the paymaster (required for private swaps)
   const fee = await buildPrivateSwapFee({ poolAddress, feeMode, paymasterApiKey }, options);
