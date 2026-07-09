@@ -6,6 +6,7 @@ import { DcaOrderStatus, DcaTradeStatus, FeedDateRange, FeedResolution, PriceFee
 export interface AvnuOptions {
   baseUrl?: string;
   impulseBaseUrl?: string;
+  paymasterBaseUrl?: string;
   abortSignal?: AbortSignal;
   avnuPublicKey?: string;
 }
@@ -133,6 +134,114 @@ export interface AvnuCalls {
   executorAddress?: string;
 }
 
+/* Privacy (private swap) Part */
+
+/**
+ * Priority tip for the AVNU privacy paymaster. Defaults to 'normal' server-side.
+ */
+export type PrivacyTip = 'slow' | 'normal' | 'fast';
+
+/**
+ * Fee mode for a private swap. The paymaster sponsors the gas and reimburses
+ * itself with a pool fee taken from the shielded balance in `poolFeeToken`.
+ */
+export interface PrivateFeeMode {
+  poolFeeToken: string;
+  tip?: PrivacyTip;
+}
+
+/**
+ * A single call as expected by the privacy paymaster JSON-RPC endpoints.
+ */
+export interface PaymasterCall {
+  to: string;
+  selector: string;
+  calldata: string[];
+}
+
+/**
+ * The pool fee returned by the paymaster `apply_action` build step. It must be
+ * withdrawn (inside the private transaction) to `recipient` so the paymaster is
+ * reimbursed for the sponsored gas.
+ */
+export interface PrivateSwapFee {
+  token: string;
+  recipient: string;
+  amount: bigint;
+}
+
+/**
+ * The zero-knowledge proof materialized by the injected prover (a STRK20 wallet
+ * or the Starknet privacy SDK). `data` and `proofFacts` are forwarded verbatim
+ * to the paymaster.
+ */
+export interface PrivacyProof {
+  data: string;
+  proofFacts: string[];
+}
+
+/**
+ * The prepared call and its proof. Both proving backends (wallet or privacy SDK)
+ * converge to this artifact, which the paymaster submits on-chain.
+ */
+export interface PrivateSwapCallAndProof {
+  call: Call;
+  proof: PrivacyProof;
+}
+
+/**
+ * A backend-neutral description of the private swap the prover must materialize:
+ * withdraw `sellAmount` of the sell token to the executor, withdraw the pool fee
+ * to its recipient, open a note for the buy token, then invoke the executor with
+ * the swap calls.
+ */
+export interface PrivateSwapPlan {
+  sellTokenAddress: string;
+  sellAmount: bigint;
+  buyTokenAddress: string;
+  executorAddress: string;
+  executorCalls: Call[];
+  fee: PrivateSwapFee;
+  takerAddress: string;
+}
+
+/**
+ * The injected proof provider. Implement it with a STRK20-capable wallet
+ * (`wallet_strk20PrepareInvoke`) or the Starknet privacy SDK. The SDK never
+ * handles private keys, notes, or proof generation itself.
+ */
+export interface PrivateSwapProver {
+  buildAndProve(plan: PrivateSwapPlan): Promise<PrivateSwapCallAndProof>;
+}
+
+export interface BuildPrivateSwapFeeParams {
+  poolAddress: string;
+  feeMode: PrivateFeeMode;
+  paymasterApiKey?: string;
+}
+
+export interface SubmitPrivateSwapParams {
+  callAndProof: PrivateSwapCallAndProof;
+  feeMode: PrivateFeeMode;
+  paymasterApiKey?: string;
+}
+
+export interface ExecutePrivateSwapParams {
+  quote: Quote;
+  slippage: number;
+  takerAddress: string;
+  poolAddress: string;
+  feeMode: PrivateFeeMode;
+  prover: PrivateSwapProver;
+  paymasterApiKey?: string;
+  /**
+   * The chain the caller operates on (e.g. from the wallet). When provided, it is
+   * checked against `quote.chainId` before any network call so an obvious network
+   * mismatch fails fast, before the expensive proof generation.
+   */
+  chainId?: string;
+}
+
 export interface QuoteRequest {
   sellTokenAddress: string;
   buyTokenAddress: string;
@@ -194,6 +303,7 @@ export interface QuoteToCallsParams {
   slippage: number;
   takerAddress?: string;
   executeApprove?: boolean;
+  /** Build a private swap. Mutually exclusive with takerAddress: the API sets the taker to its executor. */
   private?: boolean;
 }
 

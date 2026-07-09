@@ -4,6 +4,7 @@ export * from './enums';
 export * from './fixtures';
 export * from './impulse.services';
 export * from './paymaster.services';
+export * from './privacy.services';
 export * from './staking.services';
 export * from './swap.services';
 export * from './token.services';
