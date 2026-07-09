@@ -132,6 +132,11 @@ const submitPrivateSwap = (
  * 3. Delegate proof generation to the injected `prover` (STRK20 wallet or privacy SDK).
  * 4. Submit the proven transaction through the paymaster (`apply_action` execute).
  *
+ * !! When a paymaster API key is required (sponsored_private), run this on a server —
+ * !! calling it from a browser leaks the key. Browser dapps should split the flow:
+ * !! `buildPrivateSwapFee` and `submitPrivateSwap` behind server endpoints, proving
+ * !! (`prover`) client-side with the user's wallet.
+ *
  * @param params.quote The selected quote. See `getQuotes`
  * @param params.slippage The maximum acceptable slippage for the trade
  * @param params.takerAddress The address of the trader

@@ -528,6 +528,12 @@ export const PAYMASTER_BASE_URL = 'https://starknet.paymaster.avnu.fi'
 export const SEPOLIA_PAYMASTER_BASE_URL = 'https://sepolia.paymaster.avnu.fi'
 ```
 
+**Privacy pool addresses** (whitelisted by the privacy paymaster; `poolAddress` stays an explicit parameter because pools may be redeployed):
+```typescript
+export const PRIVACY_POOL_ADDRESS = '0x040337b1af3c663e86e333bab5a4b28da8d4652a15a69beee2b677776ffe812a'
+export const SEPOLIA_PRIVACY_POOL_ADDRESS = '0x254a6b2997ef52e9f830ce1f543f6b29768295e8d17e2267d672c552cfe0d91'
+```
+
 **API Version Constants:**
 ```typescript
 export const TOKEN_API_VERSION = 'v1'
