@@ -75,7 +75,7 @@
     "ethers": "6.15.0",
     "fetch-mock": "9.11.0",
     "jest": "29.7.0",
-    "knip": "^5.82.1",
+    "knip": "^6.26.0",
     "node-fetch": "2",
     "starknet": "10.4.0",
     "prettier": "3.8.1",
