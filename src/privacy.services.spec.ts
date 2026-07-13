@@ -1,8 +1,24 @@
 import fetchMock from 'fetch-mock';
+import type { STRK20_CALL_AND_PROOF } from 'starknet';
 import { hash } from 'starknet';
 import { BASE_URL, PAYMASTER_BASE_URL, SWAP_API_VERSION } from './constants';
-import { aCall, aPrivacyProof, aPrivateFeeMode, aPrivateSwapCallAndProof, aQuote } from './fixtures';
-import { buildPrivateSwapFee, executePrivateSwap, submitPrivateSwap, toPaymasterCall } from './privacy.services';
+import {
+  aCall,
+  aPrivacyProof,
+  aPrivateFeeMode,
+  aPrivateSwapCallAndProof,
+  aPrivateSwapFee,
+  aPrivateSwapPlan,
+  aQuote,
+} from './fixtures';
+import {
+  buildPrivateSwapFee,
+  buildStrk20Actions,
+  createStrk20WalletProver,
+  executePrivateSwap,
+  submitPrivateSwap,
+  toPaymasterCall,
+} from './privacy.services';
 import { createMockPrivateSwapProver } from './test-utils';
 
 describe('Privacy services', () => {
@@ -309,6 +325,84 @@ describe('Privacy services', () => {
         new Error('Private swap requires an executorAddress from quoteToCalls (ensure private swap is enabled)'),
       );
       expect(prover.buildAndProve).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('buildStrk20Actions', () => {
+    it('should materialize the plan as withdraw sell, withdraw fee, open note, invoke executor', () => {
+      // Given
+      const plan = aPrivateSwapPlan({
+        sellTokenAddress: '0x123',
+        sellAmount: 1000000000000000000n,
+        buyTokenAddress: '0x456',
+        executorAddress: '0x789',
+        executorCalls: [aCall({ contractAddress: '0xdead', entrypoint: 'execute_swap', calldata: ['0x1', '0x2'] })],
+        fee: aPrivateSwapFee({ token: '0xabc', recipient: '0xfeerecipient', amount: 500n }),
+        takerAddress: '0x7a',
+      });
+
+      // When
+      const actions = buildStrk20Actions(plan);
+
+      // Then
+      // fromCallsToExecuteCalldata_cairo1: [n_calls, to, selector('execute_swap'), calldata_len, ...calldata]
+      expect(actions).toStrictEqual([
+        { type: 'withdraw', token: '0x123', amount: '0xde0b6b3a7640000', recipient: '0x789' },
+        { type: 'withdraw', token: '0xabc', amount: '0x1f4', recipient: '0xfeerecipient' },
+        { type: 'transfer', token: '0x456', amount: 'OPEN', recipient: '0x7a' },
+        {
+          type: 'invoke',
+          contract: '0x789',
+          calldata: [
+            '0x456',
+            '0x1',
+            '0xdead',
+            '0x2838190fef3088d277dd6581e49b92f66a21df03d0442e81d31ac1147cc6048',
+            '0x2',
+            '0x1',
+            '0x2',
+            '${openNoteIds[0]}',
+          ],
+        },
+      ]);
+    });
+  });
+
+  describe('createStrk20WalletProver', () => {
+    it('should prove the actions with the wallet and map the artifact to PrivateSwapCallAndProof', async () => {
+      // Given
+      const plan = aPrivateSwapPlan();
+      const walletArtifact: STRK20_CALL_AND_PROOF = {
+        call: { contract_address: '0x11', entry_point: 'apply_actions', calldata: ['0x1'] },
+        proof: { data: 'proof-data', output: ['0x2'], proof_facts: ['0x3'] },
+      };
+      const account = { strk20PrepareInvoke: jest.fn().mockResolvedValue(walletArtifact) };
+
+      // When
+      const result = await createStrk20WalletProver(account).buildAndProve(plan);
+
+      // Then
+      expect(account.strk20PrepareInvoke).toHaveBeenCalledWith(buildStrk20Actions(plan));
+      expect(result).toStrictEqual({
+        call: { contractAddress: '0x11', entrypoint: 'apply_actions', calldata: ['0x1'] },
+        proof: { data: 'proof-data', proofFacts: ['0x3'] },
+      });
+    });
+
+    it('should default missing wallet calldata to an empty array', async () => {
+      // Given
+      const account = {
+        strk20PrepareInvoke: jest.fn().mockResolvedValue({
+          call: { contract_address: '0x11', entry_point: 'apply_actions' },
+          proof: { data: '', output: [], proof_facts: [] },
+        }),
+      };
+
+      // When
+      const result = await createStrk20WalletProver(account).buildAndProve(aPrivateSwapPlan());
+
+      // Then
+      expect(result.call.calldata).toStrictEqual([]);
     });
   });
 

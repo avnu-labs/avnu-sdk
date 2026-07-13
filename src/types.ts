@@ -1,5 +1,6 @@
 import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import type { Duration } from 'moment';
+import type { STRK20_ACTION, STRK20_CALL_AND_PROOF } from 'starknet';
 import { AccountInterface, Call, ExecutionParameters, PaymasterInterface } from 'starknet';
 import { DcaOrderStatus, DcaTradeStatus, FeedDateRange, FeedResolution, PriceFeedType, SourceType } from './enums';
 
@@ -212,6 +213,14 @@ export interface PrivateSwapPlan {
  */
 export interface PrivateSwapProver {
   buildAndProve(plan: PrivateSwapPlan): Promise<PrivateSwapCallAndProof>;
+}
+
+/**
+ * The STRK20 privacy wallet API surface needed to prove a private swap
+ * (starknet.js `WalletAccountV6` / `wallet_strk20PrepareInvoke`).
+ */
+export interface Strk20ProverAccount {
+  strk20PrepareInvoke(actions: STRK20_ACTION[], simulate?: boolean): Promise<STRK20_CALL_AND_PROOF>;
 }
 
 export interface BuildPrivateSwapFeeParams {
