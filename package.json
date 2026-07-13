@@ -78,7 +78,7 @@
     "knip": "^5.82.1",
     "node-fetch": "2",
     "starknet": "10.4.0",
-    "prettier": "3.8.1",
+    "prettier": "3.9.5",
     "size-limit": "12.0.0",
     "tsup": "8.5.1",
     "typedoc": "0.28.16",
