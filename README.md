@@ -68,7 +68,7 @@ const quotes = await getQuotes({
 await executeSwap({
   quote: quotes[0],
   slippage: 0.01, // 1%
-  account,
+  provider: account,
 });
 ```
 
@@ -81,5 +81,5 @@ For complete documentation, examples, and API reference, visit:
 ## Requirements
 
 - Node.js >= 22
-- Starknet.js >= 8.9.0
+- Starknet.js >= 10.0.0
 
