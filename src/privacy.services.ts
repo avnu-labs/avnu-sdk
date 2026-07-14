@@ -7,6 +7,7 @@ import {
   ExecutePrivateSwapParams,
   InvokeTransactionResponse,
   PaymasterCall,
+  PaymasterRpcError,
   PrivateFeeMode,
   PrivateSwapFee,
   PrivateSwapPlan,
@@ -53,7 +54,7 @@ const paymasterRpcCall = <T>(
     .then((response) => response.json() as Promise<JsonRpcResponse<T>>)
     .then((json) => {
       if (json.error) {
-        throw new Error(`Paymaster ${method}: ${json.error.message} (code: ${json.error.code})`);
+        throw new PaymasterRpcError(method, json.error.message, json.error.code, json.error.data);
       }
       return json.result as T;
     });
