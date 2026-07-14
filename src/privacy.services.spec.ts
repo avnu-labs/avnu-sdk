@@ -20,6 +20,7 @@ import {
   toPaymasterCall,
 } from './privacy.services';
 import { createMockPrivateSwapProver } from './test-utils';
+import { PaymasterRpcError } from './types';
 
 describe('Privacy services', () => {
   beforeEach(() => {
@@ -120,7 +121,7 @@ describe('Privacy services', () => {
       // When & Then
       expect.assertions(1);
       await expect(buildPrivateSwapFee({ poolAddress: '0xpool', feeMode })).rejects.toEqual(
-        new Error('Paymaster paymaster_buildTransaction: pool not found (code: -32000)'),
+        new PaymasterRpcError('paymaster_buildTransaction', 'pool not found', -32000),
       );
     });
   });
@@ -179,8 +180,34 @@ describe('Privacy services', () => {
       // When & Then
       expect.assertions(1);
       await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toEqual(
-        new Error('Paymaster paymaster_executeTransaction: invalid proof (code: -32001)'),
+        new PaymasterRpcError('paymaster_executeTransaction', 'invalid proof', -32001),
       );
+    });
+
+    it('should preserve transaction execution error data', async () => {
+      // Given
+      const feeMode = aPrivateFeeMode();
+      const callAndProof = aPrivateSwapCallAndProof();
+      const data = {
+        execution_error: {
+          contract_address: '0xcontract',
+          class_hash: '0xclass',
+          selector: '0xselector',
+          error: 'Insufficient tokens received',
+        },
+      };
+      fetchMock.post(PAYMASTER_BASE_URL, {
+        error: { code: 156, message: 'An error occurred (TRANSACTION_EXECUTION_ERROR)', data },
+      });
+
+      // When & Then
+      expect.assertions(1);
+      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toMatchObject({
+        name: 'PaymasterRpcError',
+        method: 'paymaster_executeTransaction',
+        code: 156,
+        data,
+      });
     });
   });
 

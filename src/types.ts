@@ -88,6 +88,18 @@ export class ContractError extends Error {
   }
 }
 
+export class PaymasterRpcError extends Error {
+  constructor(
+    public readonly method: string,
+    message: string,
+    public readonly code: number,
+    public readonly data?: unknown,
+  ) {
+    super(`Paymaster ${method}: ${message} (code: ${code})`);
+    this.name = 'PaymasterRpcError';
+  }
+}
+
 /* Paymaster Part */
 
 export interface PaymasterParams {
