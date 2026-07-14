@@ -104,8 +104,8 @@ Calculate min/max amounts with slippage (slippage as decimal: 0.01 = 1%).
 
 **Key types:**
 - `QuoteRequest`: sellTokenAddress, buyTokenAddress, sellAmount, takerAddress, size
-- `Quote`: routes, sellAmount, buyAmount, sellAmountInUsd, buyAmountInUsd, priceImpact, gasFeesInUsd
-- `Route`: percent, sellAmount, buyAmount, routes (sub-routes)
+- `Quote`: quoteId, sellTokenAddress, sellAmount, sellAmountInUsd, buyTokenAddress, buyAmount, buyAmountInUsd, fee, chainId, routes, gasFees, gasFeesInUsd?, priceImpact
+- `Route`: name, address, percent, sellTokenAddress, buyTokenAddress, routeInfo?, routes (sub-routes), alternativeSwapCount
 - `QuoteToCallsParams`: quoteId, slippage, takerAddress?, executeApprove?, private? (build a private swap)
 - `AvnuCalls`: chainId, calls, executorAddress? (returned when private=true)
 
@@ -123,7 +123,7 @@ Get DCA orders for a trader with pagination.
 
 **Creating orders (2 methods):**
 ```typescript
-createDcaToCalls(order: CreateDcaOrder, options?: AvnuOptions): Promise<Call[]>
+createDcaToCalls(order: CreateDcaOrder, options?: AvnuOptions): Promise<AvnuCalls>
 ```
 Build calls to create a DCA order.
 
@@ -134,7 +134,7 @@ Execute DCA order creation with paymaster support.
 
 **Canceling orders (2 methods):**
 ```typescript
-cancelDcaToCalls(orderAddress: string, options?: AvnuOptions): Promise<Call[]>
+cancelDcaToCalls(orderAddress: string, options?: AvnuOptions): Promise<AvnuCalls>
 ```
 Build calls to cancel a DCA order.
 
@@ -144,11 +144,11 @@ executeCancelDca(params: InvokeCancelDcaParams, options?: AvnuOptions): Promise<
 Execute cancellation with paymaster support.
 
 **Key types:**
-- `CreateDcaOrder`: sellTokenAddress, buyTokenAddress, sellAmountPerRepetition, repetitionCount, repetitionInterval, creatorAddress
-- `DcaOrder`: orderAddress, creatorAddress, sellToken, buyToken, totalSellAmount, soldAmount, trades, status
-- `DcaTrade`: sellAmount, buyAmount, timestamp, status (PENDING/SUCCEEDED/CANCELLED)
+- `CreateDcaOrder`: sellTokenAddress, buyTokenAddress, sellAmount, sellAmountPerCycle, frequency (moment Duration), pricingStrategy, traderAddress
+- `DcaOrder`: id, orderAddress, traderAddress, sellTokenAddress, buyTokenAddress, sellAmount, sellAmountPerCycle, amountSold, amountBought, frequency, iterations, trades, status
+- `DcaTrade`: sellAmount, buyAmount?, expectedTradeDate, actualTradeDate?, status (PENDING/SUCCEEDED/CANCELLED), txHash?
 - `DcaOrderStatus`: INDEXING, ACTIVE, CLOSED
-- `GetDcaOrdersParams`: traderAddress, limit?, offset?
+- `GetDcaOrdersParams`: traderAddress, status?, page?, size?, sort? (extends Pageable)
 
 ---
 
@@ -181,24 +181,24 @@ Get a verified or "unruggable" token by its symbol.
 Complete workflow for paymaster transactions:
 
 ```typescript
-buildPaymasterTransaction(params: BuildPaymasterTransactionParams, options?: AvnuOptions): Promise<PreparedInvokeTransaction>
+buildPaymasterTransaction(params: BuildPaymasterTransactionParams): Promise<PreparedInvokeTransaction>
 ```
 Build a transaction for the paymaster.
 
 ```typescript
-signPaymasterTransaction(params: SignPaymasterTransactionParams, options?: AvnuOptions): Promise<SignedPaymasterTransaction>
+signPaymasterTransaction(params: SignTransactionParams): Promise<SignedPaymasterTransaction>
 ```
 Sign typed data for the paymaster.
 
 ```typescript
-executePaymasterTransaction(params: ExecutePaymasterTransactionParams, options?: AvnuOptions): Promise<InvokeTransactionResponse>
+executePaymasterTransaction(params: ExecutePaymasterTransactionParams): Promise<InvokeTransactionResponse>
 ```
 Execute the signed paymaster transaction.
 
 ```typescript
-executeAllPaymasterFlow(params: ExecuteAllPaymasterFlowParams, options?: AvnuOptions): Promise<InvokeTransactionResponse>
+executeAllPaymasterFlow(params: { paymaster: InvokePaymasterParams; provider: AccountInterface; calls: Call[] }): Promise<InvokeTransactionResponse>
 ```
-Helper that chains build -> sign -> execute in a single function.
+Helper that chains build -> sign -> execute in a single function. (Note: these paymaster functions do not take an `AvnuOptions` argument.)
 
 **Key types:**
 - `PaymasterParams`: provider (PaymasterInterface from starknet.js), params (ExecutionParameters)
@@ -302,7 +302,7 @@ Get staking information for a specific user (amount, rewards, history).
 
 **Staking (2 methods):**
 ```typescript
-stakeToCalls(params: StakeToCallsParams, options?: AvnuOptions): Promise<Call[]>
+stakeToCalls(params: StakeToCallsParams, options?: AvnuOptions): Promise<AvnuCalls>
 ```
 Build calls for staking.
 
@@ -313,7 +313,7 @@ Execute staking with paymaster support.
 
 **Initiate Unstake (2 methods):**
 ```typescript
-initiateUnstakeToCalls(params: StakeToCallsParams, options?: AvnuOptions): Promise<Call[]>
+initiateUnstakeToCalls(params: StakeToCallsParams, options?: AvnuOptions): Promise<AvnuCalls>
 ```
 Build calls to initiate unstaking (starts cool-down period).
 
@@ -324,7 +324,7 @@ Execute unstake initiation.
 
 **Unstake (2 methods):**
 ```typescript
-unstakeToCalls(params: UnstakeToCallsParams, options?: AvnuOptions): Promise<Call[]>
+unstakeToCalls(params: UnstakeToCallsParams, options?: AvnuOptions): Promise<AvnuCalls>
 ```
 Build calls for unstaking (after cool-down).
 
@@ -335,7 +335,7 @@ Execute unstaking.
 
 **Claim Rewards (2 methods):**
 ```typescript
-claimRewardsToCalls(params: ClaimRewardsToCallsParams, options?: AvnuOptions): Promise<Call[]>
+claimRewardsToCalls(params: ClaimRewardsToCallsParams, options?: AvnuOptions): Promise<AvnuCalls>
 ```
 Build calls to claim rewards.
 
@@ -345,10 +345,10 @@ executeClaimRewards(params: InvokeClaimRewardsParams, options?: AvnuOptions): Pr
 Execute rewards claiming.
 
 **Key types:**
-- `StakingInfo`: selfStakedAmount, operationalAddress, operationalSignerPubKey, unclaimedRewards, poolMembersCount, delegationPools
-- `DelegationPool`: poolAddress, tokenAddress, delegatedAmount, apr
-- `UserStakingInfo`: amount, unclaimedRewards, claimedRewards, unpoolingInfo, unpooledAmount, actionsHistory, aprHistory
-- `Action`: id, index, type (Swap/Refund/DCA/Stake/Unstake/ClaimRewards/InitiateUnstake), timestamp, metadata
+- `StakingInfo`: selfStakedAmount, selfStakedAmountInUsd, operationalAddress, rewardAddress, stakerAddress, commission, delegationPools
+- `DelegationPool`: poolAddress, tokenAddress, stakedAmount, stakedAmountInUsd, apr
+- `UserStakingInfo`: amount, unclaimedRewards, totalClaimedRewards, unpoolAmount, unpoolTime, userActions, aprs
+- `Action`: blockNumber, date, transactionHash, gasFee, type (Swap/OpenDcaOrder/CancelDcaOrder/DcaTrade/StakingStake/StakingInitiateWithdrawal/StakingCancelWithdrawal/StakingWithdraw/StakingClaimRewards), metadata
 - `Apr`: date, apr
 
 ---
@@ -378,6 +378,22 @@ End-to-end orchestrator that keeps all cryptography outside the SDK. Four steps:
 
 Both proving backends (wallet or privacy SDK) converge to the same `PrivateSwapCallAndProof` artifact.
 
+**STRK20 wallet prover helpers:**
+```typescript
+createStrk20WalletProver(account: Strk20ProverAccount): PrivateSwapProver
+```
+Build a ready-made `PrivateSwapProver` backed by a STRK20-capable wallet (starknet.js `WalletAccountV6` / `wallet_strk20PrepareInvoke`). The wallet keeps the keys and notes and generates the proof.
+
+```typescript
+buildStrk20Actions(plan: PrivateSwapPlan): STRK20_ACTION[]
+```
+Translate a `PrivateSwapPlan` into the STRK20 action vocabulary. Use it directly when driving `wallet_strk20PrepareInvoke` yourself; prefer `createStrk20WalletProver` otherwise.
+
+```typescript
+toPaymasterCall(call: Call): PaymasterCall
+```
+Convert a starknet.js `Call` into the paymaster call shape (to/selector/calldata).
+
 **Key types:**
 - `PrivacyTip`: priority tip for the paymaster ('slow' / 'normal' / 'fast', default 'normal')
 - `PrivateFeeMode`: poolFeeToken, tip? (maps to the `sponsored_private` paymaster fee mode)
@@ -387,6 +403,7 @@ Both proving backends (wallet or privacy SDK) converge to the same `PrivateSwapC
 - `PrivateSwapCallAndProof`: call, proof (artifact both proving backends converge to)
 - `PrivateSwapPlan`: sellTokenAddress, sellAmount, buyTokenAddress, executorAddress, executorCalls, fee, takerAddress (backend-neutral description passed to the prover)
 - `PrivateSwapProver`: buildAndProve(plan) → PrivateSwapCallAndProof (injected; wallet or privacy SDK)
+- `Strk20ProverAccount`: strk20PrepareInvoke(actions, simulate?) → STRK20_CALL_AND_PROOF (STRK20 wallet API surface consumed by `createStrk20WalletProver`)
 - `BuildPrivateSwapFeeParams`: poolAddress, feeMode, paymasterApiKey?
 - `SubmitPrivateSwapParams`: callAndProof, feeMode, paymasterApiKey?
 - `ExecutePrivateSwapParams`: quote, slippage, takerAddress, poolAddress, feeMode, prover, paymasterApiKey?, chainId? (fail-fast network check against quote.chainId)
@@ -455,7 +472,7 @@ The `types.ts` file contains all TypeScript definitions:
 - **Execution types**: `InvokeSwapParams`, `InvokeCreateDcaParams`, `InvokeParams`, `InvokePaymasterParams`
 - **Market Data**: `TokenMarketData`, `StarknetMarket`, `GlobalMarket`, `FeedProps`
 - **Staking**: `StakingInfo`, `UserStakingInfo`, `Action`, `Apr`
-- **Options**: `AvnuOptions` (baseUrl, impulseBaseUrl, abortSignal, avnuPublicKey)
+- **Options**: `AvnuOptions` (baseUrl, impulseBaseUrl, paymasterBaseUrl, abortSignal, avnuPublicKey)
 
 **Important convention:** All amount fields (sellAmount, buyAmount, fees, etc.) are exposed as **BigInt** in the SDK, even though they are transmitted as **hex strings** by the API.
 
@@ -512,7 +529,7 @@ Parse with Zod validation and transformation.
 **Request builders:**
 ```typescript
 getRequest(options?: AvnuOptions): RequestInit
-postRequest(body: object, options?: AvnuOptions): RequestInit
+postRequest(body: unknown, options?: AvnuOptions): RequestInit
 ```
 Build fetch options with abort signal support.
 
@@ -590,15 +607,24 @@ The SDK can verify AVNU response signatures via `AvnuOptions.avnuPublicKey`. Whe
 **ContractError**: Blockchain errors with revert information
 ```typescript
 class ContractError extends Error {
-  revertReason: string
+  revertError: string
 }
 ```
 
 **RequestError**: API errors
 ```typescript
 interface RequestError {
-  message: string
-  statusCode?: number
+  messages: string[]
+  revertError: string | undefined
+}
+```
+
+**PaymasterRpcError**: Errors returned by the privacy paymaster JSON-RPC endpoints
+```typescript
+class PaymasterRpcError extends Error {
+  method: string
+  code: number
+  data?: unknown
 }
 ```
 
@@ -607,10 +633,8 @@ interface RequestError {
 ### Peer Dependencies (installed by consumers)
 ```json
 {
-  "starknet": "^8.9.0",
   "ethers": "^6.15.0",
-  "moment": "^2.30.1",
-  "qs": "^6.14.0"
+  "starknet": "^10.0.0"
 }
 ```
 
@@ -618,7 +642,9 @@ interface RequestError {
 ```json
 {
   "dayjs": "^1.11.19",  // Date handling (lightweight)
-  "zod": "^4.1.12"      // Runtime validation
+  "moment": "^2.30.1",  // Duration handling (DCA frequency)
+  "qs": "^6.14.1",      // Query string serialization
+  "zod": "^4.3.6"       // Runtime validation
 }
 ```
 
@@ -633,26 +659,22 @@ interface RequestError {
 - `impulse.services.spec.ts` - Market data, price feeds, volume, TVL
 - `staking.services.spec.ts` - Staking info, stake/unstake/claim execution
 - `paymaster.services.spec.ts` - Build, sign, execute paymaster flow
+- `privacy.services.spec.ts` - Private swap fee, submit, and end-to-end orchestration
 
 **Test Utilities** (`test-utils.ts`):
 ```typescript
 // Mock factories for starknet interfaces
 createMockAccount(address?: string): jest.Mocked<AccountInterface>
 createMockPaymaster(): jest.Mocked<PaymasterInterface>
+createMockPrivateSwapProver(): jest.Mocked<PrivateSwapProver>
 mockExecutionParams: ExecutionParameters
-
-// URL builders for consistent test setup
-buildSwapUrl(path: string): string      // BASE_URL/swap/v3{path}
-buildDcaUrl(path: string): string       // BASE_URL/dca/v3{path}
-buildTokenUrl(path: string): string     // BASE_URL/v1/starknet/tokens{path}
-buildStakingUrl(path: string): string   // BASE_URL/staking/v3{path}
-buildImpulseUrl(path: string): string   // IMPULSE_BASE_URL/v3{path}
 ```
 
 **Fixtures** (`fixtures.ts`):
 ```typescript
 // Swap fixtures
 aQuote(), aQuoteRequest(), aPrice(), aPriceRequest()
+aQuoteWithManySubRoutes(), aQuoteWithManyComplexRoutes()
 aAvnuCalls(), anInvokeTransactionResponse(), aCall()
 ethToken(), btcToken(), aPage<T>(), aSource()
 
@@ -665,6 +687,10 @@ anApr(), anAction()
 
 // Paymaster fixtures
 aPreparedTypedData(), aSignedPaymasterTransaction()
+
+// Privacy (private swap) fixtures
+aPrivateFeeMode(), aPrivateSwapFee(), aPrivacyProof()
+aPrivateSwapCallAndProof(), aPrivateSwapPlan()
 
 // Impulse/Market data fixtures
 aDataPoint(), aCandleDataPoint()
