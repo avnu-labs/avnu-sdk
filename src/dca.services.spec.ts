@@ -38,9 +38,10 @@ describe('DCA services', () => {
     });
 
     it.each([
-      { name: 'minimum', pricingStrategy: { tokenToMinAmount: '0x1' } },
-      { name: 'maximum', pricingStrategy: { tokenToMaxAmount: '0x1' } },
-    ])('should return an order with only a $name amount', async ({ pricingStrategy }) => {
+      { name: 'no', pricingStrategy: {} },
+      { name: 'only a minimum', pricingStrategy: { tokenToMinAmount: '0x1' } },
+      { name: 'only a maximum', pricingStrategy: { tokenToMaxAmount: '0x1' } },
+    ])('should return an order with $name amount', async ({ pricingStrategy }) => {
       const order = aDCAOrder();
       // Given
       const response = aPage([
