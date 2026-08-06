@@ -43,6 +43,31 @@ describe('Staking services', () => {
       expect(result).toStrictEqual(aStakingInfo());
     });
 
+    it('should return staking info when the API omits the USD amounts', async () => {
+      // Given
+      const stakingInfo = aStakingInfo();
+      const delegationPool = aDelegationPool();
+      delete stakingInfo.selfStakedAmountInUsd;
+      delete delegationPool.stakedAmountInUsd;
+      const response = {
+        ...stakingInfo,
+        selfStakedAmount: toBeHex(parseUnits('1000', 18)),
+        delegationPools: [
+          {
+            ...delegationPool,
+            stakedAmount: toBeHex(parseUnits('500', 18)),
+          },
+        ],
+      };
+      fetchMock.get(`${BASE_URL}/staking/${STAKING_API_VERSION}`, response);
+
+      // When
+      const result = await getAvnuStakingInfo();
+
+      // Then
+      expect(result).toStrictEqual({ ...stakingInfo, delegationPools: [delegationPool] });
+    });
+
     it('should throw Error with status code when status > 400', async () => {
       // Given
       fetchMock.get(`${BASE_URL}/staking/${STAKING_API_VERSION}`, 401);
@@ -105,6 +130,36 @@ describe('Staking services', () => {
 
       // Then
       expect(result).toStrictEqual(aUserStakingInfo());
+    });
+
+    it('should return user staking info when the API omits the optional fields', async () => {
+      // Given
+      const tokenAddress = '0x0token';
+      const userAddress = '0x0user';
+      const userStakingInfo = aUserStakingInfo();
+      delete userStakingInfo.amountInUsd;
+      delete userStakingInfo.unclaimedRewardsInUsd;
+      delete userStakingInfo.unpoolAmountInUsd;
+      delete userStakingInfo.unpoolTime;
+      const response = {
+        ...userStakingInfo,
+        amount: toBeHex(parseUnits('100', 18)),
+        unclaimedRewards: toBeHex(parseUnits('10', 18)),
+        unpoolAmount: '0x0',
+        totalClaimedRewards: toBeHex(parseUnits('5', 18)),
+        expectedYearlyStrkRewards: toBeHex(parseUnits('50', 18)),
+        aprs: [{ date: '2024-01-01', apr: 5.5 }],
+      };
+      fetchMock.get(
+        `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${tokenAddress}/members/${userAddress}`,
+        response,
+      );
+
+      // When
+      const result = await getUserStakingInfo(tokenAddress, userAddress);
+
+      // Then
+      expect(result).toStrictEqual(userStakingInfo);
     });
 
     it('should throw Error with status code when status > 400', async () => {

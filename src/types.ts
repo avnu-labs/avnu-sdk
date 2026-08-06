@@ -371,7 +371,7 @@ export interface InvokeClaimRewardsParams extends InvokeParams {
 
 export interface StakingInfo {
   selfStakedAmount: bigint;
-  selfStakedAmountInUsd: number | undefined;
+  selfStakedAmountInUsd?: number;
   operationalAddress: string;
   rewardAddress: string;
   stakerAddress: string;
@@ -383,7 +383,7 @@ export interface DelegationPool {
   poolAddress: string;
   tokenAddress: string;
   stakedAmount: bigint;
-  stakedAmountInUsd: number | undefined;
+  stakedAmountInUsd?: number;
   apr: number;
 }
 
@@ -393,12 +393,12 @@ export interface UserStakingInfo {
   poolAddress: string;
   userAddress: string;
   amount: bigint;
-  amountInUsd: number | undefined;
+  amountInUsd?: number;
   unclaimedRewards: bigint;
-  unclaimedRewardsInUsd: number | undefined;
+  unclaimedRewardsInUsd?: number;
   unpoolAmount: bigint;
-  unpoolAmountInUsd: number | undefined;
-  unpoolTime: Date | undefined;
+  unpoolAmountInUsd?: number;
+  unpoolTime?: Date;
   totalClaimedRewards: bigint;
   totalClaimedRewardsHistoricalUsd?: number;
   totalClaimedRewardsUsd: number;
@@ -421,8 +421,8 @@ export interface GetDcaOrdersParams extends Pageable {
 }
 
 export interface PricingStrategy {
-  tokenToMinAmount: string | undefined;
-  tokenToMaxAmount: string | undefined;
+  tokenToMinAmount?: string;
+  tokenToMaxAmount?: string;
 }
 
 export interface DcaTrade {
@@ -455,7 +455,7 @@ export interface DcaOrder {
   frequency: string;
   iterations: number;
   status: DcaOrderStatus;
-  pricingStrategy: PricingStrategy | Record<string, never>;
+  pricingStrategy: PricingStrategy;
   amountSold: bigint;
   amountBought: bigint;
   averageAmountBought: bigint;
@@ -471,7 +471,7 @@ export interface CreateDcaOrder {
   sellAmount: string;
   sellAmountPerCycle: string;
   frequency: Duration;
-  pricingStrategy: PricingStrategy | Record<string, never>;
+  pricingStrategy: PricingStrategy;
   traderAddress: string;
 }
 

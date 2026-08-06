@@ -11,6 +11,7 @@ import {
   Fee,
   type GlobalMarket,
   MarketPrice,
+  type PricingStrategy,
   type Quote,
   Route,
   Source,
@@ -112,13 +113,10 @@ export const DcaTradeSchema = z.object({
 
 export const DcaOrderStatusSchema = z.enum(DcaOrderStatus);
 
-export const PricingStrategySchema = z.union([
-  z.object({
-    tokenToMinAmount: z.string().or(z.undefined()),
-    tokenToMaxAmount: z.string().or(z.undefined()),
-  }),
-  z.object({}).strict(),
-]) as z.ZodType<{ tokenToMinAmount: string | undefined; tokenToMaxAmount: string | undefined } | Record<string, never>>;
+export const PricingStrategySchema = z.object({
+  tokenToMinAmount: z.string().optional(),
+  tokenToMaxAmount: z.string().optional(),
+}) satisfies z.ZodType<PricingStrategy>;
 
 export const DcaOrderSchema = z.object({
   id: z.string(),
@@ -327,12 +325,12 @@ export const UserStakingInfoSchema = z.object({
   poolAddress: z.string(),
   userAddress: z.string(),
   amount: hexToBigInt,
-  amountInUsd: z.number().or(z.undefined()),
+  amountInUsd: z.number().optional(),
   unclaimedRewards: hexToBigInt,
-  unclaimedRewardsInUsd: z.number().or(z.undefined()),
+  unclaimedRewardsInUsd: z.number().optional(),
   unpoolAmount: hexToBigInt,
-  unpoolAmountInUsd: z.number().or(z.undefined()),
-  unpoolTime: hexTimestampToDate,
+  unpoolAmountInUsd: z.number().optional(),
+  unpoolTime: hexTimestampToDate.optional(),
   totalClaimedRewards: hexToBigInt,
   totalClaimedRewardsHistoricalUsd: z.number().optional(),
   totalClaimedRewardsUsd: z.number(),
@@ -346,13 +344,13 @@ export const DelegationPoolSchema = z.object({
   poolAddress: z.string(),
   tokenAddress: z.string(),
   stakedAmount: hexToBigInt,
-  stakedAmountInUsd: z.number().or(z.undefined()),
+  stakedAmountInUsd: z.number().optional(),
   apr: z.number(),
 });
 
 export const StakingInfoSchema = z.object({
   selfStakedAmount: hexToBigInt,
-  selfStakedAmountInUsd: z.number().or(z.undefined()),
+  selfStakedAmountInUsd: z.number().optional(),
   operationalAddress: z.string(),
   rewardAddress: z.string(),
   stakerAddress: z.string(),

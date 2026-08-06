@@ -37,6 +37,35 @@ describe('DCA services', () => {
       expect(result).toStrictEqual(expected);
     });
 
+    it.each([
+      { name: 'no', pricingStrategy: {} },
+      { name: 'only a minimum', pricingStrategy: { tokenToMinAmount: '0x1' } },
+      { name: 'only a maximum', pricingStrategy: { tokenToMaxAmount: '0x1' } },
+    ])('should return an order with $name amount', async ({ pricingStrategy }) => {
+      const order = aDCAOrder();
+      // Given
+      const response = aPage([
+        {
+          ...order,
+          pricingStrategy,
+          sellAmount: toBeHex(parseUnits('1', 18)),
+          sellAmountPerCycle: toBeHex(parseUnits('1', 18)),
+          amountSold: toBeHex(parseUnits('1', 18)),
+          amountBought: toBeHex(parseUnits('1', 18)),
+          averageAmountBought: toBeHex(parseUnits('1', 18)),
+        },
+      ]);
+
+      const request = { traderAddress: '0x0' };
+      fetchMock.get(`begin:${BASE_URL}/dca/${DCA_API_VERSION}/orders?`, response);
+
+      // When
+      const result = (await getDcaOrders(request)).content;
+
+      // Then
+      expect(result).toStrictEqual([{ ...order, pricingStrategy }]);
+    });
+
     it('should throw Error with status code when status > 400', async () => {
       // Given
       const request = { traderAddress: '0x0' };

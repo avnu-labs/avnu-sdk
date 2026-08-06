@@ -85,7 +85,7 @@ export const parseResponseWithSchema = <T extends z.ZodTypeAny>(
       return schema.parse(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new Error(`Invalid API response: ${error.message}`);
+        throw new Error(`Invalid API response:\n${z.prettifyError(error)}`);
       }
       throw error;
     }
