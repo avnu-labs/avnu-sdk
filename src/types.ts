@@ -421,8 +421,8 @@ export interface GetDcaOrdersParams extends Pageable {
 }
 
 export interface PricingStrategy {
-  tokenToMinAmount: string | undefined;
-  tokenToMaxAmount: string | undefined;
+  tokenToMinAmount?: string;
+  tokenToMaxAmount?: string;
 }
 
 export interface DcaTrade {

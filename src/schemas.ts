@@ -11,6 +11,7 @@ import {
   Fee,
   type GlobalMarket,
   MarketPrice,
+  type PricingStrategy,
   type Quote,
   Route,
   Source,
@@ -112,13 +113,10 @@ export const DcaTradeSchema = z.object({
 
 export const DcaOrderStatusSchema = z.enum(DcaOrderStatus);
 
-export const PricingStrategySchema = z.union([
-  z.object({
-    tokenToMinAmount: z.string().or(z.undefined()),
-    tokenToMaxAmount: z.string().or(z.undefined()),
-  }),
-  z.object({}).strict(),
-]) as z.ZodType<{ tokenToMinAmount: string | undefined; tokenToMaxAmount: string | undefined } | Record<string, never>>;
+export const PricingStrategySchema = z.object({
+  tokenToMinAmount: z.string().optional(),
+  tokenToMaxAmount: z.string().optional(),
+}) satisfies z.ZodType<PricingStrategy>;
 
 export const DcaOrderSchema = z.object({
   id: z.string(),
