@@ -77,7 +77,7 @@
     "jest": "30.4.2",
     "knip": "^6.26.0",
     "node-fetch": "2",
-    "starknet": "10.4.0",
+    "starknet": "10.6.8",
     "prettier": "3.9.5",
     "size-limit": "12.1.0",
     "tsup": "8.5.1",
