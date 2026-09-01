@@ -15,12 +15,14 @@ import {
 } from './types';
 import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postRequest } from './utils';
 
+const MAX_DCA_ORDERS_PAGE_SIZE = 25;
+
 /**
  * Get the DCA orders for a given trader
  * @param params.traderAddress The trader address
  * @param params.status The status of the orders (ACTIVE, CLOSED, INDEXING)
  * @param params.page The page number
- * @param params.size The page size
+ * @param params.size The page size (maximum 25)
  * @param params.sort The sort order
  * @param options Optional SDK configuration
  * @returns The page of DCA orders corresponding to the request params
@@ -29,6 +31,10 @@ const getDcaOrders = async (
   { traderAddress, status, page, size, sort }: GetDcaOrdersParams,
   options?: AvnuOptions,
 ): Promise<Page<DcaOrder>> => {
+  if (size !== undefined && size > MAX_DCA_ORDERS_PAGE_SIZE) {
+    throw new Error(`DCA order page size must not exceed ${MAX_DCA_ORDERS_PAGE_SIZE}`);
+  }
+
   const params = qs.stringify({ traderAddress, status, page, size, sort }, { arrayFormat: 'repeat' });
 
   return fetch(`${getBaseUrl(options)}/dca/${DCA_API_VERSION}/orders?${params}`, getRequest(options)).then((response) =>

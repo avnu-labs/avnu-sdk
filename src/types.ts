@@ -418,6 +418,12 @@ export interface Apr {
 export interface GetDcaOrdersParams extends Pageable {
   traderAddress: string;
   status?: DcaOrderStatus;
+  /**
+   * Number of DCA orders to return per page.
+   *
+   * The DCA API accepts a maximum page size of 25.
+   */
+  size?: number;
 }
 
 export interface PricingStrategy {
