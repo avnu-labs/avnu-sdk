@@ -37,6 +37,40 @@ describe('DCA services', () => {
       expect(result).toStrictEqual(expected);
     });
 
+    it('should forward the maximum page size', async () => {
+      // Given
+      const response = aPage([]);
+      const url = `${BASE_URL}/dca/${DCA_API_VERSION}/orders?traderAddress=0x0&size=25`;
+      fetchMock.get(url, response);
+
+      // When
+      await getDcaOrders({ traderAddress: '0x0', size: 25 });
+
+      // Then
+      expect(fetchMock.called(url)).toBe(true);
+    });
+
+    it('should reject a page size above the API limit before sending a request', async () => {
+      // When & Then
+      await expect(getDcaOrders({ traderAddress: '0x0', size: 26 })).rejects.toEqual(
+        new Error('DCA order page size must not exceed 25'),
+      );
+      expect(fetchMock.calls()).toHaveLength(0);
+    });
+
+    it('should preserve the default page size when size is omitted', async () => {
+      // Given
+      const response = aPage([]);
+      const url = `${BASE_URL}/dca/${DCA_API_VERSION}/orders?traderAddress=0x0`;
+      fetchMock.get(url, response);
+
+      // When
+      await getDcaOrders({ traderAddress: '0x0' });
+
+      // Then
+      expect(fetchMock.called(url)).toBe(true);
+    });
+
     it.each([
       { name: 'no', pricingStrategy: {} },
       { name: 'only a minimum', pricingStrategy: { tokenToMinAmount: '0x1' } },
