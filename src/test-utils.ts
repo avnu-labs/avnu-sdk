@@ -1,5 +1,5 @@
 import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
-import { AccountInterface, ExecutionParameters, PaymasterInterface } from 'starknet';
+import { AccountInterface, constants, ExecutionParameters, PaymasterInterface } from 'starknet';
 import { aPrivateSwapCallAndProof } from './fixtures';
 import { PrivateSwapProver } from './types';
 
@@ -13,6 +13,9 @@ export const mockExecutionParams = {
 export const createMockAccount = (address = '0x123'): jest.Mocked<AccountInterface> =>
   ({
     address,
+    provider: {
+      getChainId: jest.fn().mockResolvedValue(constants.StarknetChainId.SN_SEPOLIA),
+    },
     execute: jest.fn().mockResolvedValue({ transaction_hash: '0xabc' }),
     signMessage: jest.fn().mockResolvedValue(['0x1', '0x2']),
   }) as unknown as jest.Mocked<AccountInterface>;

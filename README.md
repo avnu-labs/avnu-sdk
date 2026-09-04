@@ -49,7 +49,7 @@
 // Using npm
 npm install @avnu/avnu-sdk
 
-// or yarn 
+// or yarn
 yarn add @avnu/avnu-sdk
 ```
 
@@ -72,6 +72,26 @@ await executeSwap({
 });
 ```
 
+### Custom transaction fees
+
+Direct swap, DCA, and staking executions accept Starknet.js `UniversalDetails`. For example, you can set an
+explicit tip while keeping resource bound estimation automatic:
+
+```typescript
+await executeSwap({
+  quote: quotes[0],
+  slippage: 0.01,
+  provider: account,
+  executionDetails: {
+    tip: 0n, // FRI per L2 gas unit
+  },
+});
+```
+
+You can also provide `resourceBounds` through `executionDetails`. These details cannot be combined with an active
+paymaster. When using `WalletAccount`, the connected wallet retains final control over transaction fees and may not
+apply these details.
+
 ## Documentation
 
 For complete documentation, examples, and API reference, visit:
@@ -82,4 +102,3 @@ For complete documentation, examples, and API reference, visit:
 
 - Node.js >= 22
 - Starknet.js >= 10.0.0
-

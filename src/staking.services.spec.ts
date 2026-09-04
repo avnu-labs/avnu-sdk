@@ -335,17 +335,18 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const amount = parseUnits('100', 18);
       const avnuCalls = aAvnuCalls();
+      const executionDetails = { tip: 1n };
       fetchMock.post(
         `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/stake`,
         avnuCalls,
       );
 
       // When
-      const result = await executeStake({ provider: mockAccount, poolAddress, amount });
+      const result = await executeStake({ provider: mockAccount, poolAddress, amount, executionDetails });
 
       // Then
       expect(result).toStrictEqual({ transactionHash: '0xabc' });
-      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls);
+      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls, executionDetails);
     });
 
     it('should execute with paymaster', async () => {
@@ -382,17 +383,23 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const amount = parseUnits('100', 18);
       const avnuCalls = aAvnuCalls();
+      const executionDetails = { tip: 1n };
       fetchMock.post(
         `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/initiate-withdraw`,
         avnuCalls,
       );
 
       // When
-      const result = await executeInitiateUnstake({ provider: mockAccount, poolAddress, amount });
+      const result = await executeInitiateUnstake({
+        provider: mockAccount,
+        poolAddress,
+        amount,
+        executionDetails,
+      });
 
       // Then
       expect(result).toStrictEqual({ transactionHash: '0xabc' });
-      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls);
+      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls, executionDetails);
     });
 
     it('should execute with paymaster', async () => {
@@ -428,17 +435,18 @@ describe('Staking services', () => {
       const mockAccount = createMockAccount('0x0user');
       const poolAddress = '0x0pool';
       const avnuCalls = aAvnuCalls();
+      const executionDetails = { tip: 1n };
       fetchMock.post(
         `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/claim-withdraw`,
         avnuCalls,
       );
 
       // When
-      const result = await executeUnstake({ provider: mockAccount, poolAddress });
+      const result = await executeUnstake({ provider: mockAccount, poolAddress, executionDetails });
 
       // Then
       expect(result).toStrictEqual({ transactionHash: '0xabc' });
-      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls);
+      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls, executionDetails);
     });
 
     it('should execute with paymaster', async () => {
@@ -473,17 +481,23 @@ describe('Staking services', () => {
       const poolAddress = '0x0pool';
       const restake = true;
       const avnuCalls = aAvnuCalls();
+      const executionDetails = { tip: 1n };
       fetchMock.post(
         `${BASE_URL}/staking/${STAKING_API_VERSION}/pools/${poolAddress}/members/0x0user/claim-rewards`,
         avnuCalls,
       );
 
       // When
-      const result = await executeClaimRewards({ provider: mockAccount, poolAddress, restake });
+      const result = await executeClaimRewards({
+        provider: mockAccount,
+        poolAddress,
+        restake,
+        executionDetails,
+      });
 
       // Then
       expect(result).toStrictEqual({ transactionHash: '0xabc' });
-      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls);
+      expect(mockAccount.execute).toHaveBeenCalledWith(avnuCalls.calls, executionDetails);
     });
 
     it('should execute with paymaster', async () => {
