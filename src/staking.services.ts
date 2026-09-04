@@ -1,6 +1,6 @@
 import { toBeHex } from 'ethers';
 import { STAKING_API_VERSION } from './constants';
-import { executeAllPaymasterFlow } from './paymaster.services';
+import { executeCalls } from './execute';
 import { StakingInfoSchema, UserStakingInfoSchema } from './schemas';
 import {
   AvnuCalls,
@@ -137,12 +137,9 @@ const claimRewardsToCalls = async (params: ClaimRewardsToCallsParams, options?: 
  * @returns The transaction hash
  */
 const executeStake = async (params: InvokeStakeParams, options?: AvnuOptions): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, poolAddress, amount } = params;
+  const { provider, poolAddress, amount } = params;
   const { calls } = await stakeToCalls({ poolAddress, userAddress: provider.address, amount }, options);
-  if (paymaster && paymaster.active) {
-    return executeAllPaymasterFlow({ paymaster, provider, calls });
-  }
-  return provider.execute(calls).then((result) => ({ transactionHash: result.transaction_hash }));
+  return executeCalls(params, calls);
 };
 
 /**
@@ -161,12 +158,9 @@ const executeInitiateUnstake = async (
   params: InvokeInitiateUnstakeParams,
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, poolAddress, amount } = params;
+  const { provider, poolAddress, amount } = params;
   const { calls } = await initiateUnstakeToCalls({ poolAddress, userAddress: provider.address, amount }, options);
-  if (paymaster && paymaster.active) {
-    return executeAllPaymasterFlow({ paymaster, provider, calls });
-  }
-  return provider.execute(calls).then((result) => ({ transactionHash: result.transaction_hash }));
+  return executeCalls(params, calls);
 };
 
 /**
@@ -184,12 +178,9 @@ const executeUnstake = async (
   params: InvokeUnstakeParams,
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, poolAddress } = params;
+  const { provider, poolAddress } = params;
   const { calls } = await unstakeToCalls({ poolAddress, userAddress: provider.address }, options);
-  if (paymaster && paymaster.active) {
-    return executeAllPaymasterFlow({ paymaster, provider, calls });
-  }
-  return provider.execute(calls).then((result) => ({ transactionHash: result.transaction_hash }));
+  return executeCalls(params, calls);
 };
 
 /**
@@ -208,12 +199,9 @@ const executeClaimRewards = async (
   params: InvokeClaimRewardsParams,
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, poolAddress, restake } = params;
+  const { provider, poolAddress, restake } = params;
   const { calls } = await claimRewardsToCalls({ poolAddress, userAddress: provider.address, restake }, options);
-  if (paymaster && paymaster.active) {
-    return executeAllPaymasterFlow({ paymaster, provider, calls });
-  }
-  return provider.execute(calls).then((result) => ({ transactionHash: result.transaction_hash }));
+  return executeCalls(params, calls);
 };
 
 export {

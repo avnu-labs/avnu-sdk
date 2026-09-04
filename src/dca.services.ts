@@ -1,6 +1,6 @@
 import qs from 'qs';
 import { DCA_API_VERSION } from './constants';
-import { executeAllPaymasterFlow } from './paymaster.services';
+import { executeCalls } from './execute';
 import { DcaOrderSchema, PageSchema } from './schemas';
 import {
   AvnuCalls,
@@ -97,14 +97,9 @@ const executeCreateDca = async (
   params: InvokeCreateDcaParams,
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, order } = params;
+  const { order } = params;
   const { calls } = await createDcaToCalls(order, options);
-
-  if (paymaster && paymaster.active) {
-    return executeAllPaymasterFlow({ paymaster, provider, calls });
-  }
-  const result = await provider.execute(calls);
-  return { transactionHash: result.transaction_hash };
+  return executeCalls(params, calls);
 };
 
 /**
@@ -122,15 +117,9 @@ const executeCancelDca = async (
   params: InvokeCancelDcaParams,
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, orderAddress } = params;
+  const { orderAddress } = params;
   const { calls } = await cancelDcaToCalls(orderAddress, options);
-
-  if (paymaster && paymaster.active) {
-    return executeAllPaymasterFlow({ paymaster, provider, calls });
-  }
-
-  const result = await provider.execute(calls);
-  return { transactionHash: result.transaction_hash };
+  return executeCalls(params, calls);
 };
 
 export { cancelDcaToCalls, createDcaToCalls, executeCancelDca, executeCreateDca, getDcaOrders };

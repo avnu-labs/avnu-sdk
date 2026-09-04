@@ -2,7 +2,7 @@ import { toBeHex } from 'ethers';
 import qs from 'qs';
 import { z } from 'zod';
 import { SWAP_API_VERSION } from './constants';
-import { executeAllPaymasterFlow } from './paymaster.services';
+import { executeCalls } from './execute';
 import { QuoteSchema, SourceSchema } from './schemas';
 import {
   AvnuCalls,
@@ -91,7 +91,7 @@ const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promis
  * @returns The transaction hash
  */
 const executeSwap = async (params: InvokeSwapParams, options?: AvnuOptions): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, quote, executeApprove = true, slippage } = params;
+  const { provider, quote, executeApprove = true, slippage } = params;
 
   const chainId = await provider.provider.getChainId();
   if (chainId !== quote.chainId) {
@@ -103,12 +103,7 @@ const executeSwap = async (params: InvokeSwapParams, options?: AvnuOptions): Pro
     options,
   );
 
-  if (paymaster && paymaster.active) {
-    return executeAllPaymasterFlow({ paymaster, provider, calls });
-  }
-
-  const result = await provider.execute(calls);
-  return { transactionHash: result.transaction_hash };
+  return executeCalls(params, calls);
 };
 
 /**
