@@ -1,6 +1,6 @@
 import qs from 'qs';
 import { DCA_API_VERSION } from './constants';
-import { executeAllPaymasterFlow } from './paymaster.services';
+import { executeCalls } from './execute';
 import { DcaOrderSchema, PageSchema } from './schemas';
 import {
   AvnuCalls,
@@ -82,6 +82,7 @@ const cancelDcaToCalls = async (orderAddress: string, options?: AvnuOptions): Pr
  * @param params.paymaster.active True if the tx must be executed through a paymaster
  * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
  * @param params.paymaster.params The paymaster tx parameters
+ * @param params.executionDetails Starknet.js details for direct execution; incompatible with an active paymaster
  * @param params.order The DCA order to create
  * @param params.order.sellTokenAddress The address of the token to sell
  * @param params.order.buyTokenAddress The address of the token to buy
@@ -97,14 +98,9 @@ const executeCreateDca = async (
   params: InvokeCreateDcaParams,
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, order } = params;
+  const { order } = params;
   const { calls } = await createDcaToCalls(order, options);
-
-  if (paymaster && paymaster.active) {
-    return executeAllPaymasterFlow({ paymaster, provider, calls });
-  }
-  const result = await provider.execute(calls);
-  return { transactionHash: result.transaction_hash };
+  return executeCalls(params, calls);
 };
 
 /**
@@ -114,6 +110,7 @@ const executeCreateDca = async (
  * @param params.paymaster.active True if the tx must be executed through a paymaster
  * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
  * @param params.paymaster.params The paymaster tx parameters
+ * @param params.executionDetails Starknet.js details for direct execution; incompatible with an active paymaster
  * @param params.orderAddress The address of the DCA contract order to cancel
  * @param options Optional SDK configuration
  * @returns The transaction hash
@@ -122,15 +119,9 @@ const executeCancelDca = async (
   params: InvokeCancelDcaParams,
   options?: AvnuOptions,
 ): Promise<InvokeTransactionResponse> => {
-  const { provider, paymaster, orderAddress } = params;
+  const { orderAddress } = params;
   const { calls } = await cancelDcaToCalls(orderAddress, options);
-
-  if (paymaster && paymaster.active) {
-    return executeAllPaymasterFlow({ paymaster, provider, calls });
-  }
-
-  const result = await provider.execute(calls);
-  return { transactionHash: result.transaction_hash };
+  return executeCalls(params, calls);
 };
 
 export { cancelDcaToCalls, createDcaToCalls, executeCancelDca, executeCreateDca, getDcaOrders };

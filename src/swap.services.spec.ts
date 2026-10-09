@@ -6,10 +6,12 @@ import { aAvnuCalls, aQuote, aQuoteRequest, aSource } from './fixtures';
 import {
   calculateMaxSpendAmount,
   calculateMinReceivedAmount,
+  executeSwap,
   getQuotes,
   getSources,
   quoteToCalls,
 } from './swap.services';
+import { createMockAccount } from './test-utils';
 
 describe('Swap services', () => {
   beforeEach(() => {
@@ -160,6 +162,26 @@ describe('Swap services', () => {
       expect(quoteToCalls({ quoteId: '', takerAddress: '', slippage: 0.01 })).rejects.toEqual(
         Error('401 Unauthorized'),
       );
+    });
+  });
+
+  describe('executeSwap', () => {
+    it('should forward execution details', async () => {
+      const account = createMockAccount();
+      const quote = aQuote();
+      const avnuCalls = aAvnuCalls();
+      const executionDetails = { tip: 1n };
+      fetchMock.post(`${BASE_URL}/swap/${SWAP_API_VERSION}/build`, avnuCalls);
+
+      const result = await executeSwap({
+        provider: account,
+        quote,
+        slippage: 0.01,
+        executionDetails,
+      });
+
+      expect(result).toStrictEqual({ transactionHash: '0xabc' });
+      expect(account.execute).toHaveBeenCalledWith(avnuCalls.calls, executionDetails);
     });
   });
 

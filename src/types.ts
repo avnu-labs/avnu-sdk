@@ -1,6 +1,6 @@
 import { OutsideExecutionTypedData } from '@starknet-io/starknet-types-09';
 import type { Duration } from 'moment';
-import type { STRK20_ACTION, STRK20_CALL_AND_PROOF } from 'starknet';
+import type { STRK20_ACTION, STRK20_CALL_AND_PROOF, UniversalDetails } from 'starknet';
 import { AccountInterface, Call, ExecutionParameters, PaymasterInterface } from 'starknet';
 import { DcaOrderStatus, DcaTradeStatus, FeedDateRange, FeedResolution, PriceFeedType, SourceType } from './enums';
 
@@ -72,6 +72,8 @@ export interface InvokeTransactionResponse {
 export interface InvokeParams {
   provider: AccountInterface;
   paymaster?: InvokePaymasterParams;
+  /** Starknet details for direct execution. Cannot be used with an active paymaster; WalletAccount ignores them. */
+  executionDetails?: UniversalDetails;
 }
 
 /* Error Part */

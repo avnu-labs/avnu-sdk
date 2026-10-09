@@ -55,6 +55,7 @@ src/
 ├── types.ts              # Complete TypeScript definitions
 ├── schemas.ts            # Zod schemas with transformers
 ├── utils.ts              # Shared utilities
+├── execute.ts            # Shared direct/paymaster execution
 ├── swap.services.ts      # Swap service
 ├── dca.services.ts       # DCA service
 ├── token.services.ts     # Token service
@@ -93,7 +94,7 @@ Build Starknet calls from a quote, including approval and slippage handling. Set
 ```typescript
 executeSwap(params: InvokeSwapParams, options?: AvnuOptions): Promise<InvokeTransactionResponse>
 ```
-Execute a swap with optional paymaster support for sponsored transactions.
+Execute a swap with optional paymaster support or Starknet.js `executionDetails` for direct transactions.
 
 **Slippage helpers:**
 ```typescript
@@ -469,7 +470,7 @@ The `types.ts` file contains all TypeScript definitions:
 
 **Main categories:**
 - **API Requests/Responses**: `Quote`, `Token`, `Page<T>`, `TokenPrice`
-- **Execution types**: `InvokeSwapParams`, `InvokeCreateDcaParams`, `InvokeParams`, `InvokePaymasterParams`
+- **Execution types**: `InvokeSwapParams`, `InvokeCreateDcaParams`, `InvokeParams` (optional `executionDetails?: UniversalDetails`), `InvokePaymasterParams`
 - **Market Data**: `TokenMarketData`, `StarknetMarket`, `GlobalMarket`, `FeedProps`
 - **Staking**: `StakingInfo`, `UserStakingInfo`, `Action`, `Apr`
 - **Options**: `AvnuOptions` (baseUrl, impulseBaseUrl, paymasterBaseUrl, abortSignal, avnuPublicKey)
@@ -739,7 +740,7 @@ The `examples/` directory contains integrations:
 
 7. **Build/Execute pattern**: DCA and Staking have separate functions for building and executing
 
-8. **Integrated paymaster**: All `execute*` functions accept `InvokePaymasterParams` (provider, params, active) for sponsored transactions
+8. **Transaction execution**: All `execute*` functions accept optional `InvokePaymasterParams` for sponsored transactions and Starknet.js `executionDetails?: UniversalDetails` for direct execution. An active paymaster is incompatible with `executionDetails`; Starknet.js 10.4 `WalletAccount` ignores these details.
 
 9. **Pagination**: Use `Page<T>` type for lists (content, totalPages, totalElements, size, number)
 

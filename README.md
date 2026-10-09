@@ -49,7 +49,7 @@
 // Using npm
 npm install @avnu/avnu-sdk
 
-// or yarn 
+// or yarn
 yarn add @avnu/avnu-sdk
 ```
 
@@ -72,6 +72,46 @@ await executeSwap({
 });
 ```
 
+### Custom transaction fees
+
+Direct swap, DCA, and staking executions accept Starknet.js `UniversalDetails`. With a Starknet.js `Account`, set
+the tip explicitly while leaving resource bound estimation to Starknet.js:
+
+```typescript
+await executeSwap({
+  quote: quotes[0],
+  slippage: 0.01,
+  provider: account,
+  executionDetails: {
+    tip: 0n, // FRI per L2 gas unit; a zero tip may delay inclusion during congestion
+  },
+});
+```
+
+The tip is charged per L2 gas unit used, in addition to resource fees. `resourceBounds` limit resource amounts and
+their unit prices, but **do not cap the tip**. If you need bounds for the exact swap calls, build and estimate those
+calls before executing them:
+
+```typescript
+import { quoteToCalls } from '@avnu/avnu-sdk';
+
+const { calls } = await quoteToCalls({
+  quoteId: quotes[0].quoteId,
+  takerAddress: account.address,
+  slippage: 0.01,
+});
+const tip = 0n;
+const { resourceBounds } = await account.estimateInvokeFee(calls, { tip });
+await account.execute(calls, { tip, resourceBounds });
+```
+
+In Starknet.js 10.4, the estimate's `overall_fee` excludes the tip; include `tip * resourceBounds.l2_gas.max_amount`
+when calculating the maximum total fee.
+
+`resourceBounds` is a `ResourceBoundsBN` object with `l1_gas`, `l1_data_gas`, and `l2_gas` entries, each containing
+`max_amount` and `max_price_per_unit`. `executionDetails` cannot be combined with an active paymaster. Starknet.js
+10.4 `WalletAccount` ignores these details and leaves fee selection to the connected wallet.
+
 ## Documentation
 
 For complete documentation, examples, and API reference, visit:
@@ -82,4 +122,3 @@ For complete documentation, examples, and API reference, visit:
 
 - Node.js >= 22
 - Starknet.js >= 10.0.0
-
