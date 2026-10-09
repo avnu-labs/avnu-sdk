@@ -30,6 +30,14 @@ interface JsonRpcResponse<T> {
   error?: { code: number; message: string; data?: unknown };
 }
 
+const parseJson = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+};
+
 /**
  * Low-level JSON-RPC call against the AVNU privacy paymaster.
  * !! Be careful if you run this on a client with a paymaster API key: it will leak the key.
@@ -51,18 +59,18 @@ const paymasterRpcCall = <T>(
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
     signal: options?.abortSignal,
   }).then(async (response) => {
-    // Proxies and gateways may answer with a non-JSON body (e.g. an HTML 502 page)
-    const json = (await response.json().catch(() => ({}))) as JsonRpcResponse<T>;
-    if (json.error) {
+    // Read errors (e.g. an abort) propagate; only a non-JSON body (e.g. an HTML 502 page) is tolerated
+    const json = parseJson(await response.text()) as JsonRpcResponse<T> | undefined;
+    if (json?.error) {
       throw new PaymasterRpcError(method, json.error.message, json.error.code, json.error.data);
     }
     if (!response.ok) {
       throw new Error(`Paymaster ${method}: ${response.status} ${response.statusText}`);
     }
-    if (!('result' in json)) {
+    if (json?.result === undefined) {
       throw new Error(`Paymaster ${method}: invalid JSON-RPC response`);
     }
-    return json.result as T;
+    return json.result;
   });
 
 /**

@@ -223,6 +223,46 @@ describe('Privacy services', () => {
       );
     });
 
+    it('should throw the HTTP status when the response body is JSON null', async () => {
+      // Given
+      const feeMode = aPrivateFeeMode();
+      const callAndProof = aPrivateSwapCallAndProof();
+      fetchMock.post(PAYMASTER_BASE_URL, { status: 503, body: 'null' });
+
+      // When & Then
+      expect.assertions(1);
+      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toEqual(
+        new Error('Paymaster paymaster_executeTransaction: 503 Service Unavailable'),
+      );
+    });
+
+    it('should throw when a successful response is a JSON primitive', async () => {
+      // Given
+      const feeMode = aPrivateFeeMode();
+      const callAndProof = aPrivateSwapCallAndProof();
+      fetchMock.post(PAYMASTER_BASE_URL, { status: 200, body: '"ok"' });
+
+      // When & Then
+      expect.assertions(1);
+      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toEqual(
+        new Error('Paymaster paymaster_executeTransaction: invalid JSON-RPC response'),
+      );
+    });
+
+    it('should propagate an abort while reading the response body', async () => {
+      // Given
+      const feeMode = aPrivateFeeMode();
+      const callAndProof = aPrivateSwapCallAndProof();
+      const abortError = new DOMException('This operation was aborted', 'AbortError');
+      const response = { ok: true, status: 200, text: () => Promise.reject(abortError) } as unknown as Response;
+      const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(response);
+
+      // When & Then
+      expect.assertions(1);
+      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toBe(abortError);
+      fetchSpy.mockRestore();
+    });
+
     it('should preserve transaction execution error data', async () => {
       // Given
       const feeMode = aPrivateFeeMode();
