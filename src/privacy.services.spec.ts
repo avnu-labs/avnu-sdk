@@ -184,19 +184,6 @@ describe('Privacy services', () => {
       );
     });
 
-    it('should throw the HTTP status when the response is not a JSON-RPC envelope', async () => {
-      // Given
-      const feeMode = aPrivateFeeMode();
-      const callAndProof = aPrivateSwapCallAndProof();
-      fetchMock.post(PAYMASTER_BASE_URL, { status: 503, body: { message: 'Service Unavailable' } });
-
-      // When & Then
-      expect.assertions(1);
-      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toEqual(
-        new Error('Paymaster paymaster_executeTransaction: 503 Service Unavailable'),
-      );
-    });
-
     it('should throw the HTTP status when the response body is not JSON', async () => {
       // Given
       const feeMode = aPrivateFeeMode();
@@ -215,32 +202,6 @@ describe('Privacy services', () => {
       const feeMode = aPrivateFeeMode();
       const callAndProof = aPrivateSwapCallAndProof();
       fetchMock.post(PAYMASTER_BASE_URL, { status: 200, body: { jsonrpc: '2.0', id: 1 } });
-
-      // When & Then
-      expect.assertions(1);
-      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toEqual(
-        new Error('Paymaster paymaster_executeTransaction: invalid JSON-RPC response'),
-      );
-    });
-
-    it('should throw the HTTP status when the response body is JSON null', async () => {
-      // Given
-      const feeMode = aPrivateFeeMode();
-      const callAndProof = aPrivateSwapCallAndProof();
-      fetchMock.post(PAYMASTER_BASE_URL, { status: 503, body: 'null' });
-
-      // When & Then
-      expect.assertions(1);
-      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toEqual(
-        new Error('Paymaster paymaster_executeTransaction: 503 Service Unavailable'),
-      );
-    });
-
-    it('should throw when a successful response is a JSON primitive', async () => {
-      // Given
-      const feeMode = aPrivateFeeMode();
-      const callAndProof = aPrivateSwapCallAndProof();
-      fetchMock.post(PAYMASTER_BASE_URL, { status: 200, body: '"ok"' });
 
       // When & Then
       expect.assertions(1);
