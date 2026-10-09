@@ -1,5 +1,5 @@
 import type { STRK20_ACTION } from 'starknet';
-import { Call, hash, num, transaction } from 'starknet';
+import { Call, CallData, hash, num, transaction } from 'starknet';
 import { quoteToCalls } from './swap.services';
 import {
   AvnuOptions,
@@ -30,6 +30,14 @@ interface JsonRpcResponse<T> {
   error?: { code: number; message: string; data?: unknown };
 }
 
+const parseJson = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+};
+
 /**
  * Low-level JSON-RPC call against the AVNU privacy paymaster.
  * !! Be careful if you run this on a client with a paymaster API key: it will leak the key.
@@ -50,14 +58,20 @@ const paymasterRpcCall = <T>(
     },
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
     signal: options?.abortSignal,
-  })
-    .then((response) => response.json() as Promise<JsonRpcResponse<T>>)
-    .then((json) => {
-      if (json.error) {
-        throw new PaymasterRpcError(method, json.error.message, json.error.code, json.error.data);
-      }
-      return json.result as T;
-    });
+  }).then(async (response) => {
+    // Read errors (e.g. an abort) propagate; only a non-JSON body (e.g. an HTML 502 page) is tolerated
+    const json = parseJson(await response.text()) as JsonRpcResponse<T> | undefined;
+    if (json?.error) {
+      throw new PaymasterRpcError(method, json.error.message, json.error.code, json.error.data);
+    }
+    if (!response.ok) {
+      throw new Error(`Paymaster ${method}: ${response.status} ${response.statusText}`);
+    }
+    if (json?.result === undefined) {
+      throw new Error(`Paymaster ${method}: invalid JSON-RPC response`);
+    }
+    return json.result;
+  });
 
 /**
  * Convert the public fee mode into the `sponsored_private` shape expected by the paymaster.
@@ -74,7 +88,7 @@ const toRpcFeeMode = (feeMode: PrivateFeeMode) => ({
 const toPaymasterCall = (call: Call): PaymasterCall => ({
   to: call.contractAddress,
   selector: hash.getSelectorFromName(call.entrypoint),
-  calldata: (call.calldata as string[]) ?? [],
+  calldata: CallData.toCalldata(call.calldata).map(toFelt),
 });
 
 /**
@@ -187,14 +201,7 @@ const buildStrk20Actions = (plan: PrivateSwapPlan): STRK20_ACTION[] => [
 const createStrk20WalletProver = (account: Strk20ProverAccount): PrivateSwapProver => ({
   buildAndProve: async (plan) => {
     const { call, proof } = await account.strk20PrepareInvoke(buildStrk20Actions(plan));
-    return {
-      call: {
-        contractAddress: call.contract_address,
-        entrypoint: call.entry_point,
-        calldata: call.calldata ?? [],
-      },
-      proof: { data: proof.data, proofFacts: proof.proof_facts },
-    };
+    return { call, proof: { data: proof.data, proofFacts: proof.proof_facts } };
   },
 });
 

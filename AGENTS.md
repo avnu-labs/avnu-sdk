@@ -635,7 +635,7 @@ class PaymasterRpcError extends Error {
 ```json
 {
   "ethers": "^6.15.0",
-  "starknet": "^10.0.0"
+  "starknet": "^10.6.0"
 }
 ```
 
@@ -740,7 +740,7 @@ The `examples/` directory contains integrations:
 
 7. **Build/Execute pattern**: DCA and Staking have separate functions for building and executing
 
-8. **Transaction execution**: All `execute*` functions accept optional `InvokePaymasterParams` for sponsored transactions and Starknet.js `executionDetails?: UniversalDetails` for direct execution. An active paymaster is incompatible with `executionDetails`; Starknet.js 10.4 `WalletAccount` ignores these details.
+8. **Transaction execution**: All `execute*` functions accept optional `InvokePaymasterParams` for sponsored transactions and Starknet.js `executionDetails?: UniversalDetails` for direct execution. An active paymaster is incompatible with `executionDetails`; Starknet.js `WalletAccount` ignores these details.
 
 9. **Pagination**: Use `Page<T>` type for lists (content, totalPages, totalElements, size, number)
 

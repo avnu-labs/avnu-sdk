@@ -184,6 +184,46 @@ describe('Privacy services', () => {
       );
     });
 
+    it('should throw the HTTP status when the response body is not JSON', async () => {
+      // Given
+      const feeMode = aPrivateFeeMode();
+      const callAndProof = aPrivateSwapCallAndProof();
+      fetchMock.post(PAYMASTER_BASE_URL, { status: 502, body: '<html>Bad Gateway</html>' });
+
+      // When & Then
+      expect.assertions(1);
+      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toEqual(
+        new Error('Paymaster paymaster_executeTransaction: 502 Bad Gateway'),
+      );
+    });
+
+    it('should throw when a successful response has no JSON-RPC result', async () => {
+      // Given
+      const feeMode = aPrivateFeeMode();
+      const callAndProof = aPrivateSwapCallAndProof();
+      fetchMock.post(PAYMASTER_BASE_URL, { status: 200, body: { jsonrpc: '2.0', id: 1 } });
+
+      // When & Then
+      expect.assertions(1);
+      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toEqual(
+        new Error('Paymaster paymaster_executeTransaction: invalid JSON-RPC response'),
+      );
+    });
+
+    it('should propagate an abort while reading the response body', async () => {
+      // Given
+      const feeMode = aPrivateFeeMode();
+      const callAndProof = aPrivateSwapCallAndProof();
+      const abortError = new DOMException('This operation was aborted', 'AbortError');
+      const response = { ok: true, status: 200, text: () => Promise.reject(abortError) } as unknown as Response;
+      const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(response);
+
+      // When & Then
+      expect.assertions(1);
+      await expect(submitPrivateSwap({ callAndProof, feeMode })).rejects.toBe(abortError);
+      fetchSpy.mockRestore();
+    });
+
     it('should preserve transaction execution error data', async () => {
       // Given
       const feeMode = aPrivateFeeMode();
@@ -400,7 +440,7 @@ describe('Privacy services', () => {
       // Given
       const plan = aPrivateSwapPlan();
       const walletArtifact: STRK20_CALL_AND_PROOF = {
-        call: { contract_address: '0x11', entry_point: 'apply_actions', calldata: ['0x1'] },
+        call: { contractAddress: '0x11', entrypoint: 'apply_actions', calldata: ['0x1'] },
         proof: { data: 'proof-data', output: ['0x2'], proof_facts: ['0x3'] },
       };
       const account = { strk20PrepareInvoke: jest.fn().mockResolvedValue(walletArtifact) };
@@ -414,22 +454,6 @@ describe('Privacy services', () => {
         call: { contractAddress: '0x11', entrypoint: 'apply_actions', calldata: ['0x1'] },
         proof: { data: 'proof-data', proofFacts: ['0x3'] },
       });
-    });
-
-    it('should default missing wallet calldata to an empty array', async () => {
-      // Given
-      const account = {
-        strk20PrepareInvoke: jest.fn().mockResolvedValue({
-          call: { contract_address: '0x11', entry_point: 'apply_actions' },
-          proof: { data: '', output: [], proof_facts: [] },
-        }),
-      };
-
-      // When
-      const result = await createStrk20WalletProver(account).buildAndProve(aPrivateSwapPlan());
-
-      // Then
-      expect(result.call.calldata).toStrictEqual([]);
     });
   });
 
@@ -447,6 +471,17 @@ describe('Privacy services', () => {
         selector: hash.getSelectorFromName(call.entrypoint),
         calldata: call.calldata,
       });
+    });
+
+    it('should compile raw calldata into hex felts', () => {
+      // Given
+      const call = aCall({ calldata: [1n, 2, '3', '0x4'] });
+
+      // When
+      const result = toPaymasterCall(call);
+
+      // Then
+      expect(result.calldata).toStrictEqual(['0x1', '0x2', '0x3', '0x4']);
     });
 
     it('should default calldata to an empty array when undefined', () => {
