@@ -20,7 +20,7 @@ import { getBaseUrl, getRequest, parseResponse, parseResponseWithSchema, postReq
  * @param params.traderAddress The trader address
  * @param params.status The status of the orders (ACTIVE, CLOSED, INDEXING)
  * @param params.page The page number
- * @param params.size The page size
+ * @param params.size The page size (maximum 25)
  * @param params.sort The sort order
  * @param options Optional SDK configuration
  * @returns The page of DCA orders corresponding to the request params
