@@ -400,7 +400,7 @@ describe('Privacy services', () => {
       // Given
       const plan = aPrivateSwapPlan();
       const walletArtifact: STRK20_CALL_AND_PROOF = {
-        call: { contract_address: '0x11', entry_point: 'apply_actions', calldata: ['0x1'] },
+        call: { contractAddress: '0x11', entrypoint: 'apply_actions', calldata: ['0x1'] },
         proof: { data: 'proof-data', output: ['0x2'], proof_facts: ['0x3'] },
       };
       const account = { strk20PrepareInvoke: jest.fn().mockResolvedValue(walletArtifact) };
@@ -414,22 +414,6 @@ describe('Privacy services', () => {
         call: { contractAddress: '0x11', entrypoint: 'apply_actions', calldata: ['0x1'] },
         proof: { data: 'proof-data', proofFacts: ['0x3'] },
       });
-    });
-
-    it('should default missing wallet calldata to an empty array', async () => {
-      // Given
-      const account = {
-        strk20PrepareInvoke: jest.fn().mockResolvedValue({
-          call: { contract_address: '0x11', entry_point: 'apply_actions' },
-          proof: { data: '', output: [], proof_facts: [] },
-        }),
-      };
-
-      // When
-      const result = await createStrk20WalletProver(account).buildAndProve(aPrivateSwapPlan());
-
-      // Then
-      expect(result.call.calldata).toStrictEqual([]);
     });
   });
 

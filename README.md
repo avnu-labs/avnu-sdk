@@ -105,12 +105,12 @@ const { resourceBounds } = await account.estimateInvokeFee(calls, { tip });
 await account.execute(calls, { tip, resourceBounds });
 ```
 
-In Starknet.js 10.4, the estimate's `overall_fee` excludes the tip; include `tip * resourceBounds.l2_gas.max_amount`
+In Starknet.js, the estimate's `overall_fee` excludes the tip; include `tip * resourceBounds.l2_gas.max_amount`
 when calculating the maximum total fee.
 
 `resourceBounds` is a `ResourceBoundsBN` object with `l1_gas`, `l1_data_gas`, and `l2_gas` entries, each containing
 `max_amount` and `max_price_per_unit`. `executionDetails` cannot be combined with an active paymaster. Starknet.js
-10.4 `WalletAccount` ignores these details and leaves fee selection to the connected wallet.
+`WalletAccount` ignores these details and leaves fee selection to the connected wallet.
 
 ## Documentation
 
@@ -121,4 +121,4 @@ For complete documentation, examples, and API reference, visit:
 ## Requirements
 
 - Node.js >= 22
-- Starknet.js >= 10.0.0
+- Starknet.js >= 10.6.0

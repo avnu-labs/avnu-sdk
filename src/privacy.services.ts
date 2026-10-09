@@ -187,14 +187,7 @@ const buildStrk20Actions = (plan: PrivateSwapPlan): STRK20_ACTION[] => [
 const createStrk20WalletProver = (account: Strk20ProverAccount): PrivateSwapProver => ({
   buildAndProve: async (plan) => {
     const { call, proof } = await account.strk20PrepareInvoke(buildStrk20Actions(plan));
-    return {
-      call: {
-        contractAddress: call.contract_address,
-        entrypoint: call.entry_point,
-        calldata: call.calldata ?? [],
-      },
-      proof: { data: proof.data, proofFacts: proof.proof_facts },
-    };
+    return { call, proof: { data: proof.data, proofFacts: proof.proof_facts } };
   },
 });
 
