@@ -131,6 +131,7 @@ const claimRewardsToCalls = async (params: ClaimRewardsToCallsParams, options?: 
  * @param params.paymaster.active True if the tx must be executed through a paymaster
  * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
  * @param params.paymaster.params The paymaster tx parameters
+ * @param params.executionDetails Starknet.js details for direct execution; incompatible with an active paymaster
  * @param params.poolAddress The staking pool address
  * @param params.amount The amount to stake
  * @param options Optional SDK configuration
@@ -149,6 +150,7 @@ const executeStake = async (params: InvokeStakeParams, options?: AvnuOptions): P
  * @param params.paymaster.active True if the tx must be executed through a paymaster
  * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
  * @param params.paymaster.params The paymaster tx parameters
+ * @param params.executionDetails Starknet.js details for direct execution; incompatible with an active paymaster
  * @param params.poolAddress The staking pool address
  * @param params.amount The amount to initiate withdrawal
  * @param options Optional SDK configuration
@@ -170,6 +172,7 @@ const executeInitiateUnstake = async (
  * @param params.paymaster.active True if the tx must be executed through a paymaster
  * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
  * @param params.paymaster.params The paymaster tx parameters
+ * @param params.executionDetails Starknet.js details for direct execution; incompatible with an active paymaster
  * @param params.poolAddress The staking pool address
  * @param options Optional SDK configuration
  * @returns The transaction hash
@@ -190,6 +193,7 @@ const executeUnstake = async (
  * @param params.paymaster.active True if the tx must be executed through a paymaster
  * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
  * @param params.paymaster.params The paymaster tx parameters
+ * @param params.executionDetails Starknet.js details for direct execution; incompatible with an active paymaster
  * @param params.poolAddress The staking pool address
  * @param params.restake Whether to restake the rewards or not(only for STRK rewards)
  * @param options Optional SDK configuration

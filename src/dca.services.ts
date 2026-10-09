@@ -82,6 +82,7 @@ const cancelDcaToCalls = async (orderAddress: string, options?: AvnuOptions): Pr
  * @param params.paymaster.active True if the tx must be executed through a paymaster
  * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
  * @param params.paymaster.params The paymaster tx parameters
+ * @param params.executionDetails Starknet.js details for direct execution; incompatible with an active paymaster
  * @param params.order The DCA order to create
  * @param params.order.sellTokenAddress The address of the token to sell
  * @param params.order.buyTokenAddress The address of the token to buy
@@ -109,6 +110,7 @@ const executeCreateDca = async (
  * @param params.paymaster.active True if the tx must be executed through a paymaster
  * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
  * @param params.paymaster.params The paymaster tx parameters
+ * @param params.executionDetails Starknet.js details for direct execution; incompatible with an active paymaster
  * @param params.orderAddress The address of the DCA contract order to cancel
  * @param options Optional SDK configuration
  * @returns The transaction hash

@@ -72,7 +72,7 @@ export interface InvokeTransactionResponse {
 export interface InvokeParams {
   provider: AccountInterface;
   paymaster?: InvokePaymasterParams;
-  /** Starknet transaction details forwarded to AccountInterface.execute. Cannot be used with an active paymaster. */
+  /** Starknet details for direct execution. Cannot be used with an active paymaster; WalletAccount ignores them. */
   executionDetails?: UniversalDetails;
 }
 

@@ -84,6 +84,7 @@ const quoteToCalls = (params: QuoteToCallsParams, options?: AvnuOptions): Promis
  * @param params.paymaster.active True if the tx must be executed through a paymaster
  * @param params.paymaster.provider The paymaster provider, must implement the PaymasterInterface
  * @param params.paymaster.params The paymaster parameters
+ * @param params.executionDetails Starknet.js details for direct execution; incompatible with an active paymaster
  * @param params.quote The selected quote. See `getQuotes`
  * @param params.executeApprove False if the taker already executed `approve`. Defaults to true
  * @param params.slippage The maximum acceptable slippage for the trade
