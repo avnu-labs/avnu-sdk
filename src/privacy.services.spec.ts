@@ -433,6 +433,17 @@ describe('Privacy services', () => {
       });
     });
 
+    it('should compile raw calldata into hex felts', () => {
+      // Given
+      const call = aCall({ calldata: [1n, 2, '3', '0x4'] });
+
+      // When
+      const result = toPaymasterCall(call);
+
+      // Then
+      expect(result.calldata).toStrictEqual(['0x1', '0x2', '0x3', '0x4']);
+    });
+
     it('should default calldata to an empty array when undefined', () => {
       // Given
       const call = aCall({ calldata: undefined });

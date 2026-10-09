@@ -1,5 +1,5 @@
 import type { STRK20_ACTION } from 'starknet';
-import { Call, hash, num, transaction } from 'starknet';
+import { Call, CallData, hash, num, transaction } from 'starknet';
 import { quoteToCalls } from './swap.services';
 import {
   AvnuOptions,
@@ -74,7 +74,7 @@ const toRpcFeeMode = (feeMode: PrivateFeeMode) => ({
 const toPaymasterCall = (call: Call): PaymasterCall => ({
   to: call.contractAddress,
   selector: hash.getSelectorFromName(call.entrypoint),
-  calldata: (call.calldata as string[]) ?? [],
+  calldata: CallData.toCalldata(call.calldata).map(toFelt),
 });
 
 /**
