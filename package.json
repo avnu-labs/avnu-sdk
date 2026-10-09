@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "8.0.2",
-    "@babel/preset-typescript": "7.28.5",
+    "@babel/preset-typescript": "8.0.1",
     "@size-limit/preset-small-lib": "12.1.0",
     "@types/jest": "30.0.0",
     "@types/node": "^25.2.2",
