@@ -50,14 +50,20 @@ const paymasterRpcCall = <T>(
     },
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
     signal: options?.abortSignal,
-  })
-    .then((response) => response.json() as Promise<JsonRpcResponse<T>>)
-    .then((json) => {
-      if (json.error) {
-        throw new PaymasterRpcError(method, json.error.message, json.error.code, json.error.data);
-      }
-      return json.result as T;
-    });
+  }).then(async (response) => {
+    // Proxies and gateways may answer with a non-JSON body (e.g. an HTML 502 page)
+    const json = (await response.json().catch(() => ({}))) as JsonRpcResponse<T>;
+    if (json.error) {
+      throw new PaymasterRpcError(method, json.error.message, json.error.code, json.error.data);
+    }
+    if (!response.ok) {
+      throw new Error(`Paymaster ${method}: ${response.status} ${response.statusText}`);
+    }
+    if (!('result' in json)) {
+      throw new Error(`Paymaster ${method}: invalid JSON-RPC response`);
+    }
+    return json.result as T;
+  });
 
 /**
  * Convert the public fee mode into the `sponsored_private` shape expected by the paymaster.
