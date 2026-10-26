@@ -61,7 +61,7 @@
   "devDependencies": {
     "@babel/preset-env": "8.0.2",
     "@babel/preset-typescript": "7.28.5",
-    "@size-limit/preset-small-lib": "13.0.3",
+    "@size-limit/preset-small-lib": "14.3.0",
     "@types/jest": "30.0.0",
     "@types/node": "^26.1.2",
     "@types/qs": "6.15.1",
@@ -79,7 +79,7 @@
     "node-fetch": "2",
     "starknet": "10.8.0",
     "prettier": "3.9.5",
-    "size-limit": "13.0.3",
+    "size-limit": "14.3.0",
     "tsup": "8.5.1",
     "typedoc": "0.28.20",
     "typescript": "^6.0.3"
