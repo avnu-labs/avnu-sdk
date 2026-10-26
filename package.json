@@ -80,7 +80,7 @@
     "starknet": "10.8.0",
     "prettier": "3.9.5",
     "size-limit": "13.0.3",
-    "tsup": "8.5.1",
+    "tsup": "9.0.0",
     "typedoc": "0.28.20",
     "typescript": "^6.0.3"
   },
